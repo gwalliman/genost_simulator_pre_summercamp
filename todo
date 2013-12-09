@@ -1,0 +1,10 @@
+TODO:
+
+1. Comment and Understand Old Code
+2. Design GUI environment (basic look)
+3. Design robot object (basic look)
+4. Enable robot to drive
+5. Enable robot to use sensors
+6. Rig remote control
+7. Connect simulator to interpreter
+8. Redesign GUI to look cool

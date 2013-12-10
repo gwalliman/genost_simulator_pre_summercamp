@@ -1,0 +1,31 @@
+﻿<configuration>
+    <system.serviceModel>
+        <bindings>
+            <basicHttpBinding>
+                <binding name="BasicHttpBinding_IService" maxBufferSize="2147483647"
+                    maxReceivedMessageSize="2147483647">
+                    <security mode="None" />
+                </binding>
+                <binding name="BasicHttpBinding_IMotorService" maxBufferSize="2147483647"
+                    maxReceivedMessageSize="2147483647">
+                    <security mode="None" />
+                </binding>
+                <binding name="BasicHttpBinding_ISonarService" maxBufferSize="2147483647"
+                    maxReceivedMessageSize="2147483647">
+                    <security mode="None" />
+                </binding>
+            </basicHttpBinding>
+        </bindings>
+        <client>
+            <endpoint address="http://localhost:58210/Service.svc" binding="basicHttpBinding"
+                bindingConfiguration="BasicHttpBinding_IService" contract="robotService.IService"
+                name="BasicHttpBinding_IService" />
+            <endpoint address="http://192.168.2.110:8000/motorService" binding="basicHttpBinding"
+                bindingConfiguration="BasicHttpBinding_IMotorService" contract="motorService.IMotorService"
+                name="BasicHttpBinding_IMotorService" />
+            <endpoint address="http://192.168.2.110:8001/sonarService" binding="basicHttpBinding"
+                bindingConfiguration="BasicHttpBinding_ISonarService" contract="sonarService.ISonarService"
+                name="BasicHttpBinding_ISonarService" />
+        </client>
+    </system.serviceModel>
+</configuration>

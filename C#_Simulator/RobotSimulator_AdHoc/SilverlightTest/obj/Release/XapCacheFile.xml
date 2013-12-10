@@ -1,0 +1,10 @@
+﻿<xapCache source="C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest\Bin\Release\SilverlightTest.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="3/24/2012 2:57:50 PM">
+  <file source="C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest\obj\Release\SilverlightTest.dll" archivePath="SilverlightTest.dll" lastWriteTime="3/24/2012 2:57:50 PM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Silverlight\v4.0\Libraries\Client\System.ComponentModel.DataAnnotations.dll" archivePath="System.ComponentModel.DataAnnotations.dll" lastWriteTime="8/26/2010 2:17:48 AM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\RIA Services\v1.0\Libraries\Silverlight\System.ServiceModel.DomainServices.Client.dll" archivePath="System.ServiceModel.DomainServices.Client.dll" lastWriteTime="1/14/2011 2:13:36 PM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\RIA Services\v1.0\Libraries\Silverlight\System.ServiceModel.DomainServices.Client.Web.dll" archivePath="System.ServiceModel.DomainServices.Client.Web.dll" lastWriteTime="1/14/2011 2:13:32 PM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Silverlight\v4.0\Libraries\Client\System.ServiceModel.Web.Extensions.dll" archivePath="System.ServiceModel.Web.Extensions.dll" lastWriteTime="8/26/2010 2:17:48 AM" />
+  <file source="C:\Program Files (x86)\Microsoft SDKs\Silverlight\v4.0\Libraries\Client\System.Windows.Controls.Data.Input.dll" archivePath="System.Windows.Controls.Data.Input.dll" lastWriteTime="8/26/2010 2:17:48 AM" />
+  <file source="C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest\ServiceReferences.ClientConfig" archivePath="ServiceReferences.ClientConfig" lastWriteTime="2/9/2012 6:36:01 PM" />
+  <file source="C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest\Bin\Release\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="3/24/2012 2:57:36 PM" />
+</xapCache>

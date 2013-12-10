@@ -1,0 +1,2 @@
+C:\Users\Garret\Desktop\Simulator\RobotSimulator_AdHoc\SilverlightTest
+Generated_Code\SilverlightTest.Web.g.cs

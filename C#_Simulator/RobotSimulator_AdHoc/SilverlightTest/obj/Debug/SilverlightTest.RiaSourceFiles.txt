@@ -1,0 +1,1 @@
+C:\Users\Garret\Desktop\Simulator\RobotSimulator_AdHoc\SilverlightTest.Web\SilverlightTest.Web.csproj,634981350120000000,Properties\AssemblyInfo.cs,

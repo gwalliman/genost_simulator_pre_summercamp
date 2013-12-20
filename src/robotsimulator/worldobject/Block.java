@@ -1,22 +1,44 @@
 package robotsimulator.worldobject;
 
-public class Block extends WorldObject
+public class Block 
 {
-	private int x0, x1, x2, x3;
-	private int y0, y1, y2, y3;
+	private int width, height, centerX, centerY;
 	
-	private int centerX, centerY;
-	
-	private int width;
-	private int height;
-	
-	public Block(int w, int h)
+	public Block(int w, int h, int x, int y)
 	{
 		width = w;
 		height = h;
+		centerX = x;
+		centerY = y;
 	}
-
-	public int[] getCenter() 
+	
+	public int getWidth()
 	{
+		return width;
+	}
+	
+	public int getHeight()
+	{
+		return height;
+	}
+	
+	public int getCenterX()
+	{
+		return centerX;
+	}
+	
+	public int getCenterY()
+	{
+		return centerY;
+	}
+	
+	public int getX0()
+	{
+		return centerX - (width / 2);
+	}
+	
+	public int getY0()
+	{
+		return centerY - (height / 2);
 	}
 }

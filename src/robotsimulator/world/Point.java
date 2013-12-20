@@ -1,31 +1,28 @@
 package robotsimulator.world;
 
+import robotsimulator.worldobject.Block;
+
 public class Point 
 {
-	private int x;
-	private int y;
+	private Block obj;
 	
-	private Object block;
-	
-	public Point(int x0, int y0)
+	public Point()
 	{
-		x = x0;
-		y = y0;
 	}
 	
-	public void occupy(Object b)
+	public void occupy(Block b)
 	{
-		block = b;
+		obj = b;
 	}
 	
 	public void unOccupy()
 	{
-		block = null;
+		obj = null;
 	}
 	
 	public boolean isOccupied()
 	{
-		if(block == null)
+		if(obj == null)
 		{
 			return false;
 		}
@@ -35,8 +32,8 @@ public class Point
 		}
 	}
 	
-	public Object getOccupier()
+	public Block getOccupier()
 	{
-		return block;
+		return obj;
 	}
 }

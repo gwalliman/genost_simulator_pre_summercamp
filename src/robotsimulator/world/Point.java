@@ -5,9 +5,12 @@ import robotsimulator.worldobject.Block;
 public class Point 
 {
 	private Block obj;
+	private int x, y;
 	
-	public Point()
+	public Point(int a, int b)
 	{
+		x = a;
+		y = b;
 	}
 	
 	public void occupy(Block b)
@@ -32,8 +35,27 @@ public class Point
 		}
 	}
 	
+	public boolean compare(int a, int b)
+	{
+		if(x == a && y == b)
+		{
+			return true;
+		}
+		else return false;
+	}
+	
 	public Block getOccupier()
 	{
 		return obj;
+	}
+
+	public int getX() 
+	{
+		return x;
+	}
+	
+	public int getY()
+	{
+		return y;
 	}
 }

@@ -1,5 +1,7 @@
 package robotsimulator.world;
 
+import java.awt.Shape;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import robotsimulator.RobotSimulator;
@@ -15,11 +17,14 @@ public class World
 	private Point[][] points;
 	private Cell[][] grid;
 	private ArrayList<Block> blocks = new ArrayList<Block>();
+	private Rectangle2D boundary;
 	
 	public World(int w, int h)
 	{
 		width = w;
 		height = h;
+		
+		boundary = new Rectangle2D.Double(0, 0, width, height);
 		
 		if(width > 0 && height > 0)
 		{
@@ -28,9 +33,10 @@ public class World
 			{
 				for(int y = 0; y < height; y++)
 				{
-					points[x][y] = new Point();
+					points[x][y] = new Point(x, y);
 				}
 			}
+		
 			
 			grid = new Cell[width / gridWidth][height / gridHeight];
 			for(int x = 0; x < width / gridWidth; x++)
@@ -51,6 +57,26 @@ public class World
 	public ArrayList<Block> getBlocks()
 	{
 		return blocks;
+	}
+	
+	public Point[][] getWorldPoints()
+	{
+		return points;
+	}
+	
+	public int getWidth()
+	{
+		return width;
+	}
+	
+	public int getHeight()
+	{
+		return height;
+	}
+	
+	public Rectangle2D getBoundary() 
+	{
+		return boundary;
 	}
 	
 	public void addBlock(Block b)

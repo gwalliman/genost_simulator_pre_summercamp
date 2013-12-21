@@ -6,11 +6,13 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
+import robotsimulator.world.Point;
 import robotsimulator.worldobject.Block;
 
 public class Stage extends JPanel implements MouseListener, Runnable
@@ -45,43 +47,63 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		
 		Graphics2D g = (Graphics2D) graphics;
 		
-		g.drawRect(0, 0, width, height);
+		g.draw(sim.getWorld().getBoundary());
 		
 		ArrayList<Block> blocks = sim.getWorld().getBlocks();
 		for(Block b : blocks)
 		{
-			paintBlock(g, b);
+			paintBlock(g, b, Color.blue);
 		}
 		
-		paintBlock(g, sim.getRobot().getBlock());
+		paintBlock(g, sim.getRobot().getBlock(), Color.green);
+		
+		paintRobotEdges(g);
 	}
-	
-	private void paintBlock(Graphics2D g, Block b)
+
+	private void paintBlock(Graphics2D g, Block b, Color c)
 	{
-		g.setColor(Color.blue);
-		AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle(), b.getCenterX(), b.getCenterY());  
+		g.setColor(c);
+		AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
 		g.fill(at.createTransformedShape(b.getRect()));
 	}
+	
+	private void paintRobotEdges(Graphics2D g) 
+	{
+		g.setColor(Color.red);
 
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
+		ArrayList<Point> points = sim.getRobot().getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX1(), sim.getRobot().getY1());
+		for(Point p : points)
+		{
+			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
+		}
 		
+		points = sim.getRobot().getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX2(), sim.getRobot().getY2());
+		for(Point p : points)
+		{
+			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
+		}
+		
+		points = sim.getRobot().getLine(sim.getRobot().getX1(), sim.getRobot().getY1(), sim.getRobot().getX3(), sim.getRobot().getY3());
+		for(Point p : points)
+		{
+			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
+		}
+		
+		points = sim.getRobot().getLine(sim.getRobot().getX3(), sim.getRobot().getY3(), sim.getRobot().getX2(), sim.getRobot().getY2());
+		for(Point p : points)
+		{
+			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
+		}
+		
+		g.setColor(Color.black);
+
+		g.fill(new Ellipse2D.Double(sim.getRobot().getCenterX() - (5 / 2), sim.getRobot().getCenterY() - (5 / 2), 5, 5));
+		g.fill(new Ellipse2D.Double(sim.getRobot().getX0() - (5 / 2), sim.getRobot().getY0() - (5 / 2), 5, 5));
+		g.fill(new Ellipse2D.Double(sim.getRobot().getX1() - (5 / 2), sim.getRobot().getY1() - (5 / 2), 5, 5));
+		g.fill(new Ellipse2D.Double(sim.getRobot().getX2() - (5 / 2), sim.getRobot().getY2() - (5 / 2), 5, 5));
+		g.fill(new Ellipse2D.Double(sim.getRobot().getX3() - (5 / 2), sim.getRobot().getY3() - (5 / 2), 5, 5));		
 	}
 
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void mousePressed(MouseEvent click) 
 	{
 		System.out.println("Click");
@@ -90,14 +112,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		sim.getWorld().toggleCell(click.getX(), click.getY());
 		repaint();			
 	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
+	
 	public void run() 
 	{
 		while(true)
@@ -123,5 +138,12 @@ public class Stage extends JPanel implements MouseListener, Runnable
             beforeTime = System.currentTimeMillis();
 		}
 	}
+	
+	public void mouseClicked(MouseEvent arg0) { }
 
+	public void mouseEntered(MouseEvent arg0) {	}
+
+	public void mouseExited(MouseEvent arg0) { }
+	
+	public void mouseReleased(MouseEvent arg0) { }
 }

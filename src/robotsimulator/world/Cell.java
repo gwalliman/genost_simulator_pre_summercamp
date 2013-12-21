@@ -4,15 +4,16 @@ import robotsimulator.worldobject.Block;
 
 public class Cell 
 {
-	int x0, y0, width, height;
+	int x0, y0, width, height, angle;
 	Block b;
 	
-	public Cell(int x, int y, int w, int h)
+	public Cell(int x, int y, int w, int h, int a)
 	{
 		x0 = x;
 		y0 = y;
 		width = w;
 		height = h;
+		angle = a;
 	}
 	
 	public boolean isOccupied()
@@ -40,6 +41,11 @@ public class Cell
 	public int getHeight()
 	{
 		return height;
+	}
+	
+	public int getAngle()
+	{
+		return angle;
 	}
 	
 	public int getCenterX()

@@ -14,6 +14,10 @@ public class RobotSimulator
 	
 	public static void main(String[] args) 
 	{
-		Simulator s = new Simulator(500, 500);
+		int guiWidth = 500;
+		int guiHeight = 500;
+		int guiFPS = 30;
+		
+		Simulator s = new Simulator(guiWidth, guiHeight, guiFPS);
 	}
 }

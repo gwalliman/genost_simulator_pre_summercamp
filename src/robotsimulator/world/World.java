@@ -37,7 +37,7 @@ public class World
 			{
 				for(int y = 0; y < height / gridHeight; y++)
 				{
-					grid[x][y] = new Cell(x * gridWidth, y * gridHeight, gridWidth, gridHeight);
+					grid[x][y] = new Cell(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
 				}
 			}
 		}
@@ -56,10 +56,10 @@ public class World
 	public void addBlock(Block b)
 	{
 		blocks.add(b);
-		int x0 = (b.getCenterX()) - (b.getWidth() / 2);
-		int y0 = (b.getCenterY()) - (b.getHeight() / 2);
-		int x1 = x0 + b.getWidth();
-		int y1 = y0 + b.getHeight();
+		int x0 = (int) ((b.getCenterX()) - (b.getWidth() / 2));
+		int y0 = (int) ((b.getCenterY()) - (b.getHeight() / 2));
+		int x1 = (int) (x0 + b.getWidth());
+		int y1 = (int) (y0 + b.getHeight());
 		
 		for(int x = x0; x <= x1; x++)
 		{
@@ -73,10 +73,10 @@ public class World
 	public void removeBlock(Block b)
 	{
 		blocks.remove(b);
-		int x0 = (b.getCenterX()) - (b.getWidth() / 2);
-		int y0 = (b.getCenterY()) - (b.getHeight() / 2);
-		int x1 = x0 + b.getWidth();
-		int y1 = y0 + b.getHeight();
+		int x0 = (int) ((b.getCenterX()) - (b.getWidth() / 2));
+		int y0 = (int) ((b.getCenterY()) - (b.getHeight() / 2));
+		int x1 = (int) (x0 + b.getWidth());
+		int y1 = (int) (y0 + b.getHeight());
 		
 		for(int x = x0; x <= x1; x++)
 		{
@@ -98,7 +98,7 @@ public class World
 			
 			if(!c.isOccupied())
 			{
-				Block b = new Block(c.getWidth(), c.getHeight(), c.getCenterX(), c.getCenterY());
+				Block b = new Block(c.getWidth(), c.getHeight(), c.getCenterX(), c.getCenterY(), c.getAngle());
 				c.occupy(b);
 			
 				addBlock(b);

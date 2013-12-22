@@ -1,14 +1,15 @@
 package robotsimulator.world;
 
-import java.awt.Shape;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import robotsimulator.RobotSimulator;
+import robotsimulator.Simulator;
 import robotsimulator.worldobject.Block;
 
 public class World 
 {
+	private Simulator sim;
 	private int width;
 	private int height;
 	int gridWidth = 20;
@@ -19,10 +20,11 @@ public class World
 	private ArrayList<Block> blocks = new ArrayList<Block>();
 	private Rectangle2D boundary;
 	
-	public World(int w, int h)
+	public World(int w, int h, Simulator s)
 	{
 		width = w;
 		height = h;
+		sim = s;
 		
 		boundary = new Rectangle2D.Double(0, 0, width, height);
 		
@@ -124,7 +126,7 @@ public class World
 			
 			if(!c.isOccupied())
 			{
-				Block b = new Block(c.getWidth(), c.getHeight(), c.getCenterX(), c.getCenterY(), c.getAngle());
+				Block b = new Block(c.getWidth(), c.getHeight(), c.getCenterX(), c.getCenterY(), c.getAngle(), sim);
 				c.occupy(b);
 			
 				addBlock(b);
@@ -142,4 +144,36 @@ public class World
 			
 		}
 	}
+	
+	/* This code adapted from Garrett Drown's MazeNav simulator */
+	public static ArrayList<Point> getLine(double x1, double y1, double x2, double y2)
+    {
+		ArrayList<Point> points = new ArrayList<Point>();
+        double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+        double step = 1.0 / distance;
+
+        for (double progress = 0; progress <= 1; progress += step)
+        {
+            int posX = (int)(x1 * (1 - progress) + x2 * (progress));
+            int posY = (int)(y1 * (1 - progress) + y2 * (progress));
+            
+            boolean found = false;
+
+            for(Point p : points)
+            {
+            	if(p.compare(posX, posY))
+            	{
+            		found = true;
+            		break;
+            	}
+            }
+            
+            if(!found)
+            {
+            	points.add(new Point(posX, posY));
+            }
+        }
+        
+        return points;
+    }
 }

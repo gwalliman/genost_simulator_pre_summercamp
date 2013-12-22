@@ -1,19 +1,14 @@
 package robotsimulator.robot;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
 import robotsimulator.Simulator;
-import robotsimulator.world.Point;
 import robotsimulator.worldobject.Block;
 
 public class Robot implements Runnable
 {
 	private Simulator sim;
 	private Block b;
-	private double centerX, centerY, angle;
 	private volatile Thread robotThread;
 	private int delay = 50;
 	
@@ -23,21 +18,38 @@ public class Robot implements Runnable
 	//Stop = s
 	private char status = 's';
 	
+	private ArrayList<SonarSensor> sonars = new ArrayList<SonarSensor>();
+	
 	public Robot(Simulator s)
 	{
 		sim = s;
-		centerX = 100;
-		centerY = 100;
+		int centerX = 100;
+		int centerY = 100;
 		
 		//Degrees, 0 is direct north, counterclockwise
-		angle = 0;
+		int angle = 0;
 
-		b = new Block(20, 30, centerX, centerY, angle);
+		b = new Block(20, 30, centerX, centerY, angle, sim);
+		
+		int sonarLen = 750;
+		
+		sonars.add(new SonarSensor(sim, this, "Front", getCenterFrontX(), getCenterFrontY(), sonarLen, b.getHeight() / 2, 0, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Rear", getCenterRearX(), getCenterRearY(), sonarLen, b.getHeight() / 2, 180, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Left", getCenterLeftX(), getCenterLeftY(), sonarLen, b.getWidth() / 2, 270, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Right", getCenterRightX(), getCenterRightY(), sonarLen, b.getWidth() / 2, 90, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Front-Left", getX0(), getY0(), sonarLen, Math.sqrt(Math.pow((b.getWidth()) / 2, 2) + Math.pow((b.getHeight() / 2), 2)), 315, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Front-Right", getX1(), getY1(), sonarLen, Math.sqrt(Math.pow((b.getWidth()) / 2, 2) + Math.pow((b.getHeight() / 2), 2)), 45, 'l'));
 	}
 
 	public Block getBlock() 
 	{
 		return b;
+	}
+	
+
+	public ArrayList<SonarSensor> getSonarSensors() 
+	{
+		return sonars;
 	}
 	
 	public double getCenterX() 
@@ -52,155 +64,82 @@ public class Robot implements Runnable
 	
 	public double getX0()
 	{
-		return b.getCenterX() + (b.getHeight() / 2) * Math.cos(b.getRadAngle()) + (b.getWidth() / 2) * Math.sin(b.getRadAngle());
+		return b.getX0();
 	}
 	
 	public double getY0()
 	{
-		return b.getCenterY() - (b.getWidth() / 2) * Math.cos(b.getRadAngle()) + (b.getHeight() / 2) * Math.sin(b.getRadAngle());
+		return b.getY0();
 	}
 	
 	public double getX1()
 	{
-		return b.getCenterX() + (b.getHeight() / 2) * Math.cos(b.getRadAngle()) - (b.getWidth() / 2) * Math.sin(b.getRadAngle());
+		return b.getX1();
 	}
 	
 	public double getY1()
 	{
-		return b.getCenterY() + (b.getWidth() / 2) * Math.cos(b.getRadAngle()) + (b.getHeight() / 2) * Math.sin(b.getRadAngle());
+		return b.getY1();
 	}
 	
 	public double getX2()
 	{
-		return b.getCenterX() - (b.getHeight() / 2) * Math.cos(b.getRadAngle()) + (b.getWidth() / 2) * Math.sin(b.getRadAngle());
+		return b.getX2();
 	}
 	
 	public double getY2()
 	{
-		return b.getCenterY() - (b.getWidth() / 2) * Math.cos(b.getRadAngle()) - (b.getHeight() / 2) * Math.sin(b.getRadAngle());
+		return b.getY2();
 	}
 	
 	public double getX3()
 	{
-		return b.getCenterX() - (b.getHeight() / 2) * Math.cos(b.getRadAngle()) - (b.getWidth() / 2) * Math.sin(b.getRadAngle());
+		return b.getX3();
 	}
 	
 	public double getY3()
 	{
-		return b.getCenterY() + (b.getWidth() / 2) * Math.cos(b.getRadAngle()) - (b.getHeight() / 2) * Math.sin(b.getRadAngle());
+		return b.getY3();
 	}
 	
-	public ArrayList<Point> getLine(double x1, double y1, double x2, double y2)
-    {
-        // X1,Y1 = Robot
-        // X2,Y2 = something very far away in a particular direction
-        // It needs to be far so we don't stop short of finding an object.
-
-		ArrayList<Point> points = new ArrayList<Point>();
-        double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-        double step = 1.0 / distance;
-
-        for (double progress = 0; progress <= 1; progress += step)
-        {
-            int posX = (int)(x1 * (1 - progress) + x2 * (progress));
-            int posY = (int)(y1 * (1 - progress) + y2 * (progress));
-            
-            /*if(posX < 0)
-            {
-            	posX = 0;
-            }
-            else if(posX > sim.getWorld().getWidth())
-            {
-            	posX = sim.getWorld().getWidth();
-            }
-            
-            if(posY < 0)
-            {
-            	posY = 0;
-            }
-            else if(posY > sim.getWorld().getHeight())
-            {
-            	posY = sim.getWorld().getHeight();
-            }*/
-            
-            boolean found = false;
-
-            for(Point p : points)
-            {
-            	if(p.compare(posX, posY))
-            	{
-            		found = true;
-            		break;
-            	}
-            }
-            
-            if(!found)
-            {
-            	points.add(new Point(posX, posY));
-            }
-        }
-        
-        return points;
-
-    }
-	
-	public void setCenter(int r)
+	public double getCenterFrontX()
 	{
-		double oldCenterX = centerX;
-		double oldCenterY = centerY;
-		
-		centerX = b.getCenterX() + (r * Math.cos(b.getRadAngle()));
-		centerY = b.getCenterY() + (r * Math.sin(b.getRadAngle()));
-		b.setCenter(centerX, centerY);
-		
-		if(checkRobotCollision())
-		{
-			centerX = oldCenterX;
-			centerY = oldCenterY;
-			b.setCenter(centerX, centerY);
-		}
-	}
-
-	public void setAngle(double d)
-	{
-		double oldAngle = angle;
-		
-		b.setAngle(d);
-		angle = b.getDegAngle();
-		
-		if(checkRobotCollision())
-		{
-			b.setAngle(oldAngle);
-			angle = b.getDegAngle();
-		}
+		return (getX0() + getX1()) / 2;
 	}
 	
-	public boolean checkRobotCollision() 
+	public double getCenterFrontY()
 	{
-		Point[][] worldPoints = sim.getWorld().getWorldPoints();
-		ArrayList<Point> pfront = getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX1(), sim.getRobot().getY1());
-		ArrayList<Point> pleft = getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX2(), sim.getRobot().getY2());
-		ArrayList<Point> pright  = getLine(sim.getRobot().getX1(), sim.getRobot().getY1(), sim.getRobot().getX3(), sim.getRobot().getY3());
-		ArrayList<Point> prear = getLine(sim.getRobot().getX3(), sim.getRobot().getY3(), sim.getRobot().getX2(), sim.getRobot().getY2());
-		
-		return checkEdgeCollision(pfront, worldPoints) || checkEdgeCollision(pleft, worldPoints) || checkEdgeCollision(pright, worldPoints) || checkEdgeCollision(prear, worldPoints);
+		return (getY0() + getY1()) / 2;
 	}
 	
-	private boolean checkEdgeCollision(ArrayList<Point> points, Point[][] worldPoints) 
+	public double getCenterLeftX()
 	{
-		for(Point p : points)
-		{
-			if(p.getX() < 0 || p.getX() >= sim.getWorld().getWidth() || p.getY() < 0 || p.getY() >= sim.getWorld().getHeight())
-            {
-            	return true;
-            }
-            
-			if(worldPoints[p.getX()][p.getY()].isOccupied())
-			{
-				return true;
-			}
-		}
-		return false;
+		return (getX0() + getX2()) / 2;
+	}
+	
+	public double getCenterLeftY()
+	{
+		return (getY0() + getY2()) / 2;
+	}
+	
+	public double getCenterRightX()
+	{
+		return (getX1() + getX3()) / 2;
+	}
+	
+	public double getCenterRightY()
+	{
+		return (getY1() + getY3()) / 2;
+	}
+	
+	public double getCenterRearX()
+	{
+		return (getX2() + getX3()) / 2;
+	}
+	
+	public double getCenterRearY()
+	{
+		return (getY2() + getY3()) / 2;
 	}
 
 	public void drive(char d)
@@ -236,20 +175,44 @@ public class Robot implements Runnable
 		{
 			long beforeTime, timeDiff, sleep;
 	        beforeTime = System.currentTimeMillis();
+	        
+	        double oldX, oldY, oldA;
 			
 			switch(status)
 			{
 				case 'f':
-					setCenter(1);
+					oldX = b.getCenterX();
+					oldY = b.getCenterY();
+					b.translate(1);
+					for(SonarSensor s : sonars)
+					{
+						s.translate(b.getCenterX() - oldX, b.getCenterY() - oldY);
+					}
 				break;
 				case 'b':
-					setCenter(-1);
+					oldX = b.getCenterX();
+					oldY = b.getCenterY();
+					b.translate(-1);
+					for(SonarSensor s : sonars)
+					{
+						s.translate(b.getCenterX() - oldX, b.getCenterY() - oldY);
+					}
 				break;
 				case 'l':
-					setAngle(angle - 1);
+					oldA = b.getDegAngle();
+					b.rotate(-1);
+					for(SonarSensor s : sonars)
+					{
+						s.rotate(b.getDegAngle() - oldA);
+					}
 				break;
 				case 'r':
-					setAngle(angle + 1);
+					oldA = b.getDegAngle();
+					b.rotate(1);
+					for(SonarSensor s : sonars)
+					{
+						s.rotate(b.getDegAngle() - oldA);					
+					}
 				break;
 			}
 			

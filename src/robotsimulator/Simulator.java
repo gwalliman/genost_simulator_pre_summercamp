@@ -17,7 +17,7 @@ public class Simulator
 	
 	public Simulator(int width, int height, int fps)
 	{
-		world = new World(width, height);
+		world = new World(width, height, this);
 		robot = new Robot(this);
 		gui = new GUI(width, height, fps, this);
 	}
@@ -34,7 +34,7 @@ public class Simulator
 	
 	public void addBlock(int w, int h, int x, int y, int a)
 	{
-		Block b = new Block(w, h, x, y, a);
+		Block b = new Block(w, h, x, y, a, this);
 		world.addBlock(b);
 	}
 }

@@ -1,12 +1,15 @@
 package robotsimulator.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
 import robotsimulator.robot.Robot;
@@ -15,23 +18,26 @@ import robotsimulator.worldobject.Block;
 public class GUI extends JFrame implements KeyListener
 {
 	private Simulator sim;
-	private int width;
-	private int height;
 	private int fps;
 	
 	public GUI(int w, int h, int fps, Simulator s)
 	{
 		sim = s;
-		width = w;
-		height = h;
 		
 		this.addKeyListener(this);
 		
-		add(new Stage(w, h, fps, s));
-		
 		setBackground(Color.black);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(width, height);
+		setLayout(new BorderLayout());
+		
+		JPanel stage = new Stage(w, h, fps, sim);
+		JPanel sensorPanel = new SensorPanel(h, sim);
+		add(stage, BorderLayout.CENTER);
+		add(sensorPanel, BorderLayout.EAST);
+		
+		stage.requestFocus();
+
+		pack();
 		setVisible(true);
 	}
 	

@@ -1,6 +1,7 @@
 package robotsimulator.gui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -12,7 +13,9 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
+import robotsimulator.robot.SonarSensor;
 import robotsimulator.world.Point;
+import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
 public class Stage extends JPanel implements MouseListener, Runnable
@@ -30,7 +33,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		this.addMouseListener(this);
 		
 		setDoubleBuffered(true);
-		setSize(w, h);
+		setPreferredSize(new Dimension(w, h));
 		setBackground(Color.white);
 	}
 	
@@ -57,7 +60,8 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		
 		paintBlock(g, sim.getRobot().getBlock(), Color.green);
 		
-		paintRobotEdges(g);
+		//paintRobotEdges(g);
+		//paintSonarSensors(g);
 	}
 
 	private void paintBlock(Graphics2D g, Block b, Color c)
@@ -71,25 +75,25 @@ public class Stage extends JPanel implements MouseListener, Runnable
 	{
 		g.setColor(Color.red);
 
-		ArrayList<Point> points = sim.getRobot().getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX1(), sim.getRobot().getY1());
+		ArrayList<Point> points = World.getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX1(), sim.getRobot().getY1());
 		for(Point p : points)
 		{
 			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
 		}
 		
-		points = sim.getRobot().getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX2(), sim.getRobot().getY2());
+		points = World.getLine(sim.getRobot().getX0(), sim.getRobot().getY0(), sim.getRobot().getX2(), sim.getRobot().getY2());
 		for(Point p : points)
 		{
 			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
 		}
 		
-		points = sim.getRobot().getLine(sim.getRobot().getX1(), sim.getRobot().getY1(), sim.getRobot().getX3(), sim.getRobot().getY3());
+		points = World.getLine(sim.getRobot().getX1(), sim.getRobot().getY1(), sim.getRobot().getX3(), sim.getRobot().getY3());
 		for(Point p : points)
 		{
 			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
 		}
 		
-		points = sim.getRobot().getLine(sim.getRobot().getX3(), sim.getRobot().getY3(), sim.getRobot().getX2(), sim.getRobot().getY2());
+		points = World.getLine(sim.getRobot().getX3(), sim.getRobot().getY3(), sim.getRobot().getX2(), sim.getRobot().getY2());
 		for(Point p : points)
 		{
 			g.fill(new Ellipse2D.Double(p.getX() - (5 / 2), p.getY() - (5 / 2), 5, 5));
@@ -102,6 +106,16 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		g.fill(new Ellipse2D.Double(sim.getRobot().getX1() - (5 / 2), sim.getRobot().getY1() - (5 / 2), 5, 5));
 		g.fill(new Ellipse2D.Double(sim.getRobot().getX2() - (5 / 2), sim.getRobot().getY2() - (5 / 2), 5, 5));
 		g.fill(new Ellipse2D.Double(sim.getRobot().getX3() - (5 / 2), sim.getRobot().getY3() - (5 / 2), 5, 5));		
+	}
+	
+	private void paintSonarSensors(Graphics2D g)
+	{
+		for(SonarSensor s : sim.getRobot().getSonarSensors())
+		{
+			g.draw(s.getShape());
+			g.fill(new Ellipse2D.Double(s.getX0() - (5 / 2), s.getY0() - (5 / 2), 5, 5));
+			g.fill(new Ellipse2D.Double(s.getX1() - (5 / 2), s.getY1() - (5 / 2), 5, 5));
+		}
 	}
 
 	public void mousePressed(MouseEvent click) 

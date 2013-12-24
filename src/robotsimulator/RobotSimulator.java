@@ -1,6 +1,8 @@
 package robotsimulator;
 
-public class RobotSimulator 
+import robotinterpreter.RobotInterpreter;
+
+public class RobotSimulator
 {
 	public static void println(String m) 
 	{

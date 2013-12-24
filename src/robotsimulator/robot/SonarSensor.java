@@ -132,7 +132,7 @@ public class SonarSensor implements Runnable
 		setEndpoints(shape);
 	}
 	
-	private double getSensorValue() 
+	public double getSensorValue() 
 	{
 		Point[][] worldPoints = sim.getWorld().getWorldPoints();
 		ArrayList<Point> points = World.getLine(x0, y0, x1, y1);

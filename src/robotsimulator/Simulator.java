@@ -89,6 +89,8 @@ public class Simulator implements RobotListener
 	
 	public void driveDistance(int dist)
 	{
+		robot.stop();
+
 		double x0 = robot.getCenterX();
 		double y0 = robot.getCenterY();
 		
@@ -113,34 +115,60 @@ public class Simulator implements RobotListener
 		
 		robot.stop();
 	}
-
+	
 	public void turnAngle(int angle) 
 	{
-		/*double a = robot.getAngle();
-		int circles = 0;
-		while(angle >= 360)
-		{
-			circles++;
-			angle -= 360;
-		}
+		robot.stop();
+
+		double prevAngle = robot.getAngle();
+		double total = 0;
+		
+		double curAngle;
 		
 		if(angle > 0)
 		{
 			robot.turn('r');
+			while(total < angle)
+			{
+				curAngle = robot.getAngle();
+				System.out.println(curAngle);
+				if(curAngle < prevAngle)
+				{
+					total += curAngle + 360 - prevAngle;
+				}
+				else
+				{
+					total += curAngle - prevAngle;
+				}
+				prevAngle = curAngle;
+			}
 		}
 		else if(angle < 0)
 		{
 			robot.turn('l');
+			while(total > angle)
+			{
+				curAngle = robot.getAngle();
+				System.out.println(curAngle);
+
+				if(curAngle > prevAngle)
+				{
+					total += curAngle - 360 - prevAngle;
+				}
+				else
+				{
+					total += curAngle - prevAngle;
+				}
+				prevAngle = curAngle;
+			}
 		}
-		
-		while(circles > 0)
-		{
-			
-		}*/
+		robot.stop();
 	}
 
 	public void turnToBearing(int bearing) 
 	{
+		robot.stop();
+
 		int curBearing = getBearing();
 		
 		if(bearing > curBearing)

@@ -1,7 +1,5 @@
 package robotsimulator;
 
-import robotinterpreter.RobotInterpreter;
-
 public class RobotSimulator
 {
 	public static void println(String m) 
@@ -20,6 +18,7 @@ public class RobotSimulator
 		int guiHeight = 500;
 		int guiFPS = 30;
 		
+		@SuppressWarnings("unused")
 		Simulator s = new Simulator(guiWidth, guiHeight, guiFPS);
 	}
 }

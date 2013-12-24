@@ -34,12 +34,12 @@ public class Robot implements Runnable
 		int sonarLen = 750;
 
 		//THESE SHOULD BE ADDED IN CLOCKWISE STARTING FROM FRONT-LEFT
-		sonars.add(new SonarSensor(sim, this, "Front-Left", getX0(), getY0(), sonarLen, Math.sqrt(Math.pow((b.getWidth()) / 2, 2) + Math.pow((b.getHeight() / 2), 2)), 315, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Front", getCenterFrontX(), getCenterFrontY(), sonarLen, b.getHeight() / 2, 0, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Front-Right", getX1(), getY1(), sonarLen, Math.sqrt(Math.pow((b.getWidth()) / 2, 2) + Math.pow((b.getHeight() / 2), 2)), 45, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Right", getCenterRightX(), getCenterRightY(), sonarLen, b.getWidth() / 2, 90, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Rear", getCenterRearX(), getCenterRearY(), sonarLen, b.getHeight() / 2, 180, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Left", getCenterLeftX(), getCenterLeftY(), sonarLen, b.getWidth() / 2, 270, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Front-Left", getX0(), getY0(), sonarLen,  315, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Front", getCenterFrontX(), getCenterFrontY(), sonarLen, 0, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Front-Right", getX1(), getY1(), sonarLen, 45, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Right", getCenterRightX(), getCenterRightY(), sonarLen, 90, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Rear", getCenterRearX(), getCenterRearY(), sonarLen, 180, 'l'));
+		sonars.add(new SonarSensor(sim, this, "Left", getCenterLeftX(), getCenterLeftY(), sonarLen, 270, 'l'));
 	}
 
 	public Block getBlock() 

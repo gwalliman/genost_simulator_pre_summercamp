@@ -2,7 +2,6 @@ package robotsimulator.robot;
 
 import java.awt.Label;
 import java.awt.Shape;
-import java.awt.TextField;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
@@ -31,7 +30,6 @@ public class SonarSensor implements Runnable
 	
 	//The maximum distance that the sensor can detect items at
 	private int length;
-	private double distFromCenter;
 	
 	//The angle in degrees (with respect to the robot) that the sensor is pointing.
 	//0 is right, 90 is forwards, etc.
@@ -43,7 +41,7 @@ public class SonarSensor implements Runnable
 	//private Line2D line;
 	private Shape shape;
 	
-	public SonarSensor(Simulator s, Robot rob, String n, double x, double y, int l, double d, int a, char t)
+	public SonarSensor(Simulator s, Robot rob, String n, double x, double y, int l, int a, char t)
 	{
 		sim = s;
 		r = rob;
@@ -55,7 +53,6 @@ public class SonarSensor implements Runnable
 		x1 = getEndpointX(a);
 		y1 = getEndpointY(a);
 		
-		distFromCenter = d;
 		//angle = a;
 		type = t;
 		
@@ -209,7 +206,6 @@ public class SonarSensor implements Runnable
 
 	public void run() 
 	{
-		int x = 0;
 		while(true)
 		{
 			long beforeTime, timeDiff, sleep;

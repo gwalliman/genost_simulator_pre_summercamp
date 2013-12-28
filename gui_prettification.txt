@@ -1,0 +1,11 @@
+GUI Prettification:
+- Checkboxes to turn on sensor lines
+- Robot Control Panel:
+	- Increase / decrease velocity
+	- Show sensor values / angles
+- Simulator Control Panel
+	- Turn maze editing on / off
+	- Load robot
+	- Load maze
+	- Go to Maze Creator
+	- Go to Robot Creator

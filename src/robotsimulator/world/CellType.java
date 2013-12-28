@@ -4,16 +4,38 @@ import java.awt.Color;
 
 public class CellType 
 {
-	String id;
-	int width, height;
-	Color color;
+	private String id;
+	private String label;
+	private int width, height;
+	private Color color;
 	
-	public CellType(String i, int w, int h, Color c)
+	public CellType(String i, String n, int w, int h, Color c)
 	{
 		id = i;
+		label = n;
 		width = w;
 		height = h;
 		color = c;
+	}
+
+	public String getLabel() 
+	{
+		return label;
+	}
+	
+	public int getWidth()
+	{
+		return width;
+	}
+	
+	public int getHeight()
+	{
+		return height;
+	}
+
+	public Color getColor() 
+	{
+		return color;
 	}
 	
 }

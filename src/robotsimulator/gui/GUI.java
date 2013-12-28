@@ -32,8 +32,10 @@ public class GUI extends JFrame implements KeyListener
 		
 		JPanel stage = new Stage(w, h, fps, sim);
 		JPanel sensorPanel = new SensorPanel(h, sim);
+		JPanel worldBuilderPanel = new WorldBuilderPanel(w, sim);
 		add(stage, BorderLayout.CENTER);
 		add(sensorPanel, BorderLayout.EAST);
+		add(worldBuilderPanel, BorderLayout.SOUTH);
 		
 		stage.requestFocus();
 

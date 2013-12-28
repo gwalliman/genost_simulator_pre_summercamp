@@ -18,7 +18,7 @@ public class World
 	
 	private Point[][] points;
 	private ArrayList<CellType> cellTypes = new ArrayList<CellType>();
-	private Cell[][] grid;
+	private GridSquare[][] grid;
 	private ArrayList<Block> blocks = new ArrayList<Block>();
 	private Rectangle2D boundary;
 	
@@ -44,19 +44,19 @@ public class World
 			}
 		}
 	
-		cellTypes.add(new CellType("g_onexone1", 1, 1, Color.blue));
-		cellTypes.add(new CellType("g_onexone2", 1, 1, Color.green));
-		cellTypes.add(new CellType("g_onexone3", 1, 1, Color.red));
-		cellTypes.add(new CellType("g_twoxtwo1", 2, 2, Color.blue));
-		cellTypes.add(new CellType("g_twoxone1", 2, 1, Color.black));
-		cellTypes.add(new CellType("g_onextwo1", 1, 2, Color.black));
+		cellTypes.add(new CellType("g_onexone1", "1x1 #1", 1, 1, Color.blue));
+		cellTypes.add(new CellType("g_onexone2", "1x1 #2", 1, 1, Color.green));
+		cellTypes.add(new CellType("g_onexone3", "1x1 #3", 1, 1, Color.red));
+		cellTypes.add(new CellType("g_twoxtwo1", "2x2 #1", 2, 2, Color.blue));
+		cellTypes.add(new CellType("g_twoxone1", "2x1 #1", 2, 1, Color.black));
+		cellTypes.add(new CellType("g_onextwo1", "1x2 #2", 1, 2, Color.black));
 		
-		grid = new Cell[width / gridWidth][height / gridHeight];
+		grid = new GridSquare[width / gridWidth][height / gridHeight];
 		for(int x = 0; x < width / gridWidth; x++)
 		{
 			for(int y = 0; y < height / gridHeight; y++)
 			{
-				grid[x][y] = new Cell(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
+				grid[x][y] = new GridSquare(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
 			}
 		}
 	}
@@ -71,6 +71,11 @@ public class World
 		return points;
 	}
 	
+	public ArrayList<CellType> getCellTypes() 
+	{
+		return cellTypes;
+	}
+	
 	public int getWidth()
 	{
 		return width;
@@ -79,6 +84,16 @@ public class World
 	public int getHeight()
 	{
 		return height;
+	}
+	
+	public int getGridWidth()
+	{
+		return gridWidth;
+	}
+	
+	public int getGridHeight()
+	{
+		return gridHeight;
 	}
 	
 	public Rectangle2D getBoundary() 
@@ -127,7 +142,7 @@ public class World
 			int cellX = x / gridWidth;
 			int cellY = y / gridHeight;
 			
-			Cell c = grid[cellX][cellY];
+			GridSquare c = grid[cellX][cellY];
 			
 			if(!c.isOccupied())
 			{

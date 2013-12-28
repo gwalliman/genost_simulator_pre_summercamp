@@ -119,9 +119,31 @@ public class Simulator implements RobotListener
 	public void turnAngle(int angle) 
 	{
 		robot.stop();
+		robot.turn(angle);
+		while(robot.getStatus() != 's') 
+		{ 
+			try 
+			{
+				Thread.sleep(100);
+			} 
+			catch (InterruptedException e) 
+			{
 
-		double prevAngle = robot.getAngle();
+			}
+		}
+		
+		/*double prevAngle = robot.getAngle();
 		double total = 0;
+		
+		double goalAngle = prevAngle + angle;
+		if(goalAngle > 360)
+		{
+			goalAngle -= 360;
+		}
+		else if(goalAngle < 0)
+		{
+			goalAngle += 360;
+		}
 		
 		double curAngle;
 		
@@ -131,7 +153,7 @@ public class Simulator implements RobotListener
 			while(total < angle)
 			{
 				curAngle = robot.getAngle();
-				System.out.println(curAngle);
+				
 				if(curAngle < prevAngle)
 				{
 					total += curAngle + 360 - prevAngle;
@@ -149,7 +171,6 @@ public class Simulator implements RobotListener
 			while(total > angle)
 			{
 				curAngle = robot.getAngle();
-				System.out.println(curAngle);
 
 				if(curAngle > prevAngle)
 				{
@@ -163,6 +184,14 @@ public class Simulator implements RobotListener
 			}
 		}
 		robot.stop();
+		
+		if((int) robot.getAngle() != (int) goalAngle)
+		{
+			curAngle = robot.getAngle();
+			
+			turnAngle((int)(goalAngle - curAngle));
+			System.out.println(goalAngle - robot.getAngle());
+		}*/
 	}
 
 	public void turnToBearing(int bearing) 

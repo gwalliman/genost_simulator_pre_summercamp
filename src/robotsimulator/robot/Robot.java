@@ -11,6 +11,8 @@ public class Robot implements Runnable
 	private Block b;
 	private volatile Thread robotThread;
 	private int delay = 50;
+	private boolean driveDist, rotateDist = false;
+	private int angTotal, angGoal = 0;
 	
 	//Forward = f, Backwards = b
 	//Left = l, Right = r
@@ -34,12 +36,12 @@ public class Robot implements Runnable
 		int sonarLen = 750;
 
 		//THESE SHOULD BE ADDED IN CLOCKWISE STARTING FROM FRONT-LEFT
-		sonars.add(new SonarSensor(sim, this, "Front-Left", getX0(), getY0(), sonarLen,  315, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Front", getCenterFrontX(), getCenterFrontY(), sonarLen, 0, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Front-Right", getX1(), getY1(), sonarLen, 45, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Right", getCenterRightX(), getCenterRightY(), sonarLen, 90, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Rear", getCenterRearX(), getCenterRearY(), sonarLen, 180, 'l'));
-		sonars.add(new SonarSensor(sim, this, "Left", getCenterLeftX(), getCenterLeftY(), sonarLen, 270, 'l'));
+		sonars.add(new SonarSensor(sim, "Front-Left", getX0(), getY0(), sonarLen, 315, 25));
+		sonars.add(new SonarSensor(sim, "Front", getCenterFrontX(), getCenterFrontY(), sonarLen, 0, 25));
+		sonars.add(new SonarSensor(sim, "Front-Right", getX1(), getY1(), sonarLen, 45, 25));
+		sonars.add(new SonarSensor(sim, "Right", getCenterRightX(), getCenterRightY(), sonarLen, 90, 25));
+		sonars.add(new SonarSensor(sim, "Rear", getCenterRearX(), getCenterRearY(), sonarLen, 180, 25));
+		sonars.add(new SonarSensor(sim, "Left", getCenterLeftX(), getCenterLeftY(), sonarLen, 270, 25));
 	}
 
 	public Block getBlock() 
@@ -146,6 +148,11 @@ public class Robot implements Runnable
 	{
 		return (getY2() + getY3()) / 2;
 	}
+	
+	public char getStatus()
+	{
+		return status;
+	}
 
 	public void drive(char d)
 	{
@@ -162,6 +169,27 @@ public class Robot implements Runnable
 		if(robotThread == null)
 		{
 			status = d;
+			robotThread = new Thread(this);
+			robotThread.start();
+		}
+	}
+	
+	public void turn(int angle)
+	{
+		if(robotThread == null && angle != 0)
+		{
+			if(angle < 0)
+			{
+				status = 'l';
+			}
+			else if(angle > 0)
+			{
+				status = 'r';
+			}
+			
+			rotateDist = true;
+			angGoal = angle;
+			angTotal = 0;
 			robotThread = new Thread(this);
 			robotThread.start();
 		}
@@ -210,6 +238,26 @@ public class Robot implements Runnable
 					{
 						s.rotate(b.getDegAngle() - oldA);
 					}
+					if(rotateDist)
+					{
+						double curAngle = b.getDegAngle();
+						if(curAngle > oldA)
+						{
+							angTotal += curAngle - 360 - oldA;
+						}
+						else
+						{
+							angTotal += curAngle - oldA;
+						}
+
+						if(angGoal >= angTotal)
+						{
+							rotateDist = false;
+							angTotal = 0;
+							angGoal = 0;
+							stop();
+						}
+					}
 				break;
 				case 'r':
 					oldA = b.getDegAngle();
@@ -217,6 +265,26 @@ public class Robot implements Runnable
 					for(SonarSensor s : sonars)
 					{
 						s.rotate(b.getDegAngle() - oldA);					
+					}
+					if(rotateDist)
+					{
+						double curAngle = b.getDegAngle();
+						if(curAngle < oldA)
+						{
+							angTotal += curAngle + 360 - oldA;
+						}
+						else
+						{
+							angTotal += curAngle - oldA;
+						}
+
+						if(angGoal <= angTotal)
+						{
+							rotateDist = false;
+							angTotal = 0;
+							angGoal = 0;
+							stop();
+						}
 					}
 				break;
 			}

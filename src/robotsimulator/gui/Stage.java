@@ -60,8 +60,8 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		
 		paintBlock(g, sim.getRobot().getBlock(), Color.green);
 		
-		//paintRobotEdges(g);
-		//paintSonarSensors(g);
+		paintRobotEdges(g);
+		paintSonarSensors(g);
 	}
 
 	private void paintBlock(Graphics2D g, Block b, Color c)
@@ -112,16 +112,26 @@ public class Stage extends JPanel implements MouseListener, Runnable
 	{
 		for(SonarSensor s : sim.getRobot().getSonarSensors())
 		{
-			g.draw(s.getShape());
-			g.fill(new Ellipse2D.Double(s.getX0() - (5 / 2), s.getY0() - (5 / 2), 5, 5));
-			g.fill(new Ellipse2D.Double(s.getX1() - (5 / 2), s.getY1() - (5 / 2), 5, 5));
+			if(s.getType() == 'l')
+			{
+				g.draw(s.getShape());
+				g.fill(new Ellipse2D.Double(s.getX0() - (5 / 2), s.getY0() - (5 / 2), 5, 5));
+				g.fill(new Ellipse2D.Double(s.getX1() - (5 / 2), s.getY1() - (5 / 2), 5, 5));
+			}
+			else if(s.getType() == 'c')
+			{
+				g.draw(s.getShape1());
+				g.fill(new Ellipse2D.Double(s.getX0() - (5 / 2), s.getY0() - (5 / 2), 5, 5));
+				g.fill(new Ellipse2D.Double(s.getX1() - (5 / 2), s.getY1() - (5 / 2), 5, 5));
+				
+				g.draw(s.getShape2());
+				g.fill(new Ellipse2D.Double(s.getX2() - (5 / 2), s.getY2() - (5 / 2), 5, 5));
+			}
 		}
 	}
 
 	public void mousePressed(MouseEvent click) 
 	{
-		System.out.println("Click");
-		System.out.println(click.getX() + " " + click.getY());
 		//sim.addBlock(20, 20, click.getX(), click.getY());
 		sim.getWorld().toggleCell(click.getX(), click.getY());
 		repaint();			

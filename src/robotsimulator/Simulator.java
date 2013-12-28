@@ -90,8 +90,19 @@ public class Simulator implements RobotListener
 	public void driveDistance(int dist)
 	{
 		robot.stop();
+		robot.drive(dist);
+		while(robot.getStatus() != 's') 
+		{ 
+			try 
+			{
+				Thread.sleep(100);
+			} 
+			catch (InterruptedException e) 
+			{
 
-		double x0 = robot.getCenterX();
+			}
+		}
+		/*double x0 = robot.getCenterX();
 		double y0 = robot.getCenterY();
 		
 		if(dist > 0)
@@ -113,7 +124,7 @@ public class Simulator implements RobotListener
 			y1 = robot.getCenterY();
 		}
 		
-		robot.stop();
+		robot.stop();*/
 	}
 	
 	public void turnAngle(int angle) 

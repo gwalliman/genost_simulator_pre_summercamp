@@ -12,7 +12,7 @@ public class Robot implements Runnable
 	private volatile Thread robotThread;
 	private int delay = 50;
 	private boolean driveDist, rotateDist = false;
-	private int angTotal, angGoal = 0;
+	private int distTotal, distGoal, angTotal, angGoal = 0;
 	
 	//Forward = f, Backwards = b
 	//Left = l, Right = r
@@ -164,6 +164,28 @@ public class Robot implements Runnable
 		}
 	}
 	
+	public void drive(int dist)
+	{
+		if(robotThread == null)
+		{
+			if(dist < 0)
+			{
+				status = 'b';
+			}
+			else if(dist > 0)
+			{
+				status = 'f';
+			}
+			
+			driveDist = true;
+			distGoal = Math.abs(dist);
+			distTotal = 0;
+
+			robotThread = new Thread(this);
+			robotThread.start();
+		}
+	}
+	
 	public void turn(char d)
 	{
 		if(robotThread == null)
@@ -221,6 +243,20 @@ public class Robot implements Runnable
 					{
 						s.translate(b.getCenterX() - oldX, b.getCenterY() - oldY);
 					}
+					if(driveDist)
+					{
+						double curX = b.getCenterX();
+						double curY = b.getCenterY();
+						distTotal += Math.hypot(curX - oldX, curY - oldY);
+
+						if(distTotal >= distGoal)
+						{
+							driveDist = false;
+							distTotal = 0;
+							distGoal = 0;
+							stop();
+						}
+					}
 				break;
 				case 'b':
 					oldX = b.getCenterX();
@@ -229,6 +265,20 @@ public class Robot implements Runnable
 					for(SonarSensor s : sonars)
 					{
 						s.translate(b.getCenterX() - oldX, b.getCenterY() - oldY);
+					}
+					if(driveDist)
+					{
+						double curX = b.getCenterX();
+						double curY = b.getCenterY();
+						distTotal += Math.hypot(curX - oldX, curY - oldY);
+
+						if(distTotal >= distGoal)
+						{
+							driveDist = false;
+							distTotal = 0;
+							distGoal = 0;
+							stop();
+						}
 					}
 				break;
 				case 'l':

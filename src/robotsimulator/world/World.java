@@ -1,5 +1,6 @@
 package robotsimulator.world;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
@@ -16,6 +17,7 @@ public class World
 	int gridHeight = 20;
 	
 	private Point[][] points;
+	private ArrayList<CellType> cellTypes = new ArrayList<CellType>();
 	private Cell[][] grid;
 	private ArrayList<Block> blocks = new ArrayList<Block>();
 	private Rectangle2D boundary;
@@ -28,31 +30,34 @@ public class World
 		
 		boundary = new Rectangle2D.Double(0, 0, width, height);
 		
-		if(width > 0 && height > 0)
-		{
-			points = new Point[width][height];
-			for(int x = 0; x < width; x++)
-			{
-				for(int y = 0; y < height; y++)
-				{
-					points[x][y] = new Point(x, y);
-				}
-			}
-		
-			
-			grid = new Cell[width / gridWidth][height / gridHeight];
-			for(int x = 0; x < width / gridWidth; x++)
-			{
-				for(int y = 0; y < height / gridHeight; y++)
-				{
-					grid[x][y] = new Cell(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
-				}
-			}
-		}
-		else
+		if(width <= 0 && height <= 0)
 		{
 			RobotSimulator.println("World must have a positive width and height!");
 			RobotSimulator.halt();
+		}
+		points = new Point[width][height];
+		for(int x = 0; x < width; x++)
+		{
+			for(int y = 0; y < height; y++)
+			{
+				points[x][y] = new Point(x, y);
+			}
+		}
+	
+		cellTypes.add(new CellType("g_onexone1", 1, 1, Color.blue));
+		cellTypes.add(new CellType("g_onexone2", 1, 1, Color.green));
+		cellTypes.add(new CellType("g_onexone3", 1, 1, Color.red));
+		cellTypes.add(new CellType("g_twoxtwo1", 2, 2, Color.blue));
+		cellTypes.add(new CellType("g_twoxone1", 2, 1, Color.black));
+		cellTypes.add(new CellType("g_onextwo1", 1, 2, Color.black));
+		
+		grid = new Cell[width / gridWidth][height / gridHeight];
+		for(int x = 0; x < width / gridWidth; x++)
+		{
+			for(int y = 0; y < height / gridHeight; y++)
+			{
+				grid[x][y] = new Cell(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
+			}
 		}
 	}
 	

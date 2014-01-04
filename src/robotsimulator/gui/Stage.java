@@ -18,6 +18,7 @@ import robotsimulator.world.Point;
 import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
+@SuppressWarnings("serial")
 public class Stage extends JPanel implements MouseListener, Runnable
 {
 	private Simulator sim;
@@ -55,7 +56,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		ArrayList<Block> blocks = sim.getWorld().getBlocks();
 		for(Block b : blocks)
 		{
-			paintBlock(g, b, Color.blue);
+			paintBlock(g, b, b.getColor());
 		}
 		
 		paintBlock(g, sim.getRobot().getBlock(), Color.green);

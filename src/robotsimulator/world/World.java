@@ -21,6 +21,7 @@ public class World
 	private GridSquare[][] grid;
 	private ArrayList<Block> blocks = new ArrayList<Block>();
 	private Rectangle2D boundary;
+	private CellType curCellType;
 	
 	public World(int w, int h, Simulator s)
 	{
@@ -50,6 +51,7 @@ public class World
 		cellTypes.add(new CellType("g_twoxtwo1", "2x2 #1", 2, 2, Color.blue));
 		cellTypes.add(new CellType("g_twoxone1", "2x1 #1", 2, 1, Color.black));
 		cellTypes.add(new CellType("g_onextwo1", "1x2 #2", 1, 2, Color.black));
+		curCellType = cellTypes.get(0);
 		
 		grid = new GridSquare[width / gridWidth][height / gridHeight];
 		for(int x = 0; x < width / gridWidth; x++)
@@ -74,6 +76,11 @@ public class World
 	public ArrayList<CellType> getCellTypes() 
 	{
 		return cellTypes;
+	}
+	
+	public void setCurrentCellType(CellType c) 
+	{
+		curCellType = c;
 	}
 	
 	public int getWidth()
@@ -139,22 +146,44 @@ public class World
 	{
 		try
 		{
-			int cellX = x / gridWidth;
-			int cellY = y / gridHeight;
+			int squareX = x / gridWidth;
+			int squareY = y / gridHeight;
 			
-			GridSquare c = grid[cellX][cellY];
-			
-			if(!c.isOccupied())
+			boolean occupied = false;
+			for(int i = 0; i < curCellType.getWidth(); i++)
 			{
-				Block b = new Block(c.getWidth(), c.getHeight(), c.getCenterX(), c.getCenterY(), c.getAngle(), sim);
-				c.occupy(b);
-			
-				addBlock(b);
+				for(int j = 0; j < curCellType.getHeight(); j++)
+				{
+					if(grid[squareX + i][squareY + j].isOccupied())
+						occupied = true;
+				}
 			}
-			else
+			
+			if(!occupied)
 			{
+				//Note: we have to add each cell rotated 90 degrees in order for our width / height settings to make sense.
+				Cell c = new Cell(squareX * gridWidth, squareY * gridHeight, 90, curCellType, sim);
+				for(int i = 0; i < curCellType.getWidth(); i++)
+				{
+					for(int j = 0; j < curCellType.getHeight(); j++)
+					{
+						grid[squareX + i][squareY + j].occupy(c);
+					}
+				}
+			
+				addBlock(c.getBlock());
+			}
+			else if(grid[squareX][squareY].isOccupied())
+			{
+				Cell c = grid[squareX][squareY].getCell();
 				Block b = c.getBlock();
-				c.unOccupy();
+				for(int i = 0; i < c.getCellType().getWidth(); i++)
+				{
+					for(int j = 0; j < c.getCellType().getHeight(); j++)
+					{
+						grid[squareX + i][squareY + j].unOccupy();
+					}
+				}
 				
 				removeBlock(b);
 			}

@@ -1,5 +1,6 @@
 package robotsimulator.worldobject;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
@@ -12,6 +13,7 @@ public class Block
 	private Simulator sim;
 	private double width, height, centerX, centerY, angle;
 	private Rectangle2D rect;
+	private Color color;
 	
 	public Block(int w, int h, double centerX2, double centerY2, double angle2, Simulator s)
 	{
@@ -21,6 +23,19 @@ public class Block
 		centerY = centerY2;
 		angle = angle2;
 		sim = s;
+		
+		rect = new Rectangle2D.Float((float)getTopLeftX(), (float)getTopLeftY(), (float)w, (float)h);
+	}
+	
+	public Block(int w, int h, double centerX2, double centerY2, double angle2, Simulator s, Color c)
+	{
+		width = w;
+		height = h;
+		centerX = centerX2;
+		centerY = centerY2;
+		angle = angle2;
+		sim = s;
+		color = c;
 		
 		rect = new Rectangle2D.Float((float)getTopLeftX(), (float)getTopLeftY(), (float)w, (float)h);
 	}
@@ -63,6 +78,11 @@ public class Block
 	public double getRadAngle()
 	{
 		return Math.toRadians(angle);
+	}
+	
+	public Color getColor()
+	{
+		return color;
 	}
 	
 	public void setCenterX(double c)

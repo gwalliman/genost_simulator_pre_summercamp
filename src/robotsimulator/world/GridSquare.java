@@ -1,11 +1,9 @@
 package robotsimulator.world;
 
-import robotsimulator.worldobject.Block;
-
 public class GridSquare 
 {
 	int x0, y0, width, height, angle;
-	Block b;
+	Cell c;
 	
 	public GridSquare(int x, int y, int w, int h, int a)
 	{
@@ -18,19 +16,19 @@ public class GridSquare
 	
 	public boolean isOccupied()
 	{
-		if(b != null)
+		if(c != null)
 			return true;
 		else return false;
 	}
 	
-	public void occupy(Block b0)
+	public void occupy(Cell c0)
 	{
-		b = b0;
+		c = c0;
 	}
 	
 	public void unOccupy()
 	{
-		b = null;
+		c = null;
 	}
 
 	public int getWidth() 
@@ -58,8 +56,8 @@ public class GridSquare
 		return y0 + width / 2;
 	}
 	
-	public Block getBlock()
+	public Cell getCell()
 	{
-		return b;
+		return c;
 	}
 }

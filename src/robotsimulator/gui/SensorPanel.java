@@ -1,10 +1,8 @@
 package robotsimulator.gui;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Label;
-import java.awt.TextField;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
@@ -12,6 +10,7 @@ import javax.swing.JPanel;
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
 
+@SuppressWarnings("serial")
 public class SensorPanel extends JPanel 
 {
 	Simulator sim;

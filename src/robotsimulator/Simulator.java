@@ -1,7 +1,5 @@
 package robotsimulator;
 
-import java.util.ArrayList;
-
 import robotinterpreter.RobotInterpreter;
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
@@ -14,8 +12,6 @@ public class Simulator implements RobotListener
 	private GUI gui;
 	private World world;
 	private Robot robot;
-	
-	private ArrayList<Block> blocks = new ArrayList<Block>();
 	
 	public Simulator(int width, int height, int fps)
 	{
@@ -35,6 +31,11 @@ public class Simulator implements RobotListener
 	public World getWorld()
 	{
 		return world;
+	}
+	
+	public GUI getGUI() 
+	{
+		return gui;
 	}
 	
 	public void addBlock(int w, int h, int x, int y, int a)
@@ -102,29 +103,6 @@ public class Simulator implements RobotListener
 
 			}
 		}
-		/*double x0 = robot.getCenterX();
-		double y0 = robot.getCenterY();
-		
-		if(dist > 0)
-		{
-			robot.drive('f');
-		}
-		else if(dist < 0)
-		{
-			robot.drive('b');
-			dist = dist * -1;
-		}
-		
-		double x1 = x0;
-		double y1 = y0;
-		
-		while(Math.hypot(x1 - x0, y1 - y0) < dist)
-		{
-			x1 = robot.getCenterX();
-			y1 = robot.getCenterY();
-		}
-		
-		robot.stop();*/
 	}
 	
 	public void turnAngle(int angle) 
@@ -142,67 +120,6 @@ public class Simulator implements RobotListener
 
 			}
 		}
-		
-		/*double prevAngle = robot.getAngle();
-		double total = 0;
-		
-		double goalAngle = prevAngle + angle;
-		if(goalAngle > 360)
-		{
-			goalAngle -= 360;
-		}
-		else if(goalAngle < 0)
-		{
-			goalAngle += 360;
-		}
-		
-		double curAngle;
-		
-		if(angle > 0)
-		{
-			robot.turn('r');
-			while(total < angle)
-			{
-				curAngle = robot.getAngle();
-				
-				if(curAngle < prevAngle)
-				{
-					total += curAngle + 360 - prevAngle;
-				}
-				else
-				{
-					total += curAngle - prevAngle;
-				}
-				prevAngle = curAngle;
-			}
-		}
-		else if(angle < 0)
-		{
-			robot.turn('l');
-			while(total > angle)
-			{
-				curAngle = robot.getAngle();
-
-				if(curAngle > prevAngle)
-				{
-					total += curAngle - 360 - prevAngle;
-				}
-				else
-				{
-					total += curAngle - prevAngle;
-				}
-				prevAngle = curAngle;
-			}
-		}
-		robot.stop();
-		
-		if((int) robot.getAngle() != (int) goalAngle)
-		{
-			curAngle = robot.getAngle();
-			
-			turnAngle((int)(goalAngle - curAngle));
-			System.out.println(goalAngle - robot.getAngle());
-		}*/
 	}
 
 	public void turnToBearing(int bearing) 
@@ -219,5 +136,22 @@ public class Simulator implements RobotListener
 		{
 			turnAngle(curBearing - bearing);
 		}
+	}
+
+	@Override
+	public void print(String s) 
+	{
+		System.out.print(s);		
+	}
+
+	@Override
+	public void println(String s) {
+		System.out.println(s);		
+	
+	}
+
+	@Override
+	public void error(String var, String e) {
+		System.out.println(e);		
 	}
 }

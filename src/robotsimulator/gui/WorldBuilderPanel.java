@@ -4,16 +4,16 @@ import java.awt.Button;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.geom.Rectangle2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
-import robotsimulator.robot.SonarSensor;
 import robotsimulator.world.CellType;
 
+@SuppressWarnings("serial")
 public class WorldBuilderPanel extends JPanel
 {
 	Simulator sim;
@@ -34,7 +34,30 @@ public class WorldBuilderPanel extends JPanel
 			c.setSize(sim.getWorld().getGridWidth() * ctype.getWidth(), sim.getWorld().getGridHeight() * ctype.getHeight());
 			c.setBackground(ctype.getColor());
 			add(c);
-			add(new Button(ctype.getLabel()));
+			
+			Button b = new Button(ctype.getLabel());
+			b.setName(ctype.getID());
+			ActionListener a = new ActionListener() 
+			{
+				public void actionPerformed(ActionEvent a) 
+				{
+					Button b = (Button)a.getSource();
+					ArrayList<CellType> types = sim.getWorld().getCellTypes();
+					String id = b.getName();
+					for(CellType ct : types)
+					{
+						if(ct.getID().equals(id))
+						{
+							sim.getWorld().setCurrentCellType(ct);
+							break;
+						}
+					}
+
+				}
+			}; 
+			
+			b.addActionListener(a);
+			add(b);
 		}
 	}
 }

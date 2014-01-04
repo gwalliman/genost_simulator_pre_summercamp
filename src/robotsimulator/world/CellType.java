@@ -17,6 +17,11 @@ public class CellType
 		height = h;
 		color = c;
 	}
+	
+	public String getID()
+	{
+		return id;
+	}
 
 	public String getLabel() 
 	{

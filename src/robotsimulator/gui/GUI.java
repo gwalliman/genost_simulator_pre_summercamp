@@ -2,19 +2,16 @@ package robotsimulator.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
 import robotsimulator.robot.Robot;
-import robotsimulator.worldobject.Block;
 
+@SuppressWarnings("serial")
 public class GUI extends JFrame implements KeyListener
 {
 	private Simulator sim;
@@ -30,12 +27,14 @@ public class GUI extends JFrame implements KeyListener
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		
+		JPanel codeArea = new CodePanel(h, sim);
 		JPanel stage = new Stage(w, h, fps, sim);
 		JPanel sensorPanel = new SensorPanel(h, sim);
 		JPanel worldBuilderPanel = new WorldBuilderPanel(w, sim);
+		add(codeArea, BorderLayout.NORTH);
 		add(stage, BorderLayout.CENTER);
-		add(sensorPanel, BorderLayout.EAST);
-		add(worldBuilderPanel, BorderLayout.SOUTH);
+		add(sensorPanel, BorderLayout.SOUTH);
+		add(worldBuilderPanel, BorderLayout.EAST);
 		
 		stage.requestFocus();
 
@@ -72,16 +71,13 @@ public class GUI extends JFrame implements KeyListener
 		}
 	}
 
-	@Override
 	public void keyReleased(KeyEvent e) 
 	{
 		Robot r = sim.getRobot();
 		r.stop();
 	}
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-		
+	public void keyTyped(KeyEvent e) 
+	{
 	}
 }

@@ -56,17 +56,15 @@ public class GUI extends JFrame implements KeyListener
 		{
 			case KeyEvent.VK_UP:
 				r.drive('f');
-			break;
+				break;
 			case KeyEvent.VK_DOWN:
 				r.drive('b');
-			break;
+				break;
 			case KeyEvent.VK_LEFT:
-				//b.setAngle(b.getDegAngle() + 1);
 				r.turn('l');
 				break;
 			case KeyEvent.VK_RIGHT:
 				r.turn('r');
-				//b.setAngle(b.getDegAngle() - 1);
 				break;
 		}
 	}

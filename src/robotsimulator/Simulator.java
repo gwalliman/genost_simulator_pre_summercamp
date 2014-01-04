@@ -1,6 +1,7 @@
 package robotsimulator;
 
-import robotinterpreter.RobotInterpreter;
+import java.awt.Color;
+
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
 import robotsimulator.robot.Robot;
@@ -17,10 +18,26 @@ public class Simulator implements RobotListener
 	{
 		world = new World(width, height, this);
 		robot = new Robot(this);
-		gui = new GUI(width, height, fps, this);
+
+		world.setCellType("g_onexone1", "1x1 #1", 1, 1, Color.blue);
+		world.setCellType("g_onexone2", "1x1 #2", 1, 1, Color.green);
+		world.setCellType("g_onexone3", "1x1 #3", 1, 1, Color.red);
+		world.setCellType("g_twoxtwo1", "2x2 #1", 2, 2, Color.blue);
+		world.setCellType("g_twoxone1", "2x1 #1", 2, 1, Color.black);
+		world.setCellType("g_onextwo1", "1x2 #2", 1, 2, Color.black);
 		
-		RobotInterpreter interpreter = new RobotInterpreter();
-		interpreter.addRobotListener(this);
+		int sonarLen = 750;
+		int fov = 25;
+
+		//THESE SHOULD BE ADDED IN CLOCKWISE STARTING FROM FRONT-LEFT
+		robot.addSonar(this, "Front-Left", robot.getX0(), robot.getY0(), sonarLen, 315, fov);
+		robot.addSonar(this, "Front", robot.getCenterFrontX(), robot.getCenterFrontY(), sonarLen, 0, fov);
+		robot.addSonar(this, "Front-Right", robot.getX1(), robot.getY1(), sonarLen, 45, fov);
+		robot.addSonar(this, "Right", robot.getCenterRightX(), robot.getCenterRightY(), sonarLen, 90, fov);
+		robot.addSonar(this, "Rear", robot.getCenterRearX(), robot.getCenterRearY(), sonarLen, 180, fov);
+		robot.addSonar(this, "Left", robot.getCenterLeftX(), robot.getCenterLeftY(), sonarLen, 270, fov);
+		
+		gui = new GUI(width, height, fps, this);
 	}
 	
 	public Robot getRobot()

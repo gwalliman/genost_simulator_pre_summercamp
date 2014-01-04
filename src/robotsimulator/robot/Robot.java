@@ -32,16 +32,6 @@ public class Robot implements Runnable
 		int angle = 0;
 
 		b = new Block(20, 30, centerX, centerY, angle, sim);
-		
-		int sonarLen = 750;
-
-		//THESE SHOULD BE ADDED IN CLOCKWISE STARTING FROM FRONT-LEFT
-		sonars.add(new SonarSensor(sim, "Front-Left", getX0(), getY0(), sonarLen, 315, 25));
-		sonars.add(new SonarSensor(sim, "Front", getCenterFrontX(), getCenterFrontY(), sonarLen, 0, 25));
-		sonars.add(new SonarSensor(sim, "Front-Right", getX1(), getY1(), sonarLen, 45, 25));
-		sonars.add(new SonarSensor(sim, "Right", getCenterRightX(), getCenterRightY(), sonarLen, 90, 25));
-		sonars.add(new SonarSensor(sim, "Rear", getCenterRearX(), getCenterRearY(), sonarLen, 180, 25));
-		sonars.add(new SonarSensor(sim, "Left", getCenterLeftX(), getCenterLeftY(), sonarLen, 270, 25));
 	}
 
 	public Block getBlock() 
@@ -52,6 +42,11 @@ public class Robot implements Runnable
 	public ArrayList<SonarSensor> getSonarSensors() 
 	{
 		return sonars;
+	}
+	
+	public void addSonar(Simulator s, String n, double x, double y, int l, int a, int fov)
+	{
+		sonars.add(new SonarSensor(s, n, x, y, l, a, fov));
 	}
 	
 	public SonarSensor getSonarSensor(int num) 

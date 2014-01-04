@@ -44,14 +44,6 @@ public class World
 				points[x][y] = new Point(x, y);
 			}
 		}
-	
-		cellTypes.add(new CellType("g_onexone1", "1x1 #1", 1, 1, Color.blue));
-		cellTypes.add(new CellType("g_onexone2", "1x1 #2", 1, 1, Color.green));
-		cellTypes.add(new CellType("g_onexone3", "1x1 #3", 1, 1, Color.red));
-		cellTypes.add(new CellType("g_twoxtwo1", "2x2 #1", 2, 2, Color.blue));
-		cellTypes.add(new CellType("g_twoxone1", "2x1 #1", 2, 1, Color.black));
-		cellTypes.add(new CellType("g_onextwo1", "1x2 #2", 1, 2, Color.black));
-		curCellType = cellTypes.get(0);
 		
 		grid = new GridSquare[width / gridWidth][height / gridHeight];
 		for(int x = 0; x < width / gridWidth; x++)
@@ -76,6 +68,13 @@ public class World
 	public ArrayList<CellType> getCellTypes() 
 	{
 		return cellTypes;
+	}
+	
+	public void setCellType(String id, String n, int w, int h, Color c) 
+	{
+		cellTypes.add(new CellType(id, n, w, h, c));
+		curCellType = cellTypes.get(0);
+
 	}
 	
 	public void setCurrentCellType(CellType c) 

@@ -2,7 +2,10 @@ package robotsimulator.world;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
@@ -13,11 +16,12 @@ public class World
 	private Simulator sim;
 	private int width;
 	private int height;
-	int gridWidth = 20;
-	int gridHeight = 20;
+	int gridWidth = 32;
+	int gridHeight = 32;
 	
 	private Point[][] points;
 	private ArrayList<CellType> cellTypes = new ArrayList<CellType>();
+	private Map<String, CellTheme> cellThemes = new HashMap<String, CellTheme>();
 	private GridSquare[][] grid;
 	private ArrayList<Block> blocks = new ArrayList<Block>();
 	private Rectangle2D boundary;
@@ -82,6 +86,16 @@ public class World
 		curCellType = c;
 	}
 	
+	public Map<String, CellTheme> getCellThemes() 
+	{
+		return cellThemes;
+	}
+	
+	public void setCellTheme(String id, URL url) 
+	{
+		cellThemes.put(id, new CellTheme(id, url));
+	}
+	
 	public int getWidth()
 	{
 		return width;
@@ -100,6 +114,16 @@ public class World
 	public int getGridHeight()
 	{
 		return gridHeight;
+	}
+	
+	public void setGridWidth(int w)
+	{
+		gridWidth = w;
+	}
+	
+	public void setGridHeight(int h)
+	{
+		gridHeight = h;
 	}
 	
 	public Rectangle2D getBoundary() 

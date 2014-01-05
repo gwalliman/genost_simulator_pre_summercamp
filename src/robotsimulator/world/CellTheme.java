@@ -3,6 +3,7 @@ package robotsimulator.world;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -12,19 +13,19 @@ public class CellTheme
 	BufferedImage image;
 	int width, height;
 	
-	public CellTheme(String i, String imgsrc)
+	public CellTheme(String i, URL url)
 	{
 		id = i;
 		try 
 		{
-			image = ImageIO.read(new File(imgsrc));
+			image = ImageIO.read(url);
 			width = image.getWidth(null);
 			height = image.getHeight(null);
 			
 		}
 		catch(IOException e)
 		{
-			System.out.println("Cannot find image at " + imgsrc);
+			System.out.println("Cannot find image at " + url);
 		}
 	}
 	

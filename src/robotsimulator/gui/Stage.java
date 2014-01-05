@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
+import robotsimulator.world.CellTheme;
+import robotsimulator.world.CellType;
 import robotsimulator.world.Point;
 import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
@@ -70,6 +72,17 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		g.setColor(c);
 		AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
 		g.fill(at.createTransformedShape(b.getRect()));
+		
+		CellType ct = b.getCellType();
+		if(ct != null)
+		{
+			String cellTypeID = ct.getID();
+			if(sim.getWorld().getCellThemes().containsKey(cellTypeID))
+			{
+				CellTheme cellTheme = sim.getWorld().getCellThemes().get(cellTypeID);
+				g.drawImage(cellTheme.getImage(), (int)b.getX0(), (int)b.getY0(), (int)b.getX3(), (int)b.getY3(), cellTheme.getWidth(), cellTheme.getHeight(), 0, 0, null);
+			}
+		}
 	}
 	
 	private void paintRobotEdges(Graphics2D g) 

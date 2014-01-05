@@ -1,6 +1,7 @@
 package robotsimulator;
 
 import java.awt.Color;
+import java.net.URL;
 
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
@@ -19,12 +20,23 @@ public class Simulator implements RobotListener
 		world = new World(width, height, this);
 		robot = new Robot(this);
 
-		world.setCellType("g_onexone1", "1x1 #1", 1, 1, Color.blue);
-		world.setCellType("g_onexone2", "1x1 #2", 1, 1, Color.green);
-		world.setCellType("g_onexone3", "1x1 #3", 1, 1, Color.red);
-		world.setCellType("g_twoxtwo1", "2x2 #1", 2, 2, Color.blue);
-		world.setCellType("g_twoxone1", "2x1 #1", 2, 1, Color.black);
-		world.setCellType("g_onextwo1", "1x2 #2", 1, 2, Color.black);
+		world.setGridWidth(32);
+		world.setGridHeight(32);
+		
+		world.setCellType("loz_wall1", "Wall 1", 1, 1, Color.blue);
+		world.setCellType("loz_wall2", "Wall 2", 1, 1, Color.green);
+		world.setCellType("loz_wall3", "Wall 3", 1, 1, Color.red);
+		world.setCellType("loz_floor1", "Floor 1", 1, 1, Color.blue);
+		world.setCellType("loz_floor2", "Floor 2", 1, 1, Color.black);
+		
+		URL path = Simulator.class.getResource("/robotsimulator/themes/loz/wall1.png");	
+	    
+	    world.setCellTheme("loz_wall1", Simulator.class.getResource("/robotsimulator/themes/loz/wall1.png"));
+		world.setCellTheme("loz_wall2", Simulator.class.getResource("/robotsimulator/themes/loz/wall2.png"));
+		world.setCellTheme("loz_wall3", Simulator.class.getResource("/robotsimulator/themes/loz/wall3.png"));
+		world.setCellTheme("loz_floor1", Simulator.class.getResource("/robotsimulator/themes/loz/floor1.png"));
+		world.setCellTheme("loz_floor2", Simulator.class.getResource("/robotsimulator/themes/loz/floor2.png"));
+
 		
 		int sonarLen = 750;
 		int fov = 25;

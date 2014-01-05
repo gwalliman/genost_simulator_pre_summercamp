@@ -8,9 +8,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
+import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
 
 @SuppressWarnings("serial")
@@ -30,18 +33,27 @@ public class WorldBuilderPanel extends JPanel
 		setLayout(new GridLayout(sim.getWorld().getCellTypes().size(), 1));
 		for(CellType ctype : sim.getWorld().getCellTypes())
 		{
-			Canvas c = new Canvas();
-			c.setSize(sim.getWorld().getGridWidth() * ctype.getWidth(), sim.getWorld().getGridHeight() * ctype.getHeight());
-			c.setBackground(ctype.getColor());
-			add(c);
+			String cellTypeID = ctype.getID();	
 			
-			Button b = new Button(ctype.getLabel());
+			JButton b; 
+			if(sim.getWorld().getCellThemes().containsKey(cellTypeID))
+			{
+				CellTheme cellTheme = sim.getWorld().getCellThemes().get(cellTypeID);
+				b = new JButton(new ImageIcon(cellTheme.getImage()));
+			}
+			else
+			{
+				b = new JButton(ctype.getLabel());
+				b.setBackground(ctype.getColor());
+				b.setOpaque(true);
+			}
+			
 			b.setName(ctype.getID());
 			ActionListener a = new ActionListener() 
 			{
 				public void actionPerformed(ActionEvent a) 
 				{
-					Button b = (Button)a.getSource();
+					JButton b = (JButton)a.getSource();
 					ArrayList<CellType> types = sim.getWorld().getCellTypes();
 					String id = b.getName();
 					for(CellType ct : types)

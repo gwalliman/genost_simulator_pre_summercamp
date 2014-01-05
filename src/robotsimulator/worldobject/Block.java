@@ -5,6 +5,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import robotsimulator.Simulator;
+import robotsimulator.world.CellType;
 import robotsimulator.world.Point;
 import robotsimulator.world.World;
 
@@ -14,6 +15,7 @@ public class Block
 	private double width, height, centerX, centerY, angle;
 	private Rectangle2D rect;
 	private Color color;
+	private CellType cellType;
 	
 	public Block(int w, int h, double centerX2, double centerY2, double angle2, Simulator s)
 	{
@@ -159,6 +161,16 @@ public class Block
 	public double getY3()
 	{
 		return getCenterY() + (getWidth() / 2) * Math.cos(getRadAngle()) - (getHeight() / 2) * Math.sin(getRadAngle());
+	}
+	
+	public void setCellType(CellType c)
+	{
+		cellType = c;
+	}
+	
+	public CellType getCellType()
+	{
+		return cellType;
 	}
 	
 	public void translate(int r)

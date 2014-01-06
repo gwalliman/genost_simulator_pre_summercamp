@@ -4,15 +4,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 import robotsimulator.Simulator;
+import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
 import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
@@ -184,4 +190,6 @@ public class Stage extends JPanel implements MouseListener, Runnable
 	public void mouseExited(MouseEvent arg0) { }
 	
 	public void mouseReleased(MouseEvent arg0) { }
+	
+
 }

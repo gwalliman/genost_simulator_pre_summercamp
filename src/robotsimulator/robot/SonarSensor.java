@@ -5,6 +5,7 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
+import java.io.BufferedWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -26,6 +27,8 @@ public class SonarSensor implements Runnable
 	private Label t;
 	
 	private double x0, y0, x1, y1, x2, y2;
+	
+	private int angle;
 	
 	//The maximum distance that the sensor can detect items at
 	private int length;
@@ -58,6 +61,7 @@ public class SonarSensor implements Runnable
 		length = l;
 		label = n;
 		type = 'l';
+		angle = a;
 
 		x1 = getEndpointX(a);
 		y1 = getEndpointY(a);
@@ -87,6 +91,8 @@ public class SonarSensor implements Runnable
 		length = l;
 		label = n;
 		type = 'c';
+		angle = a;
+
 		fov = f;
 		
 		x1 = getEndpointX(a - fov / 2);
@@ -396,5 +402,24 @@ public class SonarSensor implements Runnable
 			
             beforeTime = System.currentTimeMillis();
 		}
+	}
+
+	public void export(BufferedWriter bw) 
+	{
+		Simulator.expLine("sonar", bw);
+		Simulator.expProp("type", type, bw);
+		Simulator.expProp("name", label, bw);
+		Simulator.expProp("x", x0, bw);
+		Simulator.expProp("y", y0, bw);
+		Simulator.expProp("angle", angle, bw);
+		Simulator.expProp("length", length, bw);
+
+		if(type == 'c')
+		{
+			Simulator.expProp("fov", fov, bw);
+		}
+		
+		Simulator.expLine("sonar end", bw);
+
 	}
 }

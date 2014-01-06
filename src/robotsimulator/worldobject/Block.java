@@ -223,7 +223,7 @@ public class Block
             	return true;
             }
             
-			if(worldPoints[p.getX()][p.getY()].isOccupied())
+			if(worldPoints[p.getX()][p.getY()].isOccupied() && worldPoints[p.getX()][p.getY()].getOccupier().getCellType().doesClip())
 			{
 				return true;
 			}

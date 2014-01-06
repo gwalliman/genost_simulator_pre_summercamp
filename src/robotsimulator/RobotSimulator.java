@@ -13,12 +13,8 @@ public class RobotSimulator
 	}
 	
 	public static void main(String[] args) 
-	{
-		int guiWidth = 500;
-		int guiHeight = 500;
-		int guiFPS = 30;
-		
+	{	
 		@SuppressWarnings("unused")
-		Simulator s = new Simulator(guiWidth, guiHeight, guiFPS);
+		Simulator s = new Simulator();
 	}
 }

@@ -1,6 +1,10 @@
 package robotsimulator;
 
 import java.awt.Color;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 
 import robotinterpreter.RobotListener;
@@ -14,30 +18,18 @@ public class Simulator implements RobotListener
 	private GUI gui;
 	private World world;
 	private Robot robot;
+	private static String newline = "\n";
 	
-	public Simulator(int width, int height, int fps)
+	public Simulator()
 	{
-		world = new World(width, height, this);
-		robot = new Robot(this);
+		/*
+		 * SETTING ROBOT PARAMS
+		 */
+		int centerX = 100;
+		int centerY = 100;
+		int angle = 0;
+		robot = new Robot(centerX, centerY, angle, this);
 
-		world.setGridWidth(32);
-		world.setGridHeight(32);
-		
-		world.setCellType("loz_wall1", "Wall 1", 1, 1, Color.blue);
-		world.setCellType("loz_wall2", "Wall 2", 1, 1, Color.green);
-		world.setCellType("loz_wall3", "Wall 3", 1, 1, Color.red);
-		world.setCellType("loz_floor1", "Floor 1", 1, 1, Color.blue);
-		world.setCellType("loz_floor2", "Floor 2", 1, 1, Color.black);
-		
-		URL path = Simulator.class.getResource("/robotsimulator/themes/loz/wall1.png");	
-	    
-	    world.setCellTheme("loz_wall1", Simulator.class.getResource("/robotsimulator/themes/loz/wall1.png"));
-		world.setCellTheme("loz_wall2", Simulator.class.getResource("/robotsimulator/themes/loz/wall2.png"));
-		world.setCellTheme("loz_wall3", Simulator.class.getResource("/robotsimulator/themes/loz/wall3.png"));
-		world.setCellTheme("loz_floor1", Simulator.class.getResource("/robotsimulator/themes/loz/floor1.png"));
-		world.setCellTheme("loz_floor2", Simulator.class.getResource("/robotsimulator/themes/loz/floor2.png"));
-
-		
 		int sonarLen = 750;
 		int fov = 25;
 
@@ -49,7 +41,54 @@ public class Simulator implements RobotListener
 		robot.addSonar(this, "Rear", robot.getCenterRearX(), robot.getCenterRearY(), sonarLen, 180, fov);
 		robot.addSonar(this, "Left", robot.getCenterLeftX(), robot.getCenterLeftY(), sonarLen, 270, fov);
 		
-		gui = new GUI(width, height, fps, this);
+		/*
+		world.setCellType("loz_wall1", "Wall 1", 1, 1, true, Color.blue);
+		world.setCellType("loz_wall2", "Wall 2", 1, 1, true, Color.green);
+		world.setCellType("loz_wall3", "Wall 3", 1, 1, true, Color.red);
+		world.setCellType("loz_floor1", "Floor 1", 1, 1, false, Color.blue);
+		world.setCellType("loz_floor2", "Floor 2", 1, 1, false, Color.black);
+		   
+	    world.setCellTheme("loz_wall1", Simulator.class.getResource("/robotsimulator/themes/loz/wall1.png"));
+		world.setCellTheme("loz_wall2", Simulator.class.getResource("/robotsimulator/themes/loz/wall2.png"));
+		world.setCellTheme("loz_wall3", Simulator.class.getResource("/robotsimulator/themes/loz/wall3.png"));
+		world.setCellTheme("loz_floor1", Simulator.class.getResource("/robotsimulator/themes/loz/floor1.png"));
+		world.setCellTheme("loz_floor2", Simulator.class.getResource("/robotsimulator/themes/loz/floor2.png"));
+		*/
+		
+		/*
+		 * SETTING BASIC WORLD PARAMS
+		 */
+		int gridWidth = 32;
+		int gridHeight = 32;
+		
+		int guiWidth = 640;
+		int guiHeight = 320;
+		int guiFPS = 30;
+		
+		
+		world = new World(guiWidth, guiHeight, gridWidth, gridHeight, this);
+		world.setGridWidth(gridWidth);
+		world.setGridHeight(gridHeight);
+		
+		world.setTheme("loz");
+		/*
+		 * SETTING WORLD CELL TYPES
+		 */
+		world.setCellType("pkmn_wall1", "Wall 1", 1, 1, true, Color.blue);
+		world.setCellType("pkmn_wall2", "Wall 2", 1, 1, true, Color.green);
+		world.setCellType("pkmn_wall3", "Wall 3", 1, 1, true, Color.red);
+		world.setCellType("pkmn_floor1", "Floor 1", 1, 1, false, Color.blue);
+		world.setCellType("pkmn_floor2", "Floor 2", 1, 1, false, Color.black);
+		world.setCellType("pkmn_floor3", "Floor 3", 1, 1, false, Color.black);
+
+	    world.setCellTheme("pkmn_wall1", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall1.png"));
+		world.setCellTheme("pkmn_wall2", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall2.png"));
+		world.setCellTheme("pkmn_wall3", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall3.png"));
+		world.setCellTheme("pkmn_floor1", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor1.png"));
+		world.setCellTheme("pkmn_floor2", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor2.png"));
+		world.setCellTheme("pkmn_floor3", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor3.png"));
+		
+		gui = new GUI(guiWidth, guiHeight, guiFPS, this);
 	}
 	
 	public Robot getRobot()
@@ -182,5 +221,99 @@ public class Simulator implements RobotListener
 	@Override
 	public void error(String var, String e) {
 		System.out.println(e);		
+	}
+	
+	public static void expLine(String s, BufferedWriter bw)
+	{
+		try 
+		{
+			bw.write(s);
+			bw.newLine();
+		} 
+		catch (IOException e) 
+		{
+
+		}
+	}
+	
+	public static void expBreak(BufferedWriter bw) 
+	{
+		try 
+		{
+			bw.newLine();
+		} 
+		catch (IOException e) 
+		{
+
+		}	
+	}
+	
+	public static void expProp(String k, String v, BufferedWriter bw)
+	{
+		try 
+		{
+			bw.write(k + ":" + v);
+			bw.newLine();
+		} 
+		catch (IOException e) 
+		{
+
+		}
+	}
+	
+	public static void expProp(String k, int v, BufferedWriter bw)
+	{
+		try 
+		{
+			bw.write(k + ":" + v);
+			bw.newLine();
+		} 
+		catch (IOException e) 
+		{
+
+		}
+	}
+	
+	public static void expProp(String k, Double v, BufferedWriter bw)
+	{
+		try 
+		{
+			bw.write(k + ":" + v);
+			bw.newLine();
+		} 
+		catch (IOException e) 
+		{
+
+		}
+	}
+	
+	public static void expProp(String k, boolean v, BufferedWriter bw)
+	{
+		try 
+		{
+			bw.write(k + ":" + v);
+			bw.newLine();
+		} 
+		catch (IOException e) 
+		{
+
+		}
+	}
+	
+	public void exportWorld(File f) 
+	{
+		try 
+		{
+			FileWriter fw = new FileWriter(f);
+			BufferedWriter bw = new BufferedWriter(fw);
+			robot.export(bw);
+			world.export(bw);
+			
+			bw.close();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}		
 	}
 }

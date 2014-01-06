@@ -1,15 +1,15 @@
 package robotsimulator.gui;
 
-import java.awt.Button;
-import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 
 import robotsimulator.Simulator;
@@ -20,6 +20,7 @@ import robotsimulator.world.CellType;
 public class WorldBuilderPanel extends JPanel
 {
 	Simulator sim;
+	JFileChooser fc = new JFileChooser();
 	
 	public WorldBuilderPanel(int w, Simulator s) 
 	{
@@ -71,5 +72,25 @@ public class WorldBuilderPanel extends JPanel
 			b.addActionListener(a);
 			add(b);
 		}
+		
+		JButton exportStage = new JButton("Export Stage");
+		ActionListener export = new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent a) 
+			{
+				int returnVal = fc.showSaveDialog(sim.getGUI());
+		        if (returnVal == JFileChooser.APPROVE_OPTION) 
+		        {
+		        	File file = fc.getSelectedFile();
+			        sim.exportWorld(file);
+		        } 
+		        else 
+		        {
+		        	System.out.println("Could not output file.");
+		        }
+			}
+		}; 
+		exportStage.addActionListener(export);
+		add(exportStage);
 	}
 }

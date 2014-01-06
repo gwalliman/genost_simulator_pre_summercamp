@@ -1,5 +1,6 @@
 package robotsimulator.robot;
 
+import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 import robotsimulator.Simulator;
@@ -22,14 +23,14 @@ public class Robot implements Runnable
 	
 	private ArrayList<SonarSensor> sonars = new ArrayList<SonarSensor>();
 	
-	public Robot(Simulator s)
+	public Robot(int cx, int cy, int a, Simulator s)
 	{
 		sim = s;
-		int centerX = 100;
-		int centerY = 100;
+		int centerX = cx;
+		int centerY = cy;
 		
 		//Degrees, 0 is direct north, counterclockwise
-		int angle = 0;
+		int angle = a;
 
 		b = new Block(20, 30, centerX, centerY, angle, sim);
 	}
@@ -354,5 +355,25 @@ public class Robot implements Runnable
 	public double getAngle() 
 	{
 		return b.getDegAngle();
+	}
+	
+	
+	public void export(BufferedWriter bw) 
+	{
+		Simulator.expLine("robot", bw);
+		Simulator.expProp("x", getCenterX(), bw);
+		Simulator.expProp("y", getCenterY(), bw);
+		Simulator.expProp("a", getAngle(), bw);
+		Simulator.expBreak(bw);
+
+		Simulator.expLine("sonars", bw);
+		for(SonarSensor s : sonars)
+		{
+			s.export(bw);
+			Simulator.expBreak(bw);
+		}
+		Simulator.expLine("sonars end", bw);
+		Simulator.expLine("robot end", bw);
+		Simulator.expBreak(bw);
 	}
 }

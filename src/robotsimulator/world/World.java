@@ -11,6 +11,10 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -34,12 +38,10 @@ public class World
 	private Rectangle2D boundary;
 	private CellType curCellType;
 	
-	public World(int w, int h, int gw, int gh, Simulator s)
+	public World(int w, int h, Simulator s)
 	{
 		width = w;
 		height = h;
-		gridWidth = gw;
-		gridHeight = gh;
 		sim = s;
 		
 		boundary = new Rectangle2D.Double(0, 0, width, height);
@@ -57,15 +59,6 @@ public class World
 				points[x][y] = new Point(x, y);
 			}
 		}
-		
-		grid = new GridSquare[width / gridWidth][height / gridHeight];
-		for(int x = 0; x < width / gridWidth; x++)
-		{
-			for(int y = 0; y < height / gridHeight; y++)
-			{
-				grid[x][y] = new GridSquare(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
-			}
-		}
 	}
 	
 
@@ -77,32 +70,56 @@ public class World
 	
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.parse(Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/theme.xml").toString());
-	
-			Node parent = document.getDocumentElement();
-	
-			if(parent.getNodeName().equals("theme") && parent.getAttributes().getNamedItem("id").getNodeValue().equals(themeid))
-			{
-				for (int i = 0; i < nodeList.getLength(); i++) 
-				{
-					Node node = nodeList.item(i);
-				    if (node instanceof Element) 
-				    {
-				    	switch(node.getNodeName())
-				    	{
-				    		case "gridwidth":
-				    			break;
-				    		case "gridheight":
-				    			break;
-				    		case "celltypes":
-				    			break;
-				    	}
-				    }
-				}
-			}
+			Node root = document.getDocumentElement();
+			
+			XPathFactory xPathFactory = XPathFactory.newInstance();
+		    XPath xpath = xPathFactory.newXPath();
+		    
+		    XPathExpression gridWidthExp = xpath.compile("gridwidth");
+		    Node gridWidthNode = ((NodeList)gridWidthExp.evaluate(root, XPathConstants.NODESET)).item(0);
+		    gridWidth = Integer.parseInt(gridWidthNode.getTextContent());
+		    
+		    XPathExpression gridHeightExp = xpath.compile("gridheight");
+		    Node gridHeightNode = ((NodeList)gridHeightExp.evaluate(root, XPathConstants.NODESET)).item(0);
+		    gridHeight = Integer.parseInt(gridHeightNode.getTextContent());
+		    
+		    NodeList celltypes = ((NodeList)xpath.compile("celltypes/celltype").evaluate(root, XPathConstants.NODESET));
+		    for(int i = 0; i < celltypes.getLength(); i++)
+		    {
+		    	Node idNode = celltypes.item(i).getAttributes().getNamedItem("id");
+			    Node nameNode = (((NodeList)xpath.compile("name").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+			    Node widthNode = (((NodeList)xpath.compile("width").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+			    Node heightNode = (((NodeList)xpath.compile("height").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+			    Node clipNode = (((NodeList)xpath.compile("clip").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+			    Node colorNode = (((NodeList)xpath.compile("color").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+			    Node imageNode = (((NodeList)xpath.compile("image").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+			    setCellType(
+			    		idNode.getNodeValue(), 
+						nameNode.getTextContent(), 
+						Integer.parseInt(widthNode.getTextContent()), 
+						Integer.parseInt(heightNode.getTextContent()), 
+						Boolean.parseBoolean(clipNode.getTextContent()),
+						Color.decode(colorNode.getTextContent())
+					);
+			    String path = "/robotsimulator/themes/" + idNode.getNodeValue() + "/" + imageNode.getTextContent();
+			    setCellTheme(
+			    		idNode.getNodeValue(), 
+			    		Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/" + imageNode.getTextContent())
+			    	);
+		    }
 		}
 		catch(Exception e)
 		{
 			e.printStackTrace();
+		}
+		
+		grid = new GridSquare[width / gridWidth][height / gridHeight];
+		for(int x = 0; x < width / gridWidth; x++)
+		{
+			for(int y = 0; y < height / gridHeight; y++)
+			{
+				grid[x][y] = new GridSquare(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
+			}
 		}
 
 		/*setCellType("pkmn_wall1", "Wall 1", 1, 1, true, Color.blue);

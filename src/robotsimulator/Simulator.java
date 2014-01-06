@@ -58,17 +58,18 @@ public class Simulator implements RobotListener
 		/*
 		 * SETTING BASIC WORLD PARAMS
 		 */
+		
+		/*
 		int gridWidth = 32;
 		int gridHeight = 32;
+		*/
 		
 		int guiWidth = 640;
 		int guiHeight = 320;
 		int guiFPS = 30;
 		
 		
-		world = new World(guiWidth, guiHeight, gridWidth, gridHeight, this);
-		world.setGridWidth(gridWidth);
-		world.setGridHeight(gridHeight);
+		world = new World(guiWidth, guiHeight, this);
 		
 		world.setTheme("loz");
 		/*

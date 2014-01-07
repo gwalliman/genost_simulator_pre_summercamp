@@ -121,20 +121,6 @@ public class World
 				grid[x][y] = new GridSquare(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
 			}
 		}
-
-		/*setCellType("pkmn_wall1", "Wall 1", 1, 1, true, Color.blue);
-		setCellType("pkmn_wall2", "Wall 2", 1, 1, true, Color.green);
-		world.setCellType("pkmn_wall3", "Wall 3", 1, 1, true, Color.red);
-		world.setCellType("pkmn_floor1", "Floor 1", 1, 1, false, Color.blue);
-		world.setCellType("pkmn_floor2", "Floor 2", 1, 1, false, Color.black);
-		world.setCellType("pkmn_floor3", "Floor 3", 1, 1, false, Color.black);
-		
-	    world.setCellTheme("pkmn_wall1", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall1.png"));
-		world.setCellTheme("pkmn_wall2", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall2.png"));
-		world.setCellTheme("pkmn_wall3", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall3.png"));
-		world.setCellTheme("pkmn_floor1", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor1.png"));
-		world.setCellTheme("pkmn_floor2", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor2.png"));
-		world.setCellTheme("pkmn_floor3", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor3.png"));*/
 	}
 	
 	public ArrayList<Block> getBlocks()
@@ -242,6 +228,23 @@ public class World
 		}
 	}
 	
+	public void toggleCell(int x, int y, String ct)
+	{
+		if(!curCellType.getID().equals(ct))
+		{
+			for(CellType c : cellTypes)
+			{
+				if(c.getID().equals(ct))
+				{
+					curCellType = c;
+					break;
+				}
+			}
+		}
+		
+		toggleCell(x, y);
+	}
+	
 	public void toggleCell(int x, int y)
 	{
 		try
@@ -331,60 +334,28 @@ public class World
         return points;
     }
 
-	public void export(BufferedWriter bw)
+	public void export(Document doc)
 	{
-		int gridWidth = 32;
-		int gridHeight = 32;
+		Element root = doc.getDocumentElement();
+		Element worldElement = doc.createElement("world");
+		root.appendChild(worldElement);
 		
-		int guiWidth = 640;
-		int guiHeight = 320;
-		int guiFPS = 30;
+		Element gridWidthE = doc.createElement("gridwidth");
+		gridWidthE.appendChild(doc.createTextNode(Integer.toString(gridWidth)));
+		worldElement.appendChild(gridWidthE);
+
+		Element gridHeightE = doc.createElement("gridheight");
+		gridHeightE.appendChild(doc.createTextNode(Integer.toString(gridHeight)));
+		worldElement.appendChild(gridHeightE);
+
+		Element cellParent = doc.createElement("cells");
+		worldElement.appendChild(cellParent);
 		
-		Simulator.expLine("world", bw);
-		Simulator.expBreak(bw);
-		
-		Simulator.expLine("worlddata", bw);
-		Simulator.expProp("guiwidth", guiWidth, bw);
-		Simulator.expProp("guiheight", guiHeight, bw);
-		Simulator.expProp("guifps", guiFPS, bw);
-
-		Simulator.expLine("worlddata end", bw);
-		Simulator.expBreak(bw);
-
-		/*exportCellTypes(bw);
-		Simulator.expBreak(bw);
-
-		exportCellThemes(bw);
-		Simulator.expBreak(bw);*/
-
-		exportCells(bw);
-		Simulator.expBreak(bw);
-		
-		Simulator.expLine("world end", bw);
-		Simulator.expBreak(bw);
-	}
-	
-	/*public void exportCellTypes(BufferedWriter bw) 
-	{
-		Simulator.expLine("celltypes", bw);
-		Simulator.expBreak(bw);
-		for(CellType c : cellTypes)
+		for(Block b : blocks)
 		{
-			c.export(bw);
-			Simulator.expBreak(bw);
+			Element cellElement = doc.createElement("cell");
+			cellParent.appendChild(cellElement);
+			b.export(doc, cellElement);
 		}
-		Simulator.expLine("celltypes end", bw);
-	}*/
-	
-	public void exportCells(BufferedWriter bw) 
-	{
-		Simulator.expLine("celltypes", bw);
-		Simulator.expBreak(bw);
-		for(CellType c : cellTypes)
-		{
-			c.export(bw);
-			Simulator.expBreak(bw);
-		}
-		Simulator.expLine("celltypes end", bw);
 	}
 }

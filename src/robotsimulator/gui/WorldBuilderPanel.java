@@ -73,6 +73,26 @@ public class WorldBuilderPanel extends JPanel
 			add(b);
 		}
 		
+		JButton importStage = new JButton("Import Stage");
+		ActionListener importA = new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent a) 
+			{
+				int returnVal = fc.showOpenDialog(sim.getGUI());
+		        if (returnVal == JFileChooser.APPROVE_OPTION) 
+		        {
+		        	File file = fc.getSelectedFile();
+			        sim.importStage(file);
+		        } 
+		        else 
+		        {
+		        	System.out.println("Could not output file.");
+		        }
+			}
+		}; 
+		importStage.addActionListener(importA);
+		add(importStage);
+		
 		JButton exportStage = new JButton("Export Stage");
 		ActionListener export = new ActionListener() 
 		{
@@ -82,7 +102,7 @@ public class WorldBuilderPanel extends JPanel
 		        if (returnVal == JFileChooser.APPROVE_OPTION) 
 		        {
 		        	File file = fc.getSelectedFile();
-			        sim.exportWorld(file);
+			        sim.exportStage(file);
 		        } 
 		        else 
 		        {

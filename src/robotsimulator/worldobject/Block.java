@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import robotsimulator.Simulator;
 import robotsimulator.world.CellType;
 import robotsimulator.world.Point;
@@ -234,5 +237,24 @@ public class Block
 	public Rectangle2D getRect()
 	{
 		return rect;
+	}
+	
+	public void export(Document doc, Element cellElement)
+	{
+		Element xe = doc.createElement("x");
+		xe.appendChild(doc.createTextNode(Double.toString(getTopLeftX())));
+		cellElement.appendChild(xe);
+		
+		Element ye = doc.createElement("y");
+		ye.appendChild(doc.createTextNode(Double.toString(getTopLeftY())));
+		cellElement.appendChild(ye);
+		
+		Element ae = doc.createElement("a");
+		ae.appendChild(doc.createTextNode(Double.toString(getDegAngle())));
+		cellElement.appendChild(ae);
+		
+		Element cte = doc.createElement("celltype");
+		cte.appendChild(doc.createTextNode(cellType.getID()));
+		cellElement.appendChild(cte);
 	}
 }

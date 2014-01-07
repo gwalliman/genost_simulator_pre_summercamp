@@ -6,10 +6,28 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Scanner;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
 import robotsimulator.robot.Robot;
+import robotsimulator.world.GridSquare;
 import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
@@ -19,6 +37,11 @@ public class Simulator implements RobotListener
 	private World world;
 	private Robot robot;
 	private static String newline = "\n";
+	
+	int guiWidth = 640;
+	int guiHeight = 320;
+	int guiFPS = 30;
+	String themeid = "loz";
 	
 	public Simulator()
 	{
@@ -40,55 +63,18 @@ public class Simulator implements RobotListener
 		robot.addSonar(this, "Right", robot.getCenterRightX(), robot.getCenterRightY(), sonarLen, 90, fov);
 		robot.addSonar(this, "Rear", robot.getCenterRearX(), robot.getCenterRearY(), sonarLen, 180, fov);
 		robot.addSonar(this, "Left", robot.getCenterLeftX(), robot.getCenterLeftY(), sonarLen, 270, fov);
-		
-		/*
-		world.setCellType("loz_wall1", "Wall 1", 1, 1, true, Color.blue);
-		world.setCellType("loz_wall2", "Wall 2", 1, 1, true, Color.green);
-		world.setCellType("loz_wall3", "Wall 3", 1, 1, true, Color.red);
-		world.setCellType("loz_floor1", "Floor 1", 1, 1, false, Color.blue);
-		world.setCellType("loz_floor2", "Floor 2", 1, 1, false, Color.black);
-		   
-	    world.setCellTheme("loz_wall1", Simulator.class.getResource("/robotsimulator/themes/loz/wall1.png"));
-		world.setCellTheme("loz_wall2", Simulator.class.getResource("/robotsimulator/themes/loz/wall2.png"));
-		world.setCellTheme("loz_wall3", Simulator.class.getResource("/robotsimulator/themes/loz/wall3.png"));
-		world.setCellTheme("loz_floor1", Simulator.class.getResource("/robotsimulator/themes/loz/floor1.png"));
-		world.setCellTheme("loz_floor2", Simulator.class.getResource("/robotsimulator/themes/loz/floor2.png"));
-		*/
-		
+			
 		/*
 		 * SETTING BASIC WORLD PARAMS
 		 */
-		
-		/*
-		int gridWidth = 32;
-		int gridHeight = 32;
-		*/
-		
-		int guiWidth = 640;
-		int guiHeight = 320;
-		int guiFPS = 30;
-		
-		
+			
 		world = new World(guiWidth, guiHeight, this);
+		world.setTheme(themeid);
 		
-		world.setTheme("loz");
 		/*
 		 * SETTING WORLD CELL TYPES
 		 */
-		world.setCellType("pkmn_wall1", "Wall 1", 1, 1, true, Color.blue);
-		world.setCellType("pkmn_wall2", "Wall 2", 1, 1, true, Color.green);
-		world.setCellType("pkmn_wall3", "Wall 3", 1, 1, true, Color.red);
-		world.setCellType("pkmn_floor1", "Floor 1", 1, 1, false, Color.blue);
-		world.setCellType("pkmn_floor2", "Floor 2", 1, 1, false, Color.black);
-		world.setCellType("pkmn_floor3", "Floor 3", 1, 1, false, Color.black);
-
-	    world.setCellTheme("pkmn_wall1", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall1.png"));
-		world.setCellTheme("pkmn_wall2", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall2.png"));
-		world.setCellTheme("pkmn_wall3", Simulator.class.getResource("/robotsimulator/themes/pkmn/wall3.png"));
-		world.setCellTheme("pkmn_floor1", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor1.png"));
-		world.setCellTheme("pkmn_floor2", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor2.png"));
-		world.setCellTheme("pkmn_floor3", Simulator.class.getResource("/robotsimulator/themes/pkmn/floor3.png"));
-		
+	
 		gui = new GUI(guiWidth, guiHeight, guiFPS, this);
 	}
 	
@@ -224,93 +210,131 @@ public class Simulator implements RobotListener
 		System.out.println(e);		
 	}
 	
-	public static void expLine(String s, BufferedWriter bw)
+	public void importStage(File f)
 	{
-		try 
+		try
 		{
-			bw.write(s);
-			bw.newLine();
-		} 
-		catch (IOException e) 
-		{
-
-		}
-	}
-	
-	public static void expBreak(BufferedWriter bw) 
-	{
-		try 
-		{
-			bw.newLine();
-		} 
-		catch (IOException e) 
-		{
-
-		}	
-	}
-	
-	public static void expProp(String k, String v, BufferedWriter bw)
-	{
-		try 
-		{
-			bw.write(k + ":" + v);
-			bw.newLine();
-		} 
-		catch (IOException e) 
-		{
-
-		}
-	}
-	
-	public static void expProp(String k, int v, BufferedWriter bw)
-	{
-		try 
-		{
-			bw.write(k + ":" + v);
-			bw.newLine();
-		} 
-		catch (IOException e) 
-		{
-
-		}
-	}
-	
-	public static void expProp(String k, Double v, BufferedWriter bw)
-	{
-		try 
-		{
-			bw.write(k + ":" + v);
-			bw.newLine();
-		} 
-		catch (IOException e) 
-		{
-
-		}
-	}
-	
-	public static void expProp(String k, boolean v, BufferedWriter bw)
-	{
-		try 
-		{
-			bw.write(k + ":" + v);
-			bw.newLine();
-		} 
-		catch (IOException e) 
-		{
-
-		}
-	}
-	
-	public void exportWorld(File f) 
-	{
-		try 
-		{
-			FileWriter fw = new FileWriter(f);
-			BufferedWriter bw = new BufferedWriter(fw);
-			robot.export(bw);
-			world.export(bw);
 			
-			bw.close();
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document document = builder.parse(f);
+			
+			Node root = document.getDocumentElement();
+			
+			XPathFactory xPathFactory = XPathFactory.newInstance();
+		    XPath xpath = xPathFactory.newXPath();
+		    
+	    	Node guiWidthNode = root.getAttributes().getNamedItem("guiwidth");
+	    	Node guiHeightNode = root.getAttributes().getNamedItem("guiheight");
+	    	Node themeIDNode = root.getAttributes().getNamedItem("themeid");
+		    
+		    Node robotNode = ((NodeList)xpath.compile("robot").evaluate(root, XPathConstants.NODESET)).item(0);
+		    Node robotXNode = (((NodeList)xpath.compile("x").evaluate(robotNode, XPathConstants.NODESET))).item(0);
+		    Node robotYNode = (((NodeList)xpath.compile("y").evaluate(robotNode, XPathConstants.NODESET))).item(0);
+		    Node robotANode = (((NodeList)xpath.compile("a").evaluate(robotNode, XPathConstants.NODESET))).item(0);
+	
+			robot = new Robot(
+					(int)Math.round(Double.parseDouble(robotXNode.getTextContent())), 
+					(int)Math.round(Double.parseDouble(robotYNode.getTextContent())), 
+					(int)Math.round(Double.parseDouble(robotANode.getTextContent())), 
+					this
+				);
+			
+		    NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(robotNode, XPathConstants.NODESET));
+
+		    for(int i = 0; i < sonarNodes.getLength(); i++)
+		    {
+			    Node sonarTypeNode = (((NodeList)xpath.compile("type").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarNameNode = (((NodeList)xpath.compile("name").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarXNode = (((NodeList)xpath.compile("x").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarYNode = (((NodeList)xpath.compile("y").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarAngleNode = (((NodeList)xpath.compile("angle").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarLengthNode = (((NodeList)xpath.compile("length").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    
+			    char sonarType = sonarTypeNode.getTextContent().charAt(0);
+			    if(sonarType == 'l')
+			    {
+					robot.addSonar(
+							this, 
+							sonarNameNode.getTextContent(), 
+							Double.parseDouble(sonarXNode.getTextContent()),
+							Double.parseDouble(sonarYNode.getTextContent()),
+							Integer.parseInt(sonarLengthNode.getTextContent()),
+							Integer.parseInt(sonarAngleNode.getTextContent())
+						);
+
+			    }
+			    else if(sonarType == 'c')
+			    {
+				    Node sonarFOVNode = (((NodeList)xpath.compile("fov").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+				    robot.addSonar(
+							this, 
+							sonarNameNode.getTextContent(), 
+							Double.parseDouble(sonarXNode.getTextContent()),
+							Double.parseDouble(sonarYNode.getTextContent()),
+							Integer.parseInt(sonarLengthNode.getTextContent()),
+							Integer.parseInt(sonarAngleNode.getTextContent()),
+							Integer.parseInt(sonarFOVNode.getTextContent())
+						);
+			    }
+
+		    }
+		    
+		    Node worldNode = ((NodeList)xpath.compile("world").evaluate(root, XPathConstants.NODESET)).item(0);
+		    Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
+		    Node worldGridHeighthNode = (((NodeList)xpath.compile("gridheight").evaluate(worldNode, XPathConstants.NODESET))).item(0);
+		    
+		    world = new World(guiWidth, guiHeight, this);
+		    world.setGridWidth(Integer.parseInt(worldGridWidthNode.getTextContent()));
+		    world.setGridHeight(Integer.parseInt(worldGridHeighthNode.getTextContent()));
+			world.setTheme(themeid);	
+			
+			NodeList cellNodes = ((NodeList)xpath.compile("cells/cell").evaluate(worldNode, XPathConstants.NODESET));
+			for(int i = 0; i < cellNodes.getLength(); i++)
+			{
+				Node cellXNode = (((NodeList)xpath.compile("x").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node cellYNode = (((NodeList)xpath.compile("y").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node cellTypeNode = (((NodeList)xpath.compile("celltype").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
+			    
+			    world.toggleCell(
+			    		(int)Math.floor(Double.parseDouble(cellXNode.getTextContent())),
+			    		(int)Math.floor(Double.parseDouble(cellYNode.getTextContent())),
+			    		cellTypeNode.getTextContent()
+			    	);
+			}
+			gui = new GUI(guiWidth, guiHeight, guiFPS, this);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void exportStage(File f) 
+	{
+		try 
+		{
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+	 
+			// root elements
+			Document doc = docBuilder.newDocument();
+			Element rootElement = doc.createElement("stage");
+			doc.appendChild(rootElement);
+			rootElement.setAttribute("guiwidth", Integer.toString(guiWidth));
+			rootElement.setAttribute("guiheight", Integer.toString(guiHeight));
+			rootElement.setAttribute("theme", themeid);
+			
+			robot.export(doc);
+			world.export(doc);
+			
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(f);
+	 
+			transformer.transform(source, result);
 		} 
 		catch (Exception e) 
 		{

@@ -9,6 +9,9 @@ import java.io.BufferedWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import robotsimulator.Simulator;
 import robotsimulator.world.Point;
 import robotsimulator.world.World;
@@ -62,9 +65,15 @@ public class SonarSensor implements Runnable
 		label = n;
 		type = 'l';
 		angle = a;
-
-		x1 = getEndpointX(a);
-		y1 = getEndpointY(a);
+		
+		int actualA = (int)Math.round(a + s.getRobot().getAngle());
+		if(actualA > 360)
+		{
+			actualA -= 360;
+		}
+		
+		x1 = getEndpointX(actualA);
+		y1 = getEndpointY(actualA);
 		
 		Line2D line = new Line2D.Double(x0, y0, x1, y1);
 		shape1 = line;
@@ -92,13 +101,19 @@ public class SonarSensor implements Runnable
 		label = n;
 		type = 'c';
 		angle = a;
-
+		
+		int actualA = (int)Math.round(a + s.getRobot().getAngle());
+		if(actualA > 360)
+		{
+			actualA -= 360;
+		}
+		
 		fov = f;
 		
-		x1 = getEndpointX(a - fov / 2);
-		y1 = getEndpointY(a - fov / 2);
-		x2 = getEndpointX(a + fov / 2);
-		y2 = getEndpointY(a + fov / 2);
+		x1 = getEndpointX(actualA - fov / 2);
+		y1 = getEndpointY(actualA - fov / 2);
+		x2 = getEndpointX(actualA + fov / 2);
+		y2 = getEndpointY(actualA + fov / 2);
 		
 		Line2D line = new Line2D.Double(x0, y0, x1, y1);
 		shape1 = line;
@@ -259,7 +274,7 @@ public class SonarSensor implements Runnable
 				break;
 			}
             
-			if(worldPoints[p.getX()][p.getY()].isOccupied())
+			if(worldPoints[p.getX()][p.getY()].isOccupied() && worldPoints[p.getX()][p.getY()].getOccupier().getCellType().doesClip())
 			{
 				x = p.getX();
 				y = p.getY();
@@ -327,7 +342,7 @@ public class SonarSensor implements Runnable
 					break;
 				}
 	            
-				if(worldPoints[p.getX()][p.getY()].isOccupied() && Math.hypot(p.getX() - x0, p.getY() - y0) < Math.hypot(x - x0, y - y0))
+				if(worldPoints[p.getX()][p.getY()].isOccupied() && Math.hypot(p.getX() - x0, p.getY() - y0) < Math.hypot(x - x0, y - y0) && worldPoints[p.getX()][p.getY()].getOccupier().getCellType().doesClip())
 				{
 					x = p.getX();
 					y = p.getY();
@@ -404,22 +419,37 @@ public class SonarSensor implements Runnable
 		}
 	}
 
-	public void export(BufferedWriter bw) 
+	public void export(Document doc, Element sonarElement) 
 	{
-		Simulator.expLine("sonar", bw);
-		Simulator.expProp("type", type, bw);
-		Simulator.expProp("name", label, bw);
-		Simulator.expProp("x", x0, bw);
-		Simulator.expProp("y", y0, bw);
-		Simulator.expProp("angle", angle, bw);
-		Simulator.expProp("length", length, bw);
+		Element te = doc.createElement("type");
+		te.appendChild(doc.createTextNode(Character.toString(type)));
+		sonarElement.appendChild(te);
+		
+		Element ne = doc.createElement("name");
+		ne.appendChild(doc.createTextNode(label));
+		sonarElement.appendChild(ne);
+
+		Element xe = doc.createElement("x");
+		xe.appendChild(doc.createTextNode(Double.toString(x0)));
+		sonarElement.appendChild(xe);
+		
+		Element ye = doc.createElement("y");
+		ye.appendChild(doc.createTextNode(Double.toString(y0)));
+		sonarElement.appendChild(ye);
+		
+		Element ae = doc.createElement("angle");
+		ae.appendChild(doc.createTextNode(Integer.toString(angle)));
+		sonarElement.appendChild(ae);
+		
+		Element le = doc.createElement("length");
+		le.appendChild(doc.createTextNode(Integer.toString(length)));
+		sonarElement.appendChild(le);
 
 		if(type == 'c')
 		{
-			Simulator.expProp("fov", fov, bw);
+			Element fe = doc.createElement("fov");
+			fe.appendChild(doc.createTextNode(Integer.toString(fov)));
+			sonarElement.appendChild(fe);		
 		}
-		
-		Simulator.expLine("sonar end", bw);
-
 	}
 }

@@ -69,8 +69,8 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		
 		paintBlock(g, sim.getRobot().getBlock(), Color.green);
 		
-		paintRobotEdges(g);
-		paintSonarSensors(g);
+		//paintRobotEdges(g);
+		//paintSonarSensors(g);
 	}
 
 	private void paintBlock(Graphics2D g, Block b, Color c)

@@ -3,6 +3,9 @@ package robotsimulator.robot;
 import java.io.BufferedWriter;
 import java.util.ArrayList;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import robotsimulator.Simulator;
 import robotsimulator.worldobject.Block;
 
@@ -43,6 +46,11 @@ public class Robot implements Runnable
 	public ArrayList<SonarSensor> getSonarSensors() 
 	{
 		return sonars;
+	}
+	
+	public void addSonar(Simulator s, String n, double x, double y, int l, int a)
+	{
+		sonars.add(new SonarSensor(s, n, x, y, l, a));
 	}
 	
 	public void addSonar(Simulator s, String n, double x, double y, int l, int a, int fov)
@@ -143,6 +151,11 @@ public class Robot implements Runnable
 	public double getCenterRearY()
 	{
 		return (getY2() + getY3()) / 2;
+	}
+	
+	public double getAngle() 
+	{
+		return b.getDegAngle();
 	}
 	
 	public char getStatus()
@@ -351,29 +364,33 @@ public class Robot implements Runnable
             beforeTime = System.currentTimeMillis();
 		}
 	}
-
-	public double getAngle() 
-	{
-		return b.getDegAngle();
-	}
 	
-	
-	public void export(BufferedWriter bw) 
+	public void export(Document doc) 
 	{
-		Simulator.expLine("robot", bw);
-		Simulator.expProp("x", getCenterX(), bw);
-		Simulator.expProp("y", getCenterY(), bw);
-		Simulator.expProp("a", getAngle(), bw);
-		Simulator.expBreak(bw);
+		Element root = doc.getDocumentElement();
+		Element robotElement = doc.createElement("robot");
+		root.appendChild(robotElement);
 
-		Simulator.expLine("sonars", bw);
+		Element xe = doc.createElement("x");
+		xe.appendChild(doc.createTextNode(Double.toString(getCenterX())));
+		robotElement.appendChild(xe);
+		
+		Element ye = doc.createElement("y");
+		ye.appendChild(doc.createTextNode(Double.toString(getCenterY())));
+		robotElement.appendChild(ye);
+		
+		Element ae = doc.createElement("a");
+		ae.appendChild(doc.createTextNode(Double.toString(getAngle())));
+		robotElement.appendChild(ae);
+		
+		Element sonarParent = doc.createElement("sonars");
+		robotElement.appendChild(sonarParent);
+		
 		for(SonarSensor s : sonars)
 		{
-			s.export(bw);
-			Simulator.expBreak(bw);
+			Element sonarElement = doc.createElement("sonar");
+			sonarParent.appendChild(sonarElement);
+			s.export(doc, sonarElement);
 		}
-		Simulator.expLine("sonars end", bw);
-		Simulator.expLine("robot end", bw);
-		Simulator.expBreak(bw);
 	}
 }

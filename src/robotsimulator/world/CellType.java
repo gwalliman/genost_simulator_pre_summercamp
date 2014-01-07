@@ -52,18 +52,4 @@ public class CellType
 	{
 		return color;
 	}
-
-	public void export(BufferedWriter bw) 
-	{
-		Simulator.expLine("celltype", bw);
-
-		Simulator.expProp("id", id, bw);
-		Simulator.expProp("label", label, bw);
-		Simulator.expProp("width", width, bw);
-		Simulator.expProp("height", height, bw);
-		Simulator.expProp("clip", clip, bw);
-		Simulator.expProp("color", color.getRGB(), bw);
-		
-		Simulator.expLine("celltype end", bw);
-	}
 }

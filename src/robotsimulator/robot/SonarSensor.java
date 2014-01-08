@@ -5,7 +5,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
-import java.io.BufferedWriter;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 

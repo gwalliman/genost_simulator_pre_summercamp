@@ -1,12 +1,6 @@
 package robotsimulator;
 
-import java.awt.Color;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Scanner;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,7 +10,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
@@ -27,7 +20,6 @@ import org.w3c.dom.NodeList;
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
 import robotsimulator.robot.Robot;
-import robotsimulator.world.GridSquare;
 import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
@@ -36,6 +28,7 @@ public class Simulator implements RobotListener
 	private GUI gui;
 	private World world;
 	private Robot robot;
+	@SuppressWarnings("unused")
 	private static String newline = "\n";
 	
 	int guiWidth = 640;

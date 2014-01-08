@@ -2,8 +2,6 @@ package robotsimulator.world;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -101,7 +99,6 @@ public class World
 						Boolean.parseBoolean(clipNode.getTextContent()),
 						Color.decode(colorNode.getTextContent())
 					);
-			    String path = "/robotsimulator/themes/" + idNode.getNodeValue() + "/" + imageNode.getTextContent();
 			    setCellTheme(
 			    		idNode.getNodeValue(), 
 			    		Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/" + imageNode.getTextContent())

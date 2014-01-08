@@ -1,6 +1,5 @@
 package robotsimulator.robot;
 
-import java.io.BufferedWriter;
 import java.util.ArrayList;
 
 import org.w3c.dom.Document;

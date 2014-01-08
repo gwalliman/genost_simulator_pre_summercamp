@@ -4,21 +4,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
-import javax.swing.AbstractAction;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 
 import robotsimulator.Simulator;
-import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
 import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
@@ -31,6 +25,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 {
 	private Simulator sim;
 	private Thread animator;
+	@SuppressWarnings("unused")
 	private int width, height, fps;
 
 	public Stage(int w, int h, int f, Simulator s)
@@ -103,6 +98,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void paintRobotEdges(Graphics2D g) 
 	{
 		g.setColor(Color.red);
@@ -140,6 +136,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		g.fill(new Ellipse2D.Double(sim.getRobot().getX3() - (5 / 2), sim.getRobot().getY3() - (5 / 2), 5, 5));		
 	}
 	
+	@SuppressWarnings("unused")
 	private void paintSonarSensors(Graphics2D g)
 	{
 		for(SonarSensor s : sim.getRobot().getSonarSensors())

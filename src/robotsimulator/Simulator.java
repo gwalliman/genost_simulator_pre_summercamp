@@ -40,8 +40,8 @@ public class Simulator implements RobotListener
 	
 	int guiWidth = 640;
 	int guiHeight = 320;
-	int guiFPS = 30;
-	String themeid = "loz";
+	int guiFPS = 60;
+	String themeid = "pkmn";
 	
 	public Simulator()
 	{
@@ -227,7 +227,7 @@ public class Simulator implements RobotListener
 		    
 	    	Node guiWidthNode = root.getAttributes().getNamedItem("guiwidth");
 	    	Node guiHeightNode = root.getAttributes().getNamedItem("guiheight");
-	    	Node themeIDNode = root.getAttributes().getNamedItem("themeid");
+	    	Node themeIDNode = root.getAttributes().getNamedItem("theme");
 		    
 		    Node robotNode = ((NodeList)xpath.compile("robot").evaluate(root, XPathConstants.NODESET)).item(0);
 		    Node robotXNode = (((NodeList)xpath.compile("x").evaluate(robotNode, XPathConstants.NODESET))).item(0);
@@ -285,10 +285,10 @@ public class Simulator implements RobotListener
 		    Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
 		    Node worldGridHeighthNode = (((NodeList)xpath.compile("gridheight").evaluate(worldNode, XPathConstants.NODESET))).item(0);
 		    
-		    world = new World(guiWidth, guiHeight, this);
+		    world = new World(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), this);
 		    world.setGridWidth(Integer.parseInt(worldGridWidthNode.getTextContent()));
 		    world.setGridHeight(Integer.parseInt(worldGridHeighthNode.getTextContent()));
-			world.setTheme(themeid);	
+			world.setTheme(themeIDNode.getNodeValue());	
 			
 			NodeList cellNodes = ((NodeList)xpath.compile("cells/cell").evaluate(worldNode, XPathConstants.NODESET));
 			for(int i = 0; i < cellNodes.getLength(); i++)
@@ -303,7 +303,9 @@ public class Simulator implements RobotListener
 			    		cellTypeNode.getTextContent()
 			    	);
 			}
-			gui = new GUI(guiWidth, guiHeight, guiFPS, this);
+			
+			gui.dispose();
+			gui = new GUI(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), guiFPS, this);
 		}
 		catch(Exception e)
 		{

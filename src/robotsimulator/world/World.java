@@ -199,8 +199,8 @@ public class World
 		blocks.add(b);
 		int x0 = (int) ((b.getCenterX()) - (b.getWidth() / 2));
 		int y0 = (int) ((b.getCenterY()) - (b.getHeight() / 2));
-		int x1 = (int) (x0 + b.getWidth());
-		int y1 = (int) (y0 + b.getHeight());
+		int x1 = (int) (x0 + b.getWidth()) - 1;
+		int y1 = (int) (y0 + b.getHeight()) - 1;
 		
 		for(int x = x0; x <= x1; x++)
 		{

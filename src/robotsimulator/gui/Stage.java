@@ -71,6 +71,18 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		
 		//paintRobotEdges(g);
 		//paintSonarSensors(g);
+		
+		/*Point[][] worldPoints = sim.getWorld().getWorldPoints();
+		for(int x = 0; x < worldPoints.length; x++)
+		{
+			for(int y = 0; y < worldPoints[x].length; y++)
+			{
+				if(worldPoints[x][y].isOccupied())
+				{
+					g.fill(new Ellipse2D.Double(x - (5 / 2), y - (5 / 2), 5, 5));
+				}
+			}
+		}*/
 	}
 
 	private void paintBlock(Graphics2D g, Block b, Color c)

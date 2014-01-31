@@ -3,6 +3,7 @@
 	<name>Robot Simulator</name>
 	<comment></comment>
 	<projects>
+		<project>robotinterpreter</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

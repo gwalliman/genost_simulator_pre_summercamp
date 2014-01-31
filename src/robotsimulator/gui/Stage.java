@@ -178,7 +178,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 			timeDiff = System.currentTimeMillis() - beforeTime;
 	        sleep = (1000 / fps) - timeDiff;
 	         
-	        if(sleep == 0) sleep = 2;
+	        if(sleep <= 0) sleep = 2;
 			
 			try 
 			{

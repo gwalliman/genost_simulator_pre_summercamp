@@ -20,7 +20,7 @@ import robotsimulator.world.CellType;
 public class WorldBuilderPanel extends JPanel
 {
 	Simulator sim;
-	JFileChooser fc = new JFileChooser();
+	JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
 	
 	public WorldBuilderPanel(int w, Simulator s) 
 	{
@@ -72,7 +72,7 @@ public class WorldBuilderPanel extends JPanel
 			b.addActionListener(a);
 			add(b);
 		}
-		
+				
 		JButton importStage = new JButton("Import Stage");
 		ActionListener importA = new ActionListener() 
 		{

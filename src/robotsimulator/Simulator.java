@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
+import robotsimulator.gui.SimulatorPanel;
 import robotsimulator.robot.Robot;
 import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
@@ -26,6 +27,8 @@ import robotsimulator.worldobject.Block;
 public class Simulator implements RobotListener 
 {
 	private GUI gui;
+	//private SimulatorPanel simPanel;
+	
 	private World world;
 	private Robot robot;
 	@SuppressWarnings("unused")
@@ -69,6 +72,7 @@ public class Simulator implements RobotListener
 		 */
 	
 		gui = new GUI(guiWidth, guiHeight, guiFPS, this);
+		//simPanel = new SimulatorPanel(guiWidth, guiHeight, guiFPS, this);
 	}
 	
 	public Robot getRobot()

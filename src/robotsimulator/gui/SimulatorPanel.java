@@ -5,18 +5,30 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import robotinterpreter.RobotInterpreter;
 import robotsimulator.Simulator;
+import robotsimulator.robot.SonarSensor;
 
 //Used to organize simulator components. Held by the main applet class in a JTabbedPane
-public class SimulatorPanel extends JPanel {
+public class SimulatorPanel extends JPanel implements ActionListener {
 	
 	//Components
 	//ButtonGrid
@@ -30,20 +42,55 @@ public class SimulatorPanel extends JPanel {
 	private JButton stopBtn;				//Button to stop executing the simulation
 	
 	//Right Panel
+	private JLabel runningLbl;				//Robot status-- running or not
 	private JTextArea outputTextArea;		//Holds output from running code, errors, etc.
-	private JTextArea sensorOutputArea;		//Refreshed with sensor data
+	//private JTextArea sensorOutputArea;		//Refreshed with sensor data
 	
 	//Variables
-	private Simulator sim;
 	private int width, height, fps;
+	
+	//Reference to the main containing class & simulator
+	private MainApplet main;
+	private Simulator sim;
+	
+	//List of robot sensors
+	ArrayList<SonarSensor> sonars;
+	
+	//Simulator stage
+	private Stage simStage;
+	int stageWidth = 520;
+	int stageHeight = 400;
+	//Simulator variables
+	private RobotInterpreter r;
+	SwingWorker<Void, Void> executor;
+	
+	
+	//Hold the stage itself in here, and redraw the contents of just this panel when the stage changes
+	//e.g. if we load a new stage, we only need to update this panel
+	JPanel stagePanel;
 		
-	public SimulatorPanel(int w, int h, int f, Simulator s)
+	//File IO
+	private JFileChooser fileChooser;
+	private FileNameExtensionFilter txtFilter;
+	private FileNameExtensionFilter xmlFilter;
+	
+	
+	
+	public SimulatorPanel(int w, int h, int f, Simulator s, MainApplet m)
 	{
 		
 		width = w;
 		height = h;
 		fps = f;
+		
 		sim = s;
+		main = m;
+		sonars = sim.getRobot().getSonarSensors();
+		
+		fileChooser = new JFileChooser();
+		txtFilter = new FileNameExtensionFilter("Text Files ('.txt')", "txt");
+		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
+		
 		
 		JPanel simPane = new JPanel(new GridBagLayout());		
 		//Controls size of left side-- input buttons, stage, etc. 3/4 of panel
@@ -63,10 +110,11 @@ public class SimulatorPanel extends JPanel {
 		rightSideConstraints.anchor = GridBagConstraints.FIRST_LINE_END;
 		rightSideConstraints.insets = new Insets(4, 4, 4, 4);
 		
-		JPanel leftPanel = createLeftPanel(w, h, f, s);
+		
+		JPanel leftPanel = createLeftPanel();
 		simPane.add(leftPanel, leftSideConstraints);
 		
-		JPanel rightPanel = createRightPanel(w, h, f, s);
+		JPanel rightPanel = createRightPanel();
 		simPane.add(rightPanel, rightSideConstraints);
 
 		add(simPane);
@@ -74,7 +122,7 @@ public class SimulatorPanel extends JPanel {
 	}
 	
 	//Builds the left side of the window-- input buttons, stage, etc.
-	public JPanel createLeftPanel(int w, int h, int f, Simulator s)
+	public JPanel createLeftPanel()
 	{
 		JPanel leftPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints topConstraints = new GridBagConstraints();
@@ -83,7 +131,7 @@ public class SimulatorPanel extends JPanel {
 		topConstraints.gridheight = 1;
 		topConstraints.insets = new Insets(4, 4, 4, 4);
 		//Create button grid panel and add it with these constraints
-		leftPanel.add(createButtonGridPanel(w, h, f, s), topConstraints);
+		leftPanel.add(createButtonGridPanel(), topConstraints);
 		
 		GridBagConstraints bottomConstraints = new GridBagConstraints();
 		bottomConstraints.gridx = 0;
@@ -91,15 +139,17 @@ public class SimulatorPanel extends JPanel {
 		bottomConstraints.gridheight = 2;
 		bottomConstraints.insets = new Insets(4, 4, 4, 4);
 		//Create stage and add it with these constraints
-		//leftPanel.add(new Stage(w, h, f, s), bottomConstraints);
+		stagePanel = createStagePanel();
+		leftPanel.add(stagePanel, bottomConstraints);
+		
 		//For now, create a text area to fill in the space
-		JTextArea tempStage = new JTextArea(27, 50);
-		leftPanel.add(tempStage, bottomConstraints);
+		//JTextArea tempStage = new JTextArea(27, 50);
+		//leftPanel.add(tempStage, bottomConstraints);
 		
 		return leftPanel;
 	}
 	
-	public JPanel createButtonGridPanel(int w, int h, int f, Simulator s)
+	public JPanel createButtonGridPanel()
 	{
 		//define 4x2 grid
 		GridLayout g = new GridLayout(4, 2, 20, 4);
@@ -107,34 +157,41 @@ public class SimulatorPanel extends JPanel {
 		bGridPanel.setSize(new Dimension(600, 100));
 		//Add buttons and labels to it as needed
 		openCodeBtn = new JButton("Load Program");
+		openCodeBtn.addActionListener(this);
 		bGridPanel.add(openCodeBtn);
 		
 		codeNameLbl = new JLabel("Current program: ");
 		bGridPanel.add(codeNameLbl);
 		
 		openLoadoutBtn = new JButton("Load Config");
+		openLoadoutBtn.addActionListener(this);
 		bGridPanel.add(openLoadoutBtn);
 		
 		loadoutNameLbl = new JLabel("Current Config: ");
 		bGridPanel.add(loadoutNameLbl);
 		
 		openMazeBtn = new JButton("Load Maze");
+		openMazeBtn.addActionListener(this);
 		bGridPanel.add(openMazeBtn);
 		
 		mazeNameLbl = new JLabel("Current Maze: ");
 		bGridPanel.add(mazeNameLbl);
 		
 		runBtn = new JButton("Execute!");
+		runBtn.addActionListener(this);
+		runBtn.setEnabled(false);
 		bGridPanel.add(runBtn);
 		
 		stopBtn = new JButton("Stop");
+		stopBtn.addActionListener(this);
+		stopBtn.setEnabled(false);
 		bGridPanel.add(stopBtn);
 		
 		return bGridPanel;
 	}
 	
 	//Builds the right side of the window-- status, output, sensor data, etc.
-	public JPanel createRightPanel(int w, int h, int f, Simulator s)
+	public JPanel createRightPanel()
 	{
 		JPanel rightPanel = new JPanel(new GridBagLayout());
 		rightPanel.setSize(200, 600);
@@ -150,14 +207,14 @@ public class SimulatorPanel extends JPanel {
 		
 		c.gridheight = 1;
 		//add 'running/not running' label
-		JLabel runningLbl = new JLabel("Not Running");
+		runningLbl = new JLabel("Waiting for Program...");
 		rightPanel.add(runningLbl, c);
 		
 		c.gridheight = 2;
 		c.insets = new Insets(4, 4, 4, 4);
 		//add output textarea
 		outputTextArea = new JTextArea(4, 19);
-		outputTextArea.append("output test text");
+		//outputTextArea.append("output test text");
 		outputTextArea.setEditable(false);
 		outputTextArea.setLineWrap(false);
 		JScrollPane outputScroll = new JScrollPane(outputTextArea);
@@ -174,21 +231,197 @@ public class SimulatorPanel extends JPanel {
 		
 		c.gridheight = GridBagConstraints.RELATIVE;
 		c.insets = new Insets(4, 4, 4, 4);
-		//add sensor data textarea/panel 
-		sensorOutputArea = new JTextArea(25, 19);
-		sensorOutputArea.append("sensor output test text");
-		sensorOutputArea.setEditable(false);
-		sensorOutputArea.setLineWrap(false);
-		JScrollPane sensorScroll = new JScrollPane(sensorOutputArea);
-		sensorScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		sensorScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		
-		rightPanel.add(sensorScroll, c);
-		//rightPanel.add(sensorOutputArea, c);
+		//add sensor data panel 
+		JPanel sensorPanel = createSensorPanel();
+		rightPanel.add(sensorPanel, c);
 		
 		return rightPanel;
 		
 	}
 	
+	private JPanel createSensorPanel()
+	{
+		JPanel rtn = new JPanel(new GridLayout(sonars.size() + 1, 1));
+		rtn.setPreferredSize(new Dimension(200, 100));
+		
+		rtn.add(new JLabel("Sonar Sensors"));
+		for (SonarSensor son : sonars)
+		{
+			JPanel sPanel = new JPanel(new GridLayout(1, 2));
+			sPanel.add (new Label(son.getLabel()));
+			Label t = new Label();
+			
+			sPanel.add(t);
+			son.setTextField(t);
+			
+			rtn.add(sPanel);
+		}
+		
+		//Can add any other mission critical data here as well
+		
+		
+		return rtn;
+	}
+	
+	private JPanel createStagePanel()
+	{
+		JPanel rtn = new JPanel();
+		rtn.setSize(520, 400);
+		simStage = new Stage(stageWidth * 2, stageHeight * 2, fps, sim);
+		//simStage.allowEditing();
+
+		JScrollPane stageScroll = new JScrollPane(simStage);
+		stageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		stageScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		stageScroll.setSize(stageWidth, stageHeight);
+		
+		rtn.add(stageScroll);
+		//rtn.add(simStage);
+		return rtn;		
+	}
+	
+	//Updates output textbox with code, errors, etc. Currently empty
+	public void updateOutputText()
+	{
+		//
+	}
+	
+	//Updates the runningLbl with what it's waiting on (code, maze, etc.) and its current status
+	private void updateRunningStatus()
+	{
+		if (main.codeFile == null)
+			runningLbl.setText("Waiting for Program...");
+		else if (main.configFile == null)
+			runningLbl.setText("Waiting for robot configuration...");
+		else if (main.mapFile == null)
+			runningLbl.setText("Waiting for maze file...");
+		else
+			runningLbl.setText("Ready!");		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) 
+	{
+		if (e.getSource() == openCodeBtn)
+		{
+			//Open a file chooser dialog to load in code.
+			//Restrict filechooser to the correct datatype
+			fileChooser.setFileFilter(txtFilter);
+			int returnVal = fileChooser.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+			{
+				main.codeFile = fileChooser.getSelectedFile();
+				codeNameLbl.setText(main.codeFile.getName());
+				
+				runBtn.setEnabled(true);
+				updateRunningStatus();
+				
+				loadCodeFile();
+			}
+		}
+		else if (e.getSource() == openLoadoutBtn)
+		{
+			//Open a file chooser dialog to load in robot loadouts
+			fileChooser.setFileFilter(xmlFilter);
+			int returnVal = fileChooser.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+			{
+				main.configFile = fileChooser.getSelectedFile();
+				loadoutNameLbl.setText(main.configFile.getName());
+				updateRunningStatus();
+				
+				//Update the robot's sensor and loadout configuration
+			}
+		}
+		else if (e.getSource() == openMazeBtn)
+		{
+			//Open a file chooser dialog to load in maze layouts
+			fileChooser.setFileFilter(xmlFilter);
+			int returnVal = fileChooser.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION)
+			{
+				main.mapFile = fileChooser.getSelectedFile();
+				mazeNameLbl.setText(main.mapFile.getName());
+				updateRunningStatus();
+				
+				//Update the maze here
+			}
+		}
+		else if (e.getSource() == runBtn)
+		{
+			//Begin execution, enable the stopBtn, and disable ourselves
+			runBtn.setEnabled(false);
+			stopBtn.setEnabled(true);
+			runningLbl.setText("Running!");
+
+			//Begin running the simulation
+            executor = new SwingWorker<Void, Void>()
+            {
+            	@Override
+            	public Void doInBackground()
+            	{
+            		r = new RobotInterpreter();
+            		r.addRobotListener(sim);
+            		String code = outputTextArea.getText();
+            		r.load(code);
+            		
+            		if(r.isReady())
+            		{
+            			r.execute();
+            		}
+					return null;
+            	}
+            	
+            	public void done()
+            	{
+            	}
+            };
+            executor.execute();
+
+		}
+		else if (e.getSource() == stopBtn)
+		{
+			//Stop execution, enable the runBtn, and disable ourselves
+			if(executor != null)
+        	{
+        		executor.cancel(true);
+    			runBtn.setEnabled(true);
+    			stopBtn.setEnabled(false);
+    			runningLbl.setText("Stopped.");
+        	}
+            sim.stop();
+			
+			//updateRunningStatus();
+		}
+	}
+	
+	public void loadCodeFile()
+    {
+		try 
+		{
+			FileReader fr = new FileReader(main.codeFile);
+		    BufferedReader br = new BufferedReader(fr);
+		    String line = "";
+            String code = "";
+            
+            while((line = br.readLine()) != null)
+            {
+                 code += line + "\n";
+            }
+             
+            br.close();
+            fr.close();
+             
+            outputTextArea.setText(null);
+            outputTextArea.append(code);
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
+    }
+
 	
 }
+
+

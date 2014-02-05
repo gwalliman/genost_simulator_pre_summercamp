@@ -42,6 +42,7 @@ public class World
 		height = h;
 		sim = s;
 		
+		//TODO: Adjust this to be dynamic
 		boundary = new Rectangle2D.Double(0, 0, width, height);
 		
 		if(width <= 0 && height <= 0)

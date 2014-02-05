@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
@@ -11,6 +12,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.Scrollable;
 
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
@@ -21,12 +23,14 @@ import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
 @SuppressWarnings("serial")
-public class Stage extends JPanel implements MouseListener, Runnable
+public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 {
 	private Simulator sim;
 	private Thread animator;
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	private int width, height, fps;
+	//Whether or not we can edit the maze in this view
+	private boolean editable;
 
 	public Stage(int w, int h, int f, Simulator s)
 	{
@@ -34,11 +38,18 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		width = w;
 		height = h;
 		fps = f;
+		editable = false;
 		this.addMouseListener(this);
 		
 		setDoubleBuffered(true);
 		setPreferredSize(new Dimension(w, h));
+		setSize(w, h);
 		setBackground(Color.white);
+	}
+	
+	public void allowEditing()
+	{
+		editable = true;
 	}
 	
 	public void addNotify() 
@@ -98,7 +109,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		}
 	}
 	
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	private void paintRobotEdges(Graphics2D g) 
 	{
 		g.setColor(Color.red);
@@ -136,7 +147,7 @@ public class Stage extends JPanel implements MouseListener, Runnable
 		g.fill(new Ellipse2D.Double(sim.getRobot().getX3() - (5 / 2), sim.getRobot().getY3() - (5 / 2), 5, 5));		
 	}
 	
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	private void paintSonarSensors(Graphics2D g)
 	{
 		for(SonarSensor s : sim.getRobot().getSonarSensors())
@@ -161,9 +172,14 @@ public class Stage extends JPanel implements MouseListener, Runnable
 
 	public void mousePressed(MouseEvent click) 
 	{
-		//sim.addBlock(20, 20, click.getX(), click.getY());
-		sim.getWorld().toggleCell(click.getX(), click.getY());
-		repaint();			
+		//Give focus back to the main applet in order for keyboard controls to work
+		MainApplet.m_instance.getFocus();
+		if (editable)
+		{
+			//sim.addBlock(20, 20, click.getX(), click.getY());
+			sim.getWorld().toggleCell(click.getX(), click.getY());
+			repaint();			
+		}
 	}
 	
 	public void run() 
@@ -199,6 +215,37 @@ public class Stage extends JPanel implements MouseListener, Runnable
 	public void mouseExited(MouseEvent arg0) { }
 	
 	public void mouseReleased(MouseEvent arg0) { }
+
+	//Needed to allow for variable size maps and scrolling
+	@Override
+	public Dimension getPreferredScrollableViewportSize() 
+	{
+		return new Dimension(520, 400);
+	}
+
+	@Override
+	public int getScrollableBlockIncrement(Rectangle arg0, int arg1, int arg2) 
+	{
+		return 0;
+	}
+
+	@Override
+	public boolean getScrollableTracksViewportHeight() 
+	{
+		return false;
+	}
+
+	@Override
+	public boolean getScrollableTracksViewportWidth()
+	{
+		return false;
+	}
+
+	@Override
+	public int getScrollableUnitIncrement(Rectangle arg0, int arg1, int arg2) 
+	{
+		return 0;
+	}
 	
 
 }

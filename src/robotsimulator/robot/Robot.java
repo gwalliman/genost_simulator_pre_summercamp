@@ -350,7 +350,7 @@ public class Robot implements Runnable
 			timeDiff = System.currentTimeMillis() - beforeTime;
 	        sleep = delay - timeDiff;
 	        
-	        if(sleep == 0) sleep = 2;
+	        if(sleep <= 0) sleep = 2;
 
 	        try 
 			{

@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.GUI;
+import robotsimulator.gui.MainApplet;
 import robotsimulator.gui.SimulatorPanel;
 import robotsimulator.robot.Robot;
 import robotsimulator.world.World;
@@ -27,23 +28,26 @@ import robotsimulator.worldobject.Block;
 public class Simulator implements RobotListener 
 {
 	private GUI gui;
-	//private SimulatorPanel simPanel;
+	private MainApplet mainApp;
 	
 	private World world;
 	private Robot robot;
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	private static String newline = "\n";
 	
-	int guiWidth = 640;
-	int guiHeight = 320;
+	int guiWidth = 520 * 2;
+	int guiHeight = 400 * 2;
 	int guiFPS = 60;
 	String themeid = "pkmn";
 	
-	public Simulator()
+	boolean running = false;
+	
+	public Simulator(MainApplet m)
 	{
 		/*
 		 * SETTING ROBOT PARAMS
 		 */
+		
 		int centerX = 100;
 		int centerY = 100;
 		int angle = 0;
@@ -71,8 +75,11 @@ public class Simulator implements RobotListener
 		 * SETTING WORLD CELL TYPES
 		 */
 	
-		gui = new GUI(guiWidth, guiHeight, guiFPS, this);
-		//simPanel = new SimulatorPanel(guiWidth, guiHeight, guiFPS, this);
+		//gui = new GUI(guiWidth, guiHeight, guiFPS, this);
+		mainApp = m;
+		
+		//running = true?
+
 	}
 	
 	public Robot getRobot()
@@ -122,6 +129,7 @@ public class Simulator implements RobotListener
 
 	public void stop() 
 	{
+		running = false;
 		robot.stop();
 	}
 

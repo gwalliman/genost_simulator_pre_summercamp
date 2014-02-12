@@ -301,7 +301,7 @@ public class SonarSensor implements Runnable
 		
 		//I think that these two values should always be the same, actually.
 		//int max = Math.max(points1.size(), points2.size());
-		int max = Math.min(points1.size(), points2.size());		//TODO: Verify that this will still result in good calculations
+		int max = Math.min(points1.size(), points2.size());		
 		
 		for(int i = 0; i < max; i++)
 		{

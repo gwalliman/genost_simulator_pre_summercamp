@@ -81,7 +81,7 @@ public class MainApplet extends JApplet {
 		simPanel = new SimulatorPanel(width, height, fps, sim, this);
 		tabPane.addTab("Simulator", simPanel);
 		
-		mazePanel = new MazeBuilderPanel();
+		mazePanel = new MazeBuilderPanel(fps, sim, this);
 		tabPane.addTab("Maze Builder", mazePanel);
 		
 		add (tabPane);

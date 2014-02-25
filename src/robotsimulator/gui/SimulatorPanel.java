@@ -58,8 +58,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	
 	//Simulator stage
 	private Stage simStage;
-	int stageWidth = 520;
-	int stageHeight = 400;
+	private int stageWidth = 520;
+	private int stageHeight = 400;
 	//Simulator variables
 	private RobotInterpreter r;
 	SwingWorker<Void, Void> executor;
@@ -67,7 +67,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	
 	//Hold the stage itself in here, and redraw the contents of just this panel when the stage changes
 	//e.g. if we load a new stage, we only need to update this panel
-	JPanel stagePanel;
+	private JPanel stagePanel;
+	private JScrollPane stageScroll;
 		
 	//File IO
 	private JFileChooser fileChooser;
@@ -87,7 +88,11 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		main = m;
 		sonars = sim.getRobot().getSonarSensors();
 		
-		fileChooser = new JFileChooser();
+		//TODO: Defaults to Ian's simulator folder. Use the commented out version (default path) in live releases. 
+		fileChooser = new JFileChooser("C:/Users/IAN/Documents/GitHub/robotsimulator");
+		//fileChooser = new JFileChooser();
+		
+		
 		txtFilter = new FileNameExtensionFilter("Text Files ('.txt')", "txt");
 		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
 		
@@ -160,7 +165,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		openCodeBtn.addActionListener(this);
 		bGridPanel.add(openCodeBtn);
 		
-		codeNameLbl = new JLabel("Current program: ");
+		codeNameLbl = new JLabel("Current Program: ");
 		bGridPanel.add(codeNameLbl);
 		
 		openLoadoutBtn = new JButton("Load Config");
@@ -265,25 +270,19 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	
 	private JPanel createStagePanel()
 	{
-		JPanel rtn = new JPanel();
-		rtn.setSize(520, 400);
+		stagePanel = new JPanel();
+		stagePanel.setSize(520, 400);
 		simStage = new Stage(stageWidth * 2, stageHeight * 2, fps, sim);
 		//simStage.allowEditing();
 
-		JScrollPane stageScroll = new JScrollPane(simStage);
+		stageScroll = new JScrollPane(simStage);
 		stageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		stageScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		stageScroll.setSize(stageWidth, stageHeight);
 		
-		rtn.add(stageScroll);
+		stagePanel.add(stageScroll);
 		//rtn.add(simStage);
-		return rtn;		
-	}
-	
-	//Updates output textbox with code, errors, etc. Currently empty
-	public void updateOutputText()
-	{
-		//
+		return stagePanel;		
 	}
 	
 	//Updates the runningLbl with what it's waiting on (code, maze, etc.) and its current status
@@ -311,7 +310,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
 				main.codeFile = fileChooser.getSelectedFile();
-				codeNameLbl.setText(main.codeFile.getName());
+				codeNameLbl.setText("Current Program: " + main.codeFile.getName());
 				
 				runBtn.setEnabled(true);
 				updateRunningStatus();
@@ -327,7 +326,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
 				main.configFile = fileChooser.getSelectedFile();
-				loadoutNameLbl.setText(main.configFile.getName());
+				loadoutNameLbl.setText("Current Config: " + main.configFile.getName());
 				updateRunningStatus();
 				
 				//Update the robot's sensor and loadout configuration
@@ -341,10 +340,11 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
 				main.mapFile = fileChooser.getSelectedFile();
-				mazeNameLbl.setText(main.mapFile.getName());
+				mazeNameLbl.setText("Current Maze: " + main.mapFile.getName());
 				updateRunningStatus();
 				
 				//Update the maze here
+				sim.importStage(main.mapFile);
 			}
 		}
 		else if (e.getSource() == runBtn)
@@ -420,6 +420,14 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			e.printStackTrace();
 		}
     }
+	
+	public void updateStage(int width, int height)
+	{
+		stageWidth = width;
+		stageHeight = height;
+		stagePanel = createStagePanel();
+		
+	}
 
 	
 }

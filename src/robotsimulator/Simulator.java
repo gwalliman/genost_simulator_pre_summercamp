@@ -215,6 +215,7 @@ public class Simulator implements RobotListener
 		System.out.println(e);		
 	}
 	
+	//This does not change the theme-- only the loaded maze
 	public void importStage(File f)
 	{
 		try
@@ -246,6 +247,8 @@ public class Simulator implements RobotListener
 					this
 				);
 			
+
+	    	//TODO: Separate part of this out into robot loadout import
 		    NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(robotNode, XPathConstants.NODESET));
 
 		    for(int i = 0; i < sonarNodes.getLength(); i++)
@@ -286,6 +289,7 @@ public class Simulator implements RobotListener
 
 		    }
 		    
+		    
 		    Node worldNode = ((NodeList)xpath.compile("world").evaluate(root, XPathConstants.NODESET)).item(0);
 		    Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
 		    Node worldGridHeighthNode = (((NodeList)xpath.compile("gridheight").evaluate(worldNode, XPathConstants.NODESET))).item(0);
@@ -309,8 +313,13 @@ public class Simulator implements RobotListener
 			    	);
 			}
 			
-			gui.dispose();
-			gui = new GUI(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), guiFPS, this);
+			//Update the simPanel stage
+			mainApp.simPanel.updateStage(world.getWidth(), world.getHeight());
+			
+			
+			//TODO: Fix this so it only re-renders the maze view -- seems to work without it, though
+			//gui.dispose();
+			//gui = new GUI(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), guiFPS, this);
 		}
 		catch(Exception e)
 		{

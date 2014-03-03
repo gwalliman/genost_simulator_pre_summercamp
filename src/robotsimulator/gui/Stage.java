@@ -12,6 +12,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 
 import robotsimulator.Simulator;
@@ -23,6 +24,7 @@ import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
 @SuppressWarnings("serial")
+//In charge of rendering the stage, and the robot on top of it
 public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 {
 	private Simulator sim;
@@ -73,7 +75,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 			paintBlock(g, b, b.getColor());
 		}
 		
-		paintBlock(g, sim.getRobot().getBlock(), Color.green);
+		paintBlock(g, sim.getRobot().getBlock(), Color.RED);
 		
 		//paintRobotEdges(g);
 		//paintSonarSensors(g);
@@ -96,6 +98,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		g.setColor(c);
 		AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
 		g.fill(at.createTransformedShape(b.getRect()));
+		
 		
 		CellType ct = b.getCellType();
 		if(ct != null)
@@ -202,6 +205,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 			} 
 			catch (InterruptedException e) 
 			{
+				System.out.println("Interrupted Exception");
 			}
 			
             beforeTime = System.currentTimeMillis();
@@ -216,6 +220,24 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 	
 	public void mouseReleased(MouseEvent arg0) { }
 
+	//Creates a standard scrollable stage
+	public static JPanel createStagePanel(int mazeWidth, int mazeHeight, int fps, Simulator sim)
+	{
+		JPanel stagePanel = new JPanel();
+		stagePanel.setSize(520, 400);
+		Stage simStage = new Stage(mazeWidth * 2, mazeHeight * 2, fps, sim);
+		simStage.allowEditing();
+
+		JScrollPane stageScroll = new JScrollPane(simStage);
+		stageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		stageScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		stageScroll.setSize(mazeWidth, mazeHeight);
+		
+		stagePanel.add(stageScroll);
+		return stagePanel;
+	}
+	
+	
 	//Needed to allow for variable size maps and scrolling
 	@Override
 	public Dimension getPreferredScrollableViewportSize() 

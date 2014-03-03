@@ -313,8 +313,8 @@ public class Simulator implements RobotListener
 			    	);
 			}
 			
-			//Update the simPanel stage
-			mainApp.simPanel.updateStage(world.getWidth(), world.getHeight());
+			//Update the simPanel stage -- might not even be needed. Should auto-update
+			//mainApp.simPanel.updateStage(world.getWidth(), world.getHeight());
 			
 			
 			//TODO: Fix this so it only re-renders the maze view -- seems to work without it, though
@@ -356,5 +356,12 @@ public class Simulator implements RobotListener
 		{
 			e.printStackTrace();
 		}		
+	}
+	
+	//Resets the stage back to the default, featureless void of white space
+	public void resetStage()
+	{
+		world = new World(guiWidth, guiHeight, this);
+		world.setTheme(themeid);		
 	}
 }

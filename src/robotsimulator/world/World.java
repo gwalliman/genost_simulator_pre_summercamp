@@ -60,6 +60,89 @@ public class World
 		}
 	}
 	
+	//Resize the world given the number of cells wide and high to make it
+	public void adjustWorld(int newW, int newH)
+	{
+		//Clear away any blocks that might be left outside of the boundaries now
+		cleanupOutsideBlocks(newW, newH);
+		
+		//Resize the points and grids arrays
+		resizeArrays(newW, newH);
+		
+		width = newW * gridWidth;
+		height = newH * gridHeight;
+		boundary = new Rectangle2D.Double(0, 0, width, height);
+		
+		
+	}
+	
+	//Temporary, slow, bad practice array resize. newW is in grid squares.
+	//After running it... might not be so slow and bad. Just don't make 999x999 mazes!
+	private void resizeArrays(int newW, int newH)
+	{
+		//Create a new 'points' array. This is sized by pixel, not gridSquare
+		Point[][] newPoints = new Point[newW * gridWidth][newH * gridHeight];
+		//Create a new 'grid' array. This is sized by gridsquares. 
+		GridSquare[][] newGrid = new GridSquare[newW][newH];
+		
+		//Copy each element from the old arrays to the new ones if it exists
+		//Create a new point/grid etc. if none exists
+		for (int y = 0; y < newH * gridHeight; y++)
+		{
+			for (int x = 0; x < newW * gridWidth; x++)
+			{
+				if (x < width && y < height)
+					newPoints[x][y] = points[x][y];
+				else
+					newPoints[x][y] = new Point(x, y);
+			}
+		}
+		
+		for (int y = 0; y < newH; y++)
+		{
+			for (int x = 0; x < newW; x++)
+			{
+				if (x < width / gridWidth && y < height / gridHeight)
+					newGrid[x][y] = grid[x][y];
+				else
+					newGrid[x][y] = new GridSquare(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
+			}
+		}
+		
+		//Put the new arrays in place of the old
+		points = newPoints;
+		grid = newGrid;
+	}
+	
+	//Removes entities that are outside of width and height
+	private void cleanupOutsideBlocks(int newW, int newH)
+	{
+		//private ArrayList<Block> blocks = new ArrayList<Block>();
+		ArrayList<Block> deadBlocks = new ArrayList<Block>();
+		int pixelWidth = newW * gridWidth;
+		int pixelHeight = newH * gridHeight;
+		
+		//Find all blocks in the list with x > newW and/or y > newH and call removeBlock on them
+		for (Block b : blocks)
+		{
+			double x = b.getTopLeftX();
+			double y = b.getTopLeftY();
+			if (x >= pixelWidth || y >= pixelHeight)
+			{
+				//Add it to the removal list. We'll do each remove after the foreach block. 
+				deadBlocks.add(b);
+			}
+		}
+		
+		//Remove all blocks in deadBlocks
+		for (int i = deadBlocks.size() - 1; i >= 0; i--)
+		{
+			Block deadBlock = deadBlocks.get(i);
+			removeBlock(deadBlock);
+			
+		}
+	}
+	
 
 	public void setTheme(String themeid) 
 	{
@@ -221,7 +304,8 @@ public class World
 		{
 			for(int y = y0; y <= y1; y++)
 			{
-				points[x][y].unOccupy();
+				if (x < points.length && y < points[0].length)
+					points[x][y].unOccupy();
 			}
 		}
 	}

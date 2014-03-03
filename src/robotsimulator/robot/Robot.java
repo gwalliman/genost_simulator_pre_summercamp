@@ -224,7 +224,8 @@ public class Robot implements Runnable
 			robotThread.start();
 		}
 	}
-	
+
+	//This is called every time the robot finishes an instruction-- e.g. finish a turn -> stop
 	public void stop()
 	{
 		status = 's';
@@ -358,6 +359,7 @@ public class Robot implements Runnable
 			} 
 			catch (InterruptedException e) 
 			{
+				System.out.println("InterruptedException");		//Not yet thrown... probably not a solution
 			}
 			
             beforeTime = System.currentTimeMillis();

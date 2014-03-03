@@ -89,7 +89,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		sonars = sim.getRobot().getSonarSensors();
 		
 		//TODO: Defaults to Ian's simulator folder. Use the commented out version (default path) in live releases. 
-		fileChooser = new JFileChooser("C:/Users/IAN/Documents/GitHub/robotsimulator");
+		fileChooser = new JFileChooser("C:/Users/IAN/Documents/GitHub/robotsimulator/Resources");
 		//fileChooser = new JFileChooser();
 		
 		
@@ -144,7 +144,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		bottomConstraints.gridheight = 2;
 		bottomConstraints.insets = new Insets(4, 4, 4, 4);
 		//Create stage and add it with these constraints
-		stagePanel = createStagePanel();
+		stagePanel = Stage.createStagePanel(stageWidth, stageHeight, fps, sim);
 		leftPanel.add(stagePanel, bottomConstraints);
 		
 		//For now, create a text area to fill in the space
@@ -268,6 +268,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		return rtn;
 	}
 	
+	/*
+	Use the static method in Stage instead!
 	private JPanel createStagePanel()
 	{
 		stagePanel = new JPanel();
@@ -284,6 +286,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//rtn.add(simStage);
 		return stagePanel;		
 	}
+	*/
 	
 	//Updates the runningLbl with what it's waiting on (code, maze, etc.) and its current status
 	private void updateRunningStatus()
@@ -374,6 +377,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
             	
             	public void done()
             	{
+        			runBtn.setEnabled(true);
+        			stopBtn.setEnabled(false);
+        			runningLbl.setText("Stopped.");
             	}
             };
             executor.execute();
@@ -388,6 +394,12 @@ public class SimulatorPanel extends JPanel implements ActionListener {
     			runBtn.setEnabled(true);
     			stopBtn.setEnabled(false);
     			runningLbl.setText("Stopped.");
+    			
+    			executor = null;
+    			//Once the interpreter is told to stop, it seems to restart execution
+    			//To test: run '4' in pkmn maze. Let it run all the way south, find the wall, and turn clockwise.
+    			//Restart, run '4' in pkmn maze. Let it run all the way south, find the wall, and begin turning.
+    			//		Stop execution mid-turn-- it should start from the top of the code again and drive forward. 
         	}
             sim.stop();
 			
@@ -425,7 +437,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	{
 		stageWidth = width;
 		stageHeight = height;
-		stagePanel = createStagePanel();
+		stagePanel = Stage.createStagePanel(width, height, fps, sim);
 		
 	}
 

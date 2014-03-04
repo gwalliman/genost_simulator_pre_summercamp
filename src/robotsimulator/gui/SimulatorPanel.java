@@ -348,6 +348,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				
 				//Update the maze here
 				sim.importStage(main.mapFile);
+				
 			}
 		}
 		else if (e.getSource() == runBtn)

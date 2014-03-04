@@ -203,7 +203,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		rtn.add(buttonPanel, c);
 		
 		//Dynamically fill a panel with tile button
-		JPanel palettePanel = createPaletteButtons();
+		palettePanel = createPaletteButtons();
 				
 		//Wrap it all in a scroll pane
 		JScrollPane paletteScroll = new JScrollPane(palettePanel);
@@ -220,8 +220,9 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	private JPanel createPaletteButtons()
 	{
 		JPanel rtn = new JPanel(new GridLayout(0, 1));
-		rtn.setSize(200, 500);
-		
+		rtn.setSize(200, 400);
+		rtn.setPreferredSize(new Dimension(200, 400));
+				
 		for(CellType ctype : sim.getWorld().getCellTypes())
 		{
 			String cellTypeID = ctype.getID();	
@@ -240,7 +241,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			}
 			
 			b.setName(ctype.getID());
-			b.setSize(200, 100);
+			b.setSize(150, 50);
 			b.setPreferredSize(new Dimension(150, 50));
 			ActionListener a = new ActionListener() 
 			{
@@ -316,6 +317,13 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			int newH = simWorld.getHeight() / simWorld.getGridHeight();
 			widthSpinner.setValue(newW);
 			heightSpinner.setValue(newH);
+			
+			//Update the block palette and theme
+			currentThemeLbl.setText("Current Theme: " + sim.themeid);
+			
+			palettePanel = createPaletteButtons();
+			
+			
 		}
 	}
 	

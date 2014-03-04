@@ -38,7 +38,7 @@ public class Simulator implements RobotListener
 	int guiWidth = 520 * 2;
 	int guiHeight = 400 * 2;
 	int guiFPS = 60;
-	String themeid = "pkmn";
+	public String themeid = "pkmn";
 	
 	boolean running = false;
 	
@@ -234,6 +234,7 @@ public class Simulator implements RobotListener
 	    	Node guiWidthNode = root.getAttributes().getNamedItem("guiwidth");
 	    	Node guiHeightNode = root.getAttributes().getNamedItem("guiheight");
 	    	Node themeIDNode = root.getAttributes().getNamedItem("theme");
+	    	themeid = themeIDNode.getNodeValue();
 		    
 		    Node robotNode = ((NodeList)xpath.compile("robot").evaluate(root, XPathConstants.NODESET)).item(0);
 		    Node robotXNode = (((NodeList)xpath.compile("x").evaluate(robotNode, XPathConstants.NODESET))).item(0);

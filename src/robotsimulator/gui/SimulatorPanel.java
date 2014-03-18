@@ -9,7 +9,11 @@ import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -24,6 +28,7 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import robotinterpreter.RobotInterpreter;
+import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
 
@@ -40,6 +45,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JLabel mazeNameLbl;				//Label to display loaded maze file name
 	private JButton runBtn;					//Button to begin executing the simulation
 	private JButton stopBtn;				//Button to stop executing the simulation
+	private JButton reloadCodeBtn;			//Button to reload the code from the output area
 	
 	//Right Panel
 	private JLabel runningLbl;				//Robot status-- running or not
@@ -57,7 +63,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	ArrayList<SonarSensor> sonars;
 	
 	//Simulator stage
-	private Stage simStage;
 	private int stageWidth = 520;
 	private int stageHeight = 400;
 	//Simulator variables
@@ -74,7 +79,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JFileChooser fileChooser;
 	private FileNameExtensionFilter txtFilter;
 	private FileNameExtensionFilter xmlFilter;
-	
+
 	
 	
 	public SimulatorPanel(int w, int h, int f, Simulator s, MainApplet m)
@@ -88,9 +93,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		main = m;
 		sonars = sim.getRobot().getSonarSensors();
 		
-		//TODO: Defaults to Ian's simulator folder. Use the commented out version (default path) in live releases. 
-		fileChooser = new JFileChooser("C:/Users/IAN/Documents/GitHub/robotsimulator/Resources");
-		//fileChooser = new JFileChooser();
+		fileChooser = new JFileChooser(MainEntry.resourcePath);
 		
 		
 		txtFilter = new FileNameExtensionFilter("Text Files ('.txt')", "txt");
@@ -144,7 +147,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		bottomConstraints.gridheight = 2;
 		bottomConstraints.insets = new Insets(4, 4, 4, 4);
 		//Create stage and add it with these constraints
-		stagePanel = Stage.createStagePanel(stageWidth, stageHeight, fps, sim);
+		stagePanel = Stage.createStagePanel(stageWidth, stageHeight, fps, sim, false);
 		leftPanel.add(stagePanel, bottomConstraints);
 		
 		//For now, create a text area to fill in the space
@@ -218,15 +221,24 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		c.gridheight = 2;
 		c.insets = new Insets(4, 4, 4, 4);
 		//add output textarea
-		outputTextArea = new JTextArea(4, 19);
+		//outputTextArea = new JTextArea(4, 19);
+		outputTextArea = new JTextArea(8, 19);
 		//outputTextArea.append("output test text");
-		outputTextArea.setEditable(false);
+		//TODO: Make output text interactable-- highlighting? 
+		//outputTextArea.setEditable(false);
 		outputTextArea.setLineWrap(false);
+		
 		JScrollPane outputScroll = new JScrollPane(outputTextArea);
 		outputScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		outputScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		rightPanel.add(outputScroll, c);
 		//rightPanel.add(outputTextArea, c);
+		
+		reloadCodeBtn = new JButton("Reload Code from Text");
+		//TODO: Finish reverse-code import-- edit code in textbox, reimport that code
+		//reloadCodeBtn.addActionListener(this);		
+		rightPanel.add(reloadCodeBtn, c);
+		
 		
 		c.gridheight = 1;
 		c.insets = new Insets(1, 1, 1, 1);
@@ -309,6 +321,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			//Open a file chooser dialog to load in code.
 			//Restrict filechooser to the correct datatype
 			fileChooser.setFileFilter(txtFilter);
+			fileChooser.setCurrentDirectory(new File(MainEntry.codePath));
+			
 			int returnVal = fileChooser.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
@@ -325,6 +339,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		{
 			//Open a file chooser dialog to load in robot loadouts
 			fileChooser.setFileFilter(xmlFilter);
+			fileChooser.setCurrentDirectory(new File(MainEntry.loadoutPath));
+			
 			int returnVal = fileChooser.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
@@ -333,12 +349,15 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				updateRunningStatus();
 				
 				//Update the robot's sensor and loadout configuration
+				sim.importLoadout(main.configFile);
 			}
 		}
 		else if (e.getSource() == openMazeBtn)
 		{
 			//Open a file chooser dialog to load in maze layouts
 			fileChooser.setFileFilter(xmlFilter);
+			fileChooser.setCurrentDirectory(new File(MainEntry.mazePath));
+			
 			int returnVal = fileChooser.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION)
 			{
@@ -357,6 +376,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			runBtn.setEnabled(false);
 			stopBtn.setEnabled(true);
 			runningLbl.setText("Running!");
+			
+			sim.running = true;
 
 			//Begin running the simulation
             executor = new SwingWorker<Void, Void>()
@@ -378,9 +399,14 @@ public class SimulatorPanel extends JPanel implements ActionListener {
             	
             	public void done()
             	{
+            		//TODO: Ensure robot has stopped moving here
         			runBtn.setEnabled(true);
         			stopBtn.setEnabled(false);
         			runningLbl.setText("Stopped.");
+        			r.stop();
+        			sim.getRobot().abort();
+        			
+        			sim.running = false;
             	}
             };
             executor.execute();
@@ -401,10 +427,50 @@ public class SimulatorPanel extends JPanel implements ActionListener {
     			//To test: run '4' in pkmn maze. Let it run all the way south, find the wall, and turn clockwise.
     			//Restart, run '4' in pkmn maze. Let it run all the way south, find the wall, and begin turning.
     			//		Stop execution mid-turn-- it should start from the top of the code again and drive forward. 
+    			r.stop();
+    			sim.getRobot().abort();
+    			sim.running = false;
         	}
             sim.stop();
 			
 			//updateRunningStatus();
+		}
+		else if (e.getSource() == reloadCodeBtn)
+		{
+			//Loads the program from the edited text area
+			//main.codeFile = fileChooser.getSelectedFile();	
+			//Convert the text in the textarea to a file and set the codeFile in main to be this file
+			BufferedWriter w = null;
+			try
+			{
+			File textCode = new File("ModifiedCode");
+			w = new BufferedWriter(new FileWriter(textCode));
+			w.write(outputTextArea.getText());
+			main.codeFile = textCode;
+			
+			codeNameLbl.setText("Current Program: " + "Modified from Text*");
+			
+			runBtn.setEnabled(true);
+			updateRunningStatus();
+			
+			loadCodeFile();
+			
+			}
+			catch (Exception writerE)
+			{
+				writerE.printStackTrace();
+			}
+			finally
+			{
+				try 
+				{
+					w.close();
+				} 
+				catch (Exception e1) 
+				{
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -438,7 +504,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	{
 		stageWidth = width;
 		stageHeight = height;
-		stagePanel = Stage.createStagePanel(width, height, fps, sim);
+		stagePanel = Stage.createStagePanel(width, height, fps, sim, false);
+		sim.getWorld().setGridWidth(width);
+		sim.getWorld().setGridHeight(height);
 		
 	}
 

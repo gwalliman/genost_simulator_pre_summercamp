@@ -35,12 +35,13 @@ public class Simulator implements RobotListener
 	//@SuppressWarnings("unused")
 	private static String newline = "\n";
 	
-	int guiWidth = 520 * 2;
-	int guiHeight = 400 * 2;
+	public int guiWidth = 520 * 2;
+	public int guiHeight = 400 * 2;
 	int guiFPS = 60;
-	public String themeid = "pkmn";
+	public String themeid = "default";
 	
-	boolean running = false;
+	public boolean running = false;
+	
 	
 	public Simulator(MainApplet m)
 	{
@@ -131,6 +132,9 @@ public class Simulator implements RobotListener
 	{
 		running = false;
 		robot.stop();
+		robot.abort();
+		//Need to tell interpreter to stop as well
+		
 	}
 
 	public int getSonarData(int num) 
@@ -248,9 +252,9 @@ public class Simulator implements RobotListener
 					this
 				);
 			
-
-	    	//TODO: Separate part of this out into robot loadout import
-		    NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(robotNode, XPathConstants.NODESET));
+				
+			//This is now part of the loadout import
+		    /*NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(robotNode, XPathConstants.NODESET));
 
 		    for(int i = 0; i < sonarNodes.getLength(); i++)
 		    {
@@ -289,7 +293,7 @@ public class Simulator implements RobotListener
 			    }
 
 		    }
-		    
+		    */
 		    
 		    Node worldNode = ((NodeList)xpath.compile("world").evaluate(root, XPathConstants.NODESET)).item(0);
 		    Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
@@ -318,7 +322,6 @@ public class Simulator implements RobotListener
 			//mainApp.simPanel.updateStage(world.getWidth(), world.getHeight());
 			
 			
-			//TODO: Fix this so it only re-renders the maze view -- seems to work without it, though
 			//gui.dispose();
 			//gui = new GUI(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), guiFPS, this);
 		}
@@ -365,4 +368,75 @@ public class Simulator implements RobotListener
 		world = new World(guiWidth, guiHeight, this);
 		world.setTheme(themeid);		
 	}
+	
+	//Changes the robot's sensor loadout based on the file
+	//Doesn't change x/y and angle-- that's stored in the maze
+	//TODO: Bugfix-- right side labels not showing up. Custom sensors may cause issues. 
+	public void importLoadout(File f)
+	{
+		try
+		{
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document document = builder.parse(f);
+			
+			Node root = document.getDocumentElement();
+			
+			XPathFactory xPathFactory = XPathFactory.newInstance();
+		    XPath xpath = xPathFactory.newXPath();
+		    
+		    //Reset the robot, but keep it in the same place and orientation
+		    robot = new Robot((int)robot.getCenterX(), (int)robot.getCenterY(), (int)robot.getAngle(), this);
+		    
+		    NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(root, XPathConstants.NODESET));
+
+		    System.out.println("sonar node length: " + sonarNodes.getLength());
+		    for(int i = 0; i < sonarNodes.getLength(); i++)
+		    {
+			    Node sonarTypeNode = (((NodeList)xpath.compile("type").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarNameNode = (((NodeList)xpath.compile("name").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarXNode = (((NodeList)xpath.compile("x").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarYNode = (((NodeList)xpath.compile("y").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarAngleNode = (((NodeList)xpath.compile("angle").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    Node sonarLengthNode = (((NodeList)xpath.compile("length").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+			    
+			    char sonarType = sonarTypeNode.getTextContent().charAt(0);
+			    if(sonarType == 'l')
+			    {
+					robot.addSonar(
+							this, 
+							sonarNameNode.getTextContent(), 
+							Double.parseDouble(sonarXNode.getTextContent()),
+							Double.parseDouble(sonarYNode.getTextContent()),
+							Integer.parseInt(sonarLengthNode.getTextContent()),
+							Integer.parseInt(sonarAngleNode.getTextContent())
+						);
+
+			    }
+			    else if(sonarType == 'c')
+			    {
+				    Node sonarFOVNode = (((NodeList)xpath.compile("fov").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
+				    robot.addSonar(
+							this, 
+							sonarNameNode.getTextContent(), 
+							Double.parseDouble(sonarXNode.getTextContent()),
+							Double.parseDouble(sonarYNode.getTextContent()),
+							Integer.parseInt(sonarLengthNode.getTextContent()),
+							Integer.parseInt(sonarAngleNode.getTextContent()),
+							Integer.parseInt(sonarFOVNode.getTextContent())
+						);
+			    }
+		    }
+
+		    
+		   robot.printSensors();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
 }

@@ -366,6 +366,13 @@ public class Robot implements Runnable
 		}
 	}
 	
+	//Cancels execution and stops moving. Prep for next execution. 
+	public void abort()
+	{
+		//Replace self with a brand new robot?
+		
+	}
+	
 	public void export(Document doc) 
 	{
 		Element root = doc.getDocumentElement();
@@ -393,5 +400,18 @@ public class Robot implements Runnable
 			sonarParent.appendChild(sonarElement);
 			s.export(doc, sonarElement);
 		}
+	}
+	
+	//Prints out the names of each sensor it owns
+	public void printSensors()
+	{
+		System.out.println("[Sensors]");
+		int n = 0;
+		for (SonarSensor s : sonars)
+		{
+			System.out.println("Sensor " + n + ": " + s.getLabel());
+			n++;
+		}
+		
 	}
 }

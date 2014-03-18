@@ -1,6 +1,7 @@
 package robotsimulator.gui;
 
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -14,6 +15,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
@@ -24,6 +26,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
@@ -51,8 +54,12 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	
 	JSpinner widthSpinner;
 	JSpinner heightSpinner;
-	SpinnerModel widthModel = new SpinnerNumberModel(16, 5, 30, 1);		//Defaults to 10, min 5, max 15, step 1
-	SpinnerModel heightModel = new SpinnerNumberModel(12, 5, 20, 1);		//Defaults to 10, min 5, max 15, step 1
+	private final int wMin = 5;
+	private final int wMax = 30;
+	private final int hMin = 5;
+	private final int hMax = 20;
+	SpinnerModel widthModel = new SpinnerNumberModel(16, wMin, wMax, 1);		
+	SpinnerModel heightModel = new SpinnerNumberModel(12, hMin, hMax, 1);
 	
 	JPanel leftPanel;
 	JPanel palettePanel;
@@ -62,7 +69,6 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	private JFileChooser fileChooser;
 	private FileNameExtensionFilter xmlFilter;
 	
-		
 	public MazeBuilderPanel(int f, Simulator s, MainApplet m)
 	{
 		fps = f;
@@ -73,9 +79,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		gridWidth = simWorld.getGridWidth();
 		gridHeight = simWorld.getGridHeight();
 		
-		//TODO: Defaults to Ian's simulator folder. Use the commented out version (default path) in live releases. 
-		fileChooser = new JFileChooser("C:/Users/IAN/Documents/GitHub/robotsimulator/Resources");
-		//fileChooser = new JFileChooser();		
+		fileChooser = new JFileChooser(MainEntry.resourcePath);
 		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
 				
 		
@@ -143,7 +147,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		//Add the stage and scroll below
 		g1.gridy = 1;
 		g1.anchor = GridBagConstraints.WEST;
-		stagePanel = Stage.createStagePanel(mazeWidth * gridWidth, mazeHeight * gridHeight, fps, sim);
+		stagePanel = Stage.createStagePanel(mazeWidth * gridWidth, mazeHeight * gridHeight, fps, sim, true);
 		rtn.add(stagePanel, g1);
 		
 		return rtn;
@@ -155,7 +159,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		World simWorld = sim.getWorld();
 		gridWidth = simWorld.getGridWidth();
 		gridHeight = simWorld.getGridHeight();
-		stagePanel = Stage.createStagePanel(mazeWidth * gridWidth, mazeHeight * gridHeight, fps, sim);		
+		stagePanel = Stage.createStagePanel(mazeWidth * gridWidth, mazeHeight * gridHeight, fps, sim, true);		
 		
 	}
 	
@@ -187,17 +191,20 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		loadThemeBtn = new JButton("Load Theme");
 		loadThemeBtn.addActionListener(this);
 		
-		currentThemeLbl = new JLabel("Current Theme: none");
-		
+		currentThemeLbl = new JLabel("Current Theme: " + sim.themeid);
+				
 		rtn.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 1;
 		
 		JPanel buttonPanel = new JPanel(new GridLayout(3, 0));
-		buttonPanel.add(loadThemeBtn);
+		//buttonPanel.add(loadThemeBtn);
 		buttonPanel.add(currentThemeLbl);
 		
-		buttonPanel.add(new JSeparator());
+		JSeparator jsep = new JSeparator();
+		jsep.setSize(200, 20);
+		jsep.setPreferredSize(new Dimension(200, 20));
+		buttonPanel.add(jsep);
 		
 		c.gridy = 0;
 		rtn.add(buttonPanel, c);
@@ -219,6 +226,8 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	
 	private JPanel createPaletteButtons()
 	{
+		//System.out.println("Create palette: " + sim.themeid);
+		
 		JPanel rtn = new JPanel(new GridLayout(0, 1));
 		rtn.setSize(200, 400);
 		rtn.setPreferredSize(new Dimension(200, 400));
@@ -228,6 +237,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			String cellTypeID = ctype.getID();	
 			
 			JButton b; 
+			//System.out.println("  -celltypeID: " + cellTypeID);
 			if(sim.getWorld().getCellThemes().containsKey(cellTypeID))
 			{
 				CellTheme cellTheme = sim.getWorld().getCellThemes().get(cellTypeID);
@@ -247,6 +257,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			{
 				public void actionPerformed(ActionEvent a) 
 				{
+					//System.out.println("Clicked " + hashCode());
 					JButton b = (JButton)a.getSource();
 					ArrayList<CellType> types = sim.getWorld().getCellTypes();
 					String id = b.getName();
@@ -289,14 +300,42 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		}
 		else if (e.getSource() == loadThemeBtn)
 		{
-			loadTheme();
+			//loadTheme();
 		}
 	}
 	
 	//When the 'New Maze' button is clicked, creates a new, empty maze
 	private void newMaze()
 	{
-		sim.resetStage();
+		//Open up a dialog
+		//Get some user prefs-- dimensions, theme
+		
+		//Collect available themes
+		File currentDir = new File(MainEntry.themePath);
+		String[] themeNames = currentDir.list();
+		
+		//Open the dialog
+		String userChoice = (String)JOptionPane.showInputDialog(new Frame(), "Select a theme: ", "New Maze", JOptionPane.PLAIN_MESSAGE, null, themeNames, themeNames[0]);
+		
+		if (userChoice != null && userChoice.length() > 0)
+		{
+			//User has made a choice
+			
+			sim.themeid = userChoice;
+			sim.getWorld().setTheme(sim.themeid);
+			//Clear out old celltypes
+			
+			
+			//Reset the theme palette
+			refreshPalette();
+			
+			sim.resetStage();
+		}
+		else
+		{
+			//Cancelled, or otherwise wrong
+		}
+		
 	}
 	
 	//When the 'Load Maze' button is clicked, loads a maze in from a file for editing. 
@@ -304,6 +343,8 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	private void loadMaze()
 	{
 		fileChooser.setFileFilter(xmlFilter);
+		fileChooser.setCurrentDirectory(new File(MainEntry.mazePath));
+		
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{
@@ -315,16 +356,38 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			World simWorld = sim.getWorld();
 			int newW = simWorld.getWidth() / simWorld.getGridWidth();
 			int newH = simWorld.getHeight() / simWorld.getGridHeight();
+			
+			//Constrain new width and height to spinner boundaries
+			if (newW > wMax)
+				newW = wMax;
+			else if (newW < wMin)
+				newW = wMin;
+			if (newH > hMax)
+				newH = hMax;
+			else if (newH < hMin)
+				newH = hMin;
+			
 			widthSpinner.setValue(newW);
 			heightSpinner.setValue(newH);
+			simWorld.adjustWorld(newW, newH);
 			
 			//Update the block palette and theme
 			currentThemeLbl.setText("Current Theme: " + sim.themeid);
 			
-			palettePanel = createPaletteButtons();
-			
+			refreshPalette();
 			
 		}
+	}
+
+	//Hacky method to redraw the block palette
+	private void refreshPalette()
+	{
+		remove(palettePanel);
+		palettePanel = null;
+		palettePanel = createPalettePanel();
+		add(palettePanel);
+		revalidate();
+		
 	}
 	
 	//When the 'Save Maze' button is clicked, saves the maze on the user's local file system.
@@ -332,6 +395,8 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	private void saveMaze()
 	{
 		//Open a file dialog and write the file to XML
+		fileChooser.setCurrentDirectory(new File(MainEntry.mazePath));
+		
 		int returnVal = fileChooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION)
 		{
@@ -340,12 +405,5 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			sim.exportStage(saveFile);	
 		}
 	}
-	
-	//Loads in the theme from a file. Will need to call 'createPaletteButtons' again to recreate the buttons
-	private void loadTheme()
-	{
-		
-	}
-
 	
 }

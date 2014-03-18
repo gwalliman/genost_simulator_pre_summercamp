@@ -32,7 +32,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 	//@SuppressWarnings("unused")
 	private int width, height, fps;
 	//Whether or not we can edit the maze in this view
-	private boolean editable;
+	private boolean editable = false;
 
 	public Stage(int w, int h, int f, Simulator s)
 	{
@@ -52,6 +52,11 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 	public void allowEditing()
 	{
 		editable = true;
+	}
+	
+	public void disableEditing()
+	{
+		editable = false;
 	}
 	
 	public void addNotify() 
@@ -221,12 +226,13 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 	public void mouseReleased(MouseEvent arg0) { }
 
 	//Creates a standard scrollable stage
-	public static JPanel createStagePanel(int mazeWidth, int mazeHeight, int fps, Simulator sim)
+	public static JPanel createStagePanel(int mazeWidth, int mazeHeight, int fps, Simulator sim, boolean editable)
 	{
 		JPanel stagePanel = new JPanel();
 		stagePanel.setSize(520, 400);
 		Stage simStage = new Stage(mazeWidth * 2, mazeHeight * 2, fps, sim);
-		simStage.allowEditing();
+		if (editable)
+			simStage.allowEditing();
 
 		JScrollPane stageScroll = new JScrollPane(simStage);
 		stageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -236,7 +242,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		stagePanel.add(stageScroll);
 		return stagePanel;
 	}
-	
+		
 	
 	//Needed to allow for variable size maps and scrolling
 	@Override

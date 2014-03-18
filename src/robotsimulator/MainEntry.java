@@ -11,6 +11,15 @@ public class MainEntry {
 	 * Props to: http://stackoverflow.com/questions/14506704/how-to-generate-jar-file-with-no-main-method
 	 * @param args
 	 */
+	
+	//File paths
+	public static String resourcePath = System.getProperty("user.dir") + "/Resources";
+	public static String codePath = resourcePath + "/Code";
+	public static String loadoutPath = resourcePath + "/Loadouts";
+	public static String mazePath = resourcePath + "/Mazes";
+	public static String themePath = System.getProperty("user.dir") + "/robotsimulator/themes";	
+	
+	
 	public static void main(String[] args) 
 	{
 		MainApplet m = new MainApplet();

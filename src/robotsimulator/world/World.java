@@ -42,7 +42,6 @@ public class World
 		height = h;
 		sim = s;
 		
-		//TODO: Adjust this to be dynamic
 		boundary = new Rectangle2D.Double(0, 0, width, height);
 		
 		if(width <= 0 && height <= 0)
@@ -72,6 +71,8 @@ public class World
 		width = newW * gridWidth;
 		height = newH * gridHeight;
 		boundary = new Rectangle2D.Double(0, 0, width, height);
+		sim.guiWidth = width;
+		sim.guiHeight = height;
 		
 		
 	}
@@ -164,6 +165,9 @@ public class World
 		    XPathExpression gridHeightExp = xpath.compile("gridheight");
 		    Node gridHeightNode = ((NodeList)gridHeightExp.evaluate(root, XPathConstants.NODESET)).item(0);
 		    gridHeight = Integer.parseInt(gridHeightNode.getTextContent());
+		    
+		    //Reset cell types beforehand
+			cellTypes = new ArrayList<CellType>();
 		    
 		    NodeList celltypes = ((NodeList)xpath.compile("celltypes/celltype").evaluate(root, XPathConstants.NODESET));
 		    for(int i = 0; i < celltypes.getLength(); i++)

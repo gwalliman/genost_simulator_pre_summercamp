@@ -17,7 +17,7 @@ import javax.swing.event.ChangeListener;
 import robotsimulator.Simulator;
 
 //This needs to duplicate the functionality of GUI
-public class MainApplet extends JApplet {
+public class MainApplet extends JApplet implements ChangeListener {
 
 	public static MainApplet m_instance;
 	
@@ -77,6 +77,7 @@ public class MainApplet extends JApplet {
 		//Remove the keyboard shortcuts-- 
 		//Want to control robot with arrow keys, not switch tabs
 		tabPane.setActionMap(null);
+		tabPane.addChangeListener(this);
 		
 		simPanel = new SimulatorPanel(width, height, fps, sim, this);
 		tabPane.addTab("Simulator", simPanel);
@@ -162,13 +163,20 @@ public class MainApplet extends JApplet {
 		return (tabPane.getSelectedIndex() == 1);
 	}
 	
-	//Listener that fires whenever a tab is changed. Used to save/close/stop execution when changing focus
-	private class tabListener implements ChangeListener
+	@Override
+	//Fires whenever a tab is changed. Used to save/close/stop execution when changing focus
+	public void stateChanged(ChangeEvent e) 
 	{
-		public void stateChanged(ChangeEvent arg0) 
+		System.out.println("Changed tab.");
+		
+		if (inSimulatorView())
 		{
-			//TODO: Add code to detect the old tab and take action accordingly
-			//e.g. stop simulation/interpreter when switching to maze view
+			System.out.println("In sim view");
+			sim.getWorld();
+		}
+		if (inMazeView())
+		{
+			System.out.println("In maze view");
 		}
 	}
 

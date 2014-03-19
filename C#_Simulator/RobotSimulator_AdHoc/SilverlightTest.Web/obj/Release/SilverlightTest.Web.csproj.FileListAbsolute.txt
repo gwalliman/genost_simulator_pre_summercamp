@@ -1,5 +1,0 @@
-C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest.Web\bin\SilverlightTest.Web.dll
-C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest.Web\bin\SilverlightTest.Web.pdb
-C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest.Web\obj\Release\ResolveAssemblyReference.cache
-C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest.Web\obj\Release\SilverlightTest.Web.dll
-C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest.Web\obj\Release\SilverlightTest.Web.pdb

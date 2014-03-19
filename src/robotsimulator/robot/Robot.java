@@ -224,7 +224,8 @@ public class Robot implements Runnable
 			robotThread.start();
 		}
 	}
-	
+
+	//This is called every time the robot finishes an instruction-- e.g. finish a turn -> stop
 	public void stop()
 	{
 		status = 's';
@@ -350,7 +351,7 @@ public class Robot implements Runnable
 			timeDiff = System.currentTimeMillis() - beforeTime;
 	        sleep = delay - timeDiff;
 	        
-	        if(sleep == 0) sleep = 2;
+	        if(sleep <= 0) sleep = 2;
 
 	        try 
 			{
@@ -358,10 +359,18 @@ public class Robot implements Runnable
 			} 
 			catch (InterruptedException e) 
 			{
+				System.out.println("InterruptedException");		//Not yet thrown... probably not a solution
 			}
 			
             beforeTime = System.currentTimeMillis();
 		}
+	}
+	
+	//Cancels execution and stops moving. Prep for next execution. 
+	public void abort()
+	{
+		//Replace self with a brand new robot?
+		
 	}
 	
 	public void export(Document doc) 
@@ -391,5 +400,18 @@ public class Robot implements Runnable
 			sonarParent.appendChild(sonarElement);
 			s.export(doc, sonarElement);
 		}
+	}
+	
+	//Prints out the names of each sensor it owns
+	public void printSensors()
+	{
+		System.out.println("[Sensors]");
+		int n = 0;
+		for (SonarSensor s : sonars)
+		{
+			System.out.println("Sensor " + n + ": " + s.getLabel());
+			n++;
+		}
+		
 	}
 }

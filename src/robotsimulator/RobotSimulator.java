@@ -14,7 +14,7 @@ public class RobotSimulator
 	
 	public static void main(String[] args) 
 	{	
-		@SuppressWarnings("unused")
-		Simulator s = new Simulator();
+		//@SuppressWarnings("unused")
+		//Simulator s = new Simulator();
 	}
 }

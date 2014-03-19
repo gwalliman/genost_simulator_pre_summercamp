@@ -1,1 +1,0 @@
-C:\Users\Garrett\Documents\My Dropbox\School\Thesis\SilverlightTest\SilverlightTest.Web\SilverlightTest.Web.csproj,634634614366055143,Properties\AssemblyInfo.cs,

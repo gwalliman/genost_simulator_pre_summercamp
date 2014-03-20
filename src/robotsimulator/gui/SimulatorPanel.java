@@ -37,6 +37,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	
 	//Components
 	//ButtonGrid
+	private JPanel leftPanel;
 	private JButton openCodeBtn;			//Button for loading code from a file
 	private JLabel codeNameLbl;				//Label to display loaded code file name
 	private JButton openLoadoutBtn;			//Button for loading robot loadouts from a file
@@ -48,9 +49,11 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JButton reloadCodeBtn;			//Button to reload the code from the output area
 	
 	//Right Panel
+	private JPanel rightPanel;
 	private JLabel runningLbl;				//Robot status-- running or not
 	private JTextArea outputTextArea;		//Holds output from running code, errors, etc.
 	//private JTextArea sensorOutputArea;		//Refreshed with sensor data
+	private JPanel sensorPanel;				//Holds labels for sensor data
 	
 	//Variables
 	private int width, height, fps;
@@ -68,6 +71,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	//Simulator variables
 	private RobotInterpreter r;
 	SwingWorker<Void, Void> executor;
+	
+	//Whether all necessary files are loaded in-- i.e. can we execute?
+	private boolean readyToRun = false;
 	
 	
 	//Hold the stage itself in here, and redraw the contents of just this panel when the stage changes
@@ -119,14 +125,27 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		rightSideConstraints.insets = new Insets(4, 4, 4, 4);
 		
 		
-		JPanel leftPanel = createLeftPanel();
+		leftPanel = createLeftPanel();
 		simPane.add(leftPanel, leftSideConstraints);
 		
-		JPanel rightPanel = createRightPanel();
+		rightPanel = createRightPanel();
 		simPane.add(rightPanel, rightSideConstraints);
 
 		add(simPane);
 		
+		loadDefaults();		
+	}
+	
+	//Load in default options-- default map, sensor loadout, and program
+	private void loadDefaults()
+	{
+		//Load loadout config
+		main.configFile = new File(MainEntry.loadoutPath + "/DefaultLoadout.xml");
+		loadoutNameLbl.setText("Current Config: " + main.configFile.getName());
+		updateRunningStatus();
+		
+		//Update the robot's sensor and loadout configuration
+		sim.importLoadout(main.configFile);
 	}
 	
 	//Builds the left side of the window-- input buttons, stage, etc.
@@ -170,20 +189,21 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		codeNameLbl = new JLabel("Current Program: ");
 		bGridPanel.add(codeNameLbl);
-		
-		openLoadoutBtn = new JButton("Load Config");
-		openLoadoutBtn.addActionListener(this);
-		bGridPanel.add(openLoadoutBtn);
-		
-		loadoutNameLbl = new JLabel("Current Config: ");
-		bGridPanel.add(loadoutNameLbl);
-		
+			
 		openMazeBtn = new JButton("Load Maze");
 		openMazeBtn.addActionListener(this);
 		bGridPanel.add(openMazeBtn);
 		
 		mazeNameLbl = new JLabel("Current Maze: ");
 		bGridPanel.add(mazeNameLbl);
+		
+		openLoadoutBtn = new JButton("Load Config");
+		openLoadoutBtn.addActionListener(this);
+		openLoadoutBtn.setEnabled(false);
+		bGridPanel.add(openLoadoutBtn);
+		
+		loadoutNameLbl = new JLabel("Current Config: ");
+		bGridPanel.add(loadoutNameLbl);
 		
 		runBtn = new JButton("Execute!");
 		runBtn.addActionListener(this);
@@ -221,22 +241,30 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		c.gridheight = 2;
 		c.insets = new Insets(4, 4, 4, 4);
 		//add output textarea
-		//outputTextArea = new JTextArea(4, 19);
-		outputTextArea = new JTextArea(8, 19);
-		//outputTextArea.append("output test text");
-		//TODO: Make output text interactable-- highlighting? 
-		//outputTextArea.setEditable(false);
+		outputTextArea = new JTextArea(12, 19);
+		
+		/*
+		TODO: Make output text interactable-- highlighting? 
+		Highlighting might require a custom component or using a JEditorPane
+		-First approach is most flexible. Would likely be a series of 
+		 separate textfield-like components that we adjust the font of on the fly
+		
+		-Second part causes issues, because it uses HTML markup, which we'd need 
+		 to modify on the fly-- add <b> tags to executing lines, remove all 
+		 formatting for re-execution, but is the simplest approach. 
+		
+		-Third approach-- some kind of ~adorner~ that just moves position based on
+		 currently executing code and overlays a highlight box or something.
+		*/
 		outputTextArea.setLineWrap(false);
 		
 		JScrollPane outputScroll = new JScrollPane(outputTextArea);
 		outputScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		outputScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		rightPanel.add(outputScroll, c);
-		//rightPanel.add(outputTextArea, c);
 		
 		reloadCodeBtn = new JButton("Reload Code from Text");
-		//TODO: Finish reverse-code import-- edit code in textbox, reimport that code
-		//reloadCodeBtn.addActionListener(this);		
+		reloadCodeBtn.addActionListener(this);		
 		rightPanel.add(reloadCodeBtn, c);
 		
 		
@@ -249,7 +277,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		c.gridheight = GridBagConstraints.RELATIVE;
 		c.insets = new Insets(4, 4, 4, 4);
 		//add sensor data panel 
-		JPanel sensorPanel = createSensorPanel();
+		sensorPanel = createSensorPanel();
 		rightPanel.add(sensorPanel, c);
 		
 		return rightPanel;
@@ -258,12 +286,14 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	
 	private JPanel createSensorPanel()
 	{
+		System.out.println("Creating Sensor Panel...");
 		JPanel rtn = new JPanel(new GridLayout(sonars.size() + 1, 1));
 		rtn.setPreferredSize(new Dimension(200, 100));
 		
 		rtn.add(new JLabel("Sonar Sensors"));
 		for (SonarSensor son : sonars)
 		{
+			//TODO: Sort out sensors not updating their labels
 			JPanel sPanel = new JPanel(new GridLayout(1, 2));
 			sPanel.add (new Label(son.getLabel()));
 			Label t = new Label();
@@ -275,7 +305,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		}
 		
 		//Can add any other mission critical data here as well
-		
 		
 		return rtn;
 	}
@@ -303,14 +332,30 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	//Updates the runningLbl with what it's waiting on (code, maze, etc.) and its current status
 	private void updateRunningStatus()
 	{
+		readyToRun = false;
+		runBtn.setEnabled(false);
+		openLoadoutBtn.setEnabled(false);
+		
 		if (main.codeFile == null)
-			runningLbl.setText("Waiting for Program...");
-		else if (main.configFile == null)
-			runningLbl.setText("Waiting for robot configuration...");
+			{
+				runningLbl.setText("Waiting for Program...");
+			}
 		else if (main.mapFile == null)
-			runningLbl.setText("Waiting for maze file...");
+			{
+				runningLbl.setText("Waiting for maze file...");
+			}
+		else if (main.configFile == null)
+			{
+				openLoadoutBtn.setEnabled(true);
+				runningLbl.setText("Waiting for robot configuration...");
+			}
 		else
-			runningLbl.setText("Ready!");		
+			{
+				runningLbl.setText("Ready!");	
+				readyToRun = true;
+				openLoadoutBtn.setEnabled(true);
+    			runBtn.setEnabled(true);
+			}
 	}
 
 	@Override
@@ -349,7 +394,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				updateRunningStatus();
 				
 				//Update the robot's sensor and loadout configuration
-				sim.importLoadout(main.configFile);
+				reinitializeSensors();
 			}
 		}
 		else if (e.getSource() == openMazeBtn)
@@ -367,111 +412,132 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				
 				//Update the maze here
 				sim.importStage(main.mapFile);
-				
+				reinitializeSensors();
 			}
 		}
 		else if (e.getSource() == runBtn)
 		{
-			//Begin execution, enable the stopBtn, and disable ourselves
-			runBtn.setEnabled(false);
-			stopBtn.setEnabled(true);
-			runningLbl.setText("Running!");
-			
-			sim.running = true;
-
-			//Begin running the simulation
-            executor = new SwingWorker<Void, Void>()
-            {
-            	@Override
-            	public Void doInBackground()
-            	{
-            		r = new RobotInterpreter();
-            		r.addRobotListener(sim);
-            		String code = outputTextArea.getText();
-            		r.load(code);
-            		
-            		if(r.isReady())
-            		{
-            			r.execute();
-            		}
-					return null;
-            	}
-            	
-            	public void done()
-            	{
-            		//TODO: Ensure robot has stopped moving here
-        			runBtn.setEnabled(true);
-        			stopBtn.setEnabled(false);
-        			runningLbl.setText("Stopped.");
-        			r.stop();
-        			sim.getRobot().abort();
-        			
-        			sim.running = false;
-            	}
-            };
-            executor.execute();
-
+			if (readyToRun)
+			{
+				//Begin execution, enable the stopBtn, and disable ourselves
+				runBtn.setEnabled(false);
+				stopBtn.setEnabled(true);
+				runningLbl.setText("Running!");
+				
+				sim.running = true;
+	
+				//Begin running the simulation
+	            executor = new SwingWorker<Void, Void>()
+	            {
+	            	@Override
+	            	public Void doInBackground()
+	            	{
+	            		System.out.println("doInBackground: " + this.hashCode());
+	            		
+	            		r = new RobotInterpreter();
+	            		r.addRobotListener(sim);
+	            		String code = outputTextArea.getText();
+	            		r.load(code);
+	
+	        			sim.getRobot().start();
+	        			sim.running = true;
+	        			
+	            		if(r.isReady())
+	            		{
+	            			r.execute();
+	            		}
+						return null;
+	            	}
+	            	
+	            	public void done()
+	            	{
+	            		System.out.println("done: " + this.hashCode());
+	            		
+	        			runBtn.setEnabled(true);
+	        			stopBtn.setEnabled(false);
+	        			runningLbl.setText("Stopped.");
+	        			r.stop();
+	        			r.removeRobotListener(sim);		//--Need to tell it to stop listening to the interpreter
+	        			sim.stop();
+	        			
+	            	}
+	            };
+	            executor.execute();
+	        }
+			else
+			{
+				//Not ready to run!
+				
+			}
 		}
 		else if (e.getSource() == stopBtn)
 		{
 			//Stop execution, enable the runBtn, and disable ourselves
-			if(executor != null)
-        	{
-        		executor.cancel(true);
-    			runBtn.setEnabled(true);
-    			stopBtn.setEnabled(false);
-    			runningLbl.setText("Stopped.");
-    			
-    			executor = null;
-    			//Once the interpreter is told to stop, it seems to restart execution
-    			//To test: run '4' in pkmn maze. Let it run all the way south, find the wall, and turn clockwise.
-    			//Restart, run '4' in pkmn maze. Let it run all the way south, find the wall, and begin turning.
-    			//		Stop execution mid-turn-- it should start from the top of the code again and drive forward. 
-    			r.stop();
-    			sim.getRobot().abort();
-    			sim.running = false;
-        	}
-            sim.stop();
-			
+			stopExecution();
 			//updateRunningStatus();
 		}
 		else if (e.getSource() == reloadCodeBtn)
 		{
 			//Loads the program from the edited text area
-			//main.codeFile = fileChooser.getSelectedFile();	
-			//Convert the text in the textarea to a file and set the codeFile in main to be this file
-			BufferedWriter w = null;
-			try
+			loadCodefromText(outputTextArea.getText());			
+		}
+	}
+	
+	public void stopExecution()
+	{
+		if(executor != null)
+    	{
+    		executor.cancel(true);
+			
+			if (r != null)
+				r.stop();
+    	}
+		
+        sim.stop();
+		executor = null;
+		
+		runBtn.setEnabled(true);
+		stopBtn.setEnabled(false);
+		runningLbl.setText("Stopped.");
+		
+	}
+	
+	public void loadCodefromText(String code)
+	{
+		//Convert the text in the textarea to a file and set the codeFile in main to be this file
+		BufferedWriter w = null;
+		try
+		{
+		File textCode = new File("ModifiedCode");
+		w = new BufferedWriter(new FileWriter(textCode));
+		w.write(code);
+		w.close();
+		
+		main.codeFile = textCode;
+		codeNameLbl.setText("Current Program: " + "Modified from Text*");
+		
+		runBtn.setEnabled(true);
+		updateRunningStatus();
+		
+		loadCodeFile();
+		
+		}
+		catch (Exception writerE)
+		{
+			writerE.printStackTrace();
+		}
+		finally
+		{
+			try 
 			{
-			File textCode = new File("ModifiedCode");
-			w = new BufferedWriter(new FileWriter(textCode));
-			w.write(outputTextArea.getText());
-			main.codeFile = textCode;
-			
-			codeNameLbl.setText("Current Program: " + "Modified from Text*");
-			
-			runBtn.setEnabled(true);
-			updateRunningStatus();
-			
-			loadCodeFile();
-			
-			}
-			catch (Exception writerE)
+				w.close();
+			} 
+			catch (Exception e1) 
 			{
-				writerE.printStackTrace();
-			}
-			finally
-			{
-				try 
-				{
-					w.close();
-				} 
-				catch (Exception e1) 
-				{
-					e1.printStackTrace();
-				}
+				e1.printStackTrace();
 			}
 		}
+
 	}
 	
 	public void loadCodeFile()
@@ -507,7 +573,20 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		stagePanel = Stage.createStagePanel(width, height, fps, sim, false);
 		sim.getWorld().setGridWidth(width);
 		sim.getWorld().setGridHeight(height);
+	}
+	
+	//Hacky method to reinitialize sensors and have them work again after the maze has changed
+	private void reinitializeSensors()
+	{
+		if (main.configFile != null)
+			sim.importLoadout(main.configFile);	
 		
+		//Also update the sensor panel
+		rightPanel.remove(sensorPanel);
+		sensorPanel = null;
+		sensorPanel = createSensorPanel();
+		rightPanel.add(sensorPanel);
+		rightPanel.revalidate();
 	}
 
 	

@@ -21,7 +21,8 @@ public class Robot implements Runnable
 	//Left = l, Right = r
 	//Strafe Left = h, Strafe Right = i (Hook and slIce)
 	//Stop = s
-	private char status = 's';
+	//Off = o
+	private char status = 'o';
 	
 	private ArrayList<SonarSensor> sonars = new ArrayList<SonarSensor>();
 	
@@ -169,6 +170,8 @@ public class Robot implements Runnable
 			status = d;
 			robotThread = new Thread(this);
 			robotThread.start();
+			
+			logThread(robotThread);
 		}
 	}
 	
@@ -191,6 +194,8 @@ public class Robot implements Runnable
 
 			robotThread = new Thread(this);
 			robotThread.start();
+			
+			logThread(robotThread);
 		}
 	}
 	
@@ -201,6 +206,8 @@ public class Robot implements Runnable
 			status = d;
 			robotThread = new Thread(this);
 			robotThread.start();
+			
+			logThread(robotThread);
 		}
 	}
 	
@@ -222,10 +229,19 @@ public class Robot implements Runnable
 			angTotal = 0;
 			robotThread = new Thread(this);
 			robotThread.start();
+			
+			logThread(robotThread);
 		}
 	}
+	
+	//Puts the robot on 'stopped' state and allows execution to being
+	public void start()
+	{
+		status = 's';
+		robotThread = null;
+	}
 
-	//This is called every time the robot finishes an instruction-- e.g. finish a turn -> stop
+	//Once a thread finishes executing, it calls stop to end that step of commands
 	public void stop()
 	{
 		status = 's';
@@ -244,6 +260,9 @@ public class Robot implements Runnable
 			
 			switch(status)
 			{
+				case 'o':
+					//Idle until we're told to execute				
+				break;
 				case 'f':
 					oldX = b.getCenterX();
 					oldY = b.getCenterY();
@@ -369,8 +388,8 @@ public class Robot implements Runnable
 	//Cancels execution and stops moving. Prep for next execution. 
 	public void abort()
 	{
-		//Replace self with a brand new robot?
-		
+		status = 'o';
+		robotThread = null;
 	}
 	
 	public void export(Document doc) 
@@ -402,7 +421,7 @@ public class Robot implements Runnable
 		}
 	}
 	
-	//Prints out the names of each sensor it owns
+	//Debug function: prints out the names of each sensor it owns
 	public void printSensors()
 	{
 		System.out.println("[Sensors]");
@@ -411,7 +430,13 @@ public class Robot implements Runnable
 		{
 			System.out.println("Sensor " + n + ": " + s.getLabel());
 			n++;
-		}
-		
+		}	
 	}
+	
+	//Debug function: logs thread name to the console
+	private void logThread(Thread t)
+	{
+		//System.out.println("[logThread] ID: " + t.getId() + ", Name: " + t.getName());
+	}
+	
 }

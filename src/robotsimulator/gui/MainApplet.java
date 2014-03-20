@@ -113,7 +113,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("up", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().drive('f');
 	    	}
 	    });
@@ -121,7 +121,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("down", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().drive('b');
 	    	}
 	    });
@@ -129,7 +129,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("left", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().turn('l');
 	    	}
 	    });
@@ -137,7 +137,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("right", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().turn('r');
 	    	}
 	    });
@@ -145,7 +145,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("stop", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().stop();
 	    	}
 	    });
@@ -163,6 +163,12 @@ public class MainApplet extends JApplet implements ChangeListener {
 		return (tabPane.getSelectedIndex() == 1);
 	}
 	
+	//Returns true if the simulator tab is currently running code
+	private boolean isExecuting()
+	{
+		return sim.running;
+	}
+		
 	@Override
 	//Fires whenever a tab is changed. Used to save/close/stop execution when changing focus
 	public void stateChanged(ChangeEvent e) 
@@ -172,11 +178,12 @@ public class MainApplet extends JApplet implements ChangeListener {
 		if (inSimulatorView())
 		{
 			System.out.println("In sim view");
-			sim.getWorld();
 		}
 		if (inMazeView())
 		{
 			System.out.println("In maze view");
+			//Stop execution
+			sim.stop();
 		}
 	}
 

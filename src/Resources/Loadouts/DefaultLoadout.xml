@@ -3,7 +3,7 @@
   <sonars>
     <sonar>
       <type>c</type>
-      <name>Front-Left-TEST</name>
+      <name>Front-Left</name>
       <x>88.64538643426425</x>
       <y>150.79355909133707</y>
       <angle>315</angle>
@@ -12,7 +12,7 @@
     </sonar>
     <sonar>
       <type>c</type>
-      <name>Front-TEST</name>
+      <name>Front</name>
       <x>78.64538643426434</x>
       <y>150.79355909133716</y>
       <angle>0</angle>

@@ -371,7 +371,6 @@ public class Simulator implements RobotListener
 	
 	//Changes the robot's sensor loadout based on the file
 	//Doesn't change x/y and angle-- that's stored in the maze
-	//TODO: Bugfix-- right side labels not showing up. Custom sensors may cause issues. 
 	public void importLoadout(File f)
 	{
 		try

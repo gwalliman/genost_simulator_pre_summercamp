@@ -1,10 +1,13 @@
 package robotsimulator.gui;
 
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
@@ -14,7 +17,9 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
+import robotsimulator.robot.Robot;
 
 //This needs to duplicate the functionality of GUI
 public class MainApplet extends JApplet implements ChangeListener {
@@ -37,6 +42,9 @@ public class MainApplet extends JApplet implements ChangeListener {
 	public File codeFile;
 	public File configFile;
 	public File mapFile;
+	
+	//If true, this is a student build, and we should disable the maze builder, etc.
+	private static final boolean studentBuild = true;
 		
 	//This needs to be the main entry point into the program
 	public void init()
@@ -64,6 +72,23 @@ public class MainApplet extends JApplet implements ChangeListener {
 			e.printStackTrace();
 		}
 		
+
+		//Load some resources
+		Image img = null;
+		try
+		{
+			//img = ImageIO.read(new File(MainEntry.resourcePath + "/magictree.png"));
+			img = ImageIO.read(new File(MainEntry.resourcePath + "/robot.png"));
+			MainEntry.robotSprite = img;
+			
+			System.out.println("img: " + MainEntry.robotSprite.toString());
+			
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 		
 	}
 	
@@ -83,8 +108,9 @@ public class MainApplet extends JApplet implements ChangeListener {
 		tabPane.addTab("Simulator", simPanel);
 		
 		mazePanel = new MazeBuilderPanel(fps, sim, this);
-		tabPane.addTab("Maze Builder", mazePanel);
-		
+		if (!studentBuild)
+			tabPane.addTab("Maze Builder", mazePanel);
+				
 		add (tabPane);
 	}
 	
@@ -102,6 +128,8 @@ public class MainApplet extends JApplet implements ChangeListener {
 
 	private void setKeyBindings()
 	{
+		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0, false), "debug");
+		
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), "up");
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, true), "stop");
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0, false), "down");
@@ -110,10 +138,27 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), "stop");
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), "right");
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, true), "stop");
+		
+		getRootPane().getActionMap().put("debug", new AbstractAction()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				System.out.println("[DEBUG]");
+				Robot b = sim.getRobot();
+				double tx = b.getCenterX() - MainEntry.robotSprite.getWidth(null) / 2;
+				double ty = b.getCenterY() - MainEntry.robotSprite.getHeight(null) / 2;
+				
+				System.out.println("tx: " + tx + ", ty: " + ty);
+				System.out.println("cx: " + b.getCenterX() + ", cy: " + b.getCenterY());
+				System.out.println("w: " + MainEntry.robotSprite.getWidth(null) + "h: " + MainEntry.robotSprite.getHeight(null));
+				
+			}
+		});
+		
 		getRootPane().getActionMap().put("up", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().drive('f');
 	    	}
 	    });
@@ -121,7 +166,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("down", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().drive('b');
 	    	}
 	    });
@@ -129,7 +174,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("left", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().turn('l');
 	    	}
 	    });
@@ -137,7 +182,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("right", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().turn('r');
 	    	}
 	    });
@@ -145,7 +190,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		getRootPane().getActionMap().put("stop", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
-	    		if (inSimulatorView())
+	    		if (inSimulatorView() && !isExecuting())
 	    			sim.getRobot().stop();
 	    	}
 	    });
@@ -163,6 +208,12 @@ public class MainApplet extends JApplet implements ChangeListener {
 		return (tabPane.getSelectedIndex() == 1);
 	}
 	
+	//Returns true if the simulator tab is currently running code
+	private boolean isExecuting()
+	{
+		return sim.running;
+	}
+		
 	@Override
 	//Fires whenever a tab is changed. Used to save/close/stop execution when changing focus
 	public void stateChanged(ChangeEvent e) 
@@ -172,11 +223,13 @@ public class MainApplet extends JApplet implements ChangeListener {
 		if (inSimulatorView())
 		{
 			System.out.println("In sim view");
-			sim.getWorld();
 		}
 		if (inMazeView())
 		{
 			System.out.println("In maze view");
+			//Stop execution
+			simPanel.stopExecution();
+			//sim.stop();
 		}
 	}
 

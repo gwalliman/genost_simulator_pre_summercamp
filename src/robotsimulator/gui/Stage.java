@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 
+import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
 import robotsimulator.world.CellTheme;
@@ -80,7 +81,8 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 			paintBlock(g, b, b.getColor());
 		}
 		
-		paintBlock(g, sim.getRobot().getBlock(), Color.RED);
+		//paintBlock(g, sim.getRobot().getBlock(), Color.RED);
+		paintRobot(g, sim.getRobot().getBlock(), Color.RED);
 		
 		//paintRobotEdges(g);
 		//paintSonarSensors(g);
@@ -104,6 +106,49 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
 		g.fill(at.createTransformedShape(b.getRect()));
 		
+		
+		CellType ct = b.getCellType();
+		if(ct != null)
+		{
+			String cellTypeID = ct.getID();
+			if(sim.getWorld().getCellThemes().containsKey(cellTypeID))
+			{
+				CellTheme cellTheme = sim.getWorld().getCellThemes().get(cellTypeID);
+				g.drawImage(cellTheme.getImage(), (int)b.getX0(), (int)b.getY0(), (int)b.getX3(), (int)b.getY3(), cellTheme.getWidth(), cellTheme.getHeight(), 0, 0, null);
+			}
+		}
+	}
+	
+	private void paintRobot(Graphics2D g, Block b, Color c)
+	{
+		//g.setColor(c);
+		//AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
+		//g.fill(at.createTransformedShape(b.getRect()));
+		
+		AffineTransform at1 = new AffineTransform();
+		AffineTransform at2 = new AffineTransform();
+		
+		//Need to adjust this to hit the exact center of 
+		double sWidth = MainEntry.robotSprite.getWidth(this);
+		double sHeight = MainEntry.robotSprite.getHeight(this);
+		double tx = b.getCenterX() - sWidth / 2;
+		double ty = b.getCenterY() - sHeight / 2;
+		
+		//Create the translation
+		at1.translate(tx, ty);
+		//Create the rotation
+		at2.rotate(b.getRadAngle() - (Math.PI / 2), sWidth / 2, sHeight / 2);
+		
+		//Apply the rotation to the translation
+		at1.concatenate(at2);
+		
+		//Draw robot sprite
+		g.drawImage(MainEntry.robotSprite, at1, this);
+		
+		//Draw debug box
+		//g.setColor(c);
+		//AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
+		//g.fill(at.createTransformedShape(b.getRect()));
 		
 		CellType ct = b.getCellType();
 		if(ct != null)

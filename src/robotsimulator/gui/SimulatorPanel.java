@@ -32,6 +32,7 @@ import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
 
+
 //Used to organize simulator components. Held by the main applet class in a JTabbedPane
 public class SimulatorPanel extends JPanel implements ActionListener {
 	
@@ -47,6 +48,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JButton runBtn;					//Button to begin executing the simulation
 	private JButton stopBtn;				//Button to stop executing the simulation
 	private JButton reloadCodeBtn;			//Button to reload the code from the output area
+	private JButton resetBtn;				//Button to reset the maze, robot position, and stop execution. 
 	
 	//Right Panel
 	private JPanel rightPanel;
@@ -205,15 +207,27 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		loadoutNameLbl = new JLabel("Current Config: ");
 		bGridPanel.add(loadoutNameLbl);
 		
+		JPanel commandPanel = new JPanel();
+		
 		runBtn = new JButton("Execute!");
 		runBtn.addActionListener(this);
 		runBtn.setEnabled(false);
-		bGridPanel.add(runBtn);
+		//bGridPanel.add(runBtn);
+		commandPanel.add(runBtn);
 		
 		stopBtn = new JButton("Stop");
 		stopBtn.addActionListener(this);
 		stopBtn.setEnabled(false);
-		bGridPanel.add(stopBtn);
+		//bGridPanel.add(stopBtn);
+		commandPanel.add(stopBtn);
+		
+		resetBtn = new JButton("Reset");
+		resetBtn.addActionListener(this);
+		//resetBtn.setEnabled(false);
+		//bGridPanel.add(resetBtn);
+		commandPanel.add(resetBtn);
+		
+		bGridPanel.add(commandPanel);
 		
 		return bGridPanel;
 	}
@@ -355,6 +369,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				readyToRun = true;
 				openLoadoutBtn.setEnabled(true);
     			runBtn.setEnabled(true);
+    			resetBtn.setEnabled(true);
 			}
 	}
 
@@ -476,6 +491,17 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			stopExecution();
 			//updateRunningStatus();
 		}
+		else if (e.getSource() == resetBtn)
+		{
+			//Stop execution, reload the maze
+			stopExecution();
+			
+			if (main.mapFile != null)
+			{
+				sim.importStage(main.mapFile);
+				reinitializeSensors();
+			}
+		}
 		else if (e.getSource() == reloadCodeBtn)
 		{
 			//Loads the program from the edited text area
@@ -496,9 +522,10 @@ public class SimulatorPanel extends JPanel implements ActionListener {
         sim.stop();
 		executor = null;
 		
-		runBtn.setEnabled(true);
-		stopBtn.setEnabled(false);
-		runningLbl.setText("Stopped.");
+		updateRunningStatus();
+		//runBtn.setEnabled(true);
+		//stopBtn.setEnabled(false);
+		//runningLbl.setText("Stopped.");
 		
 	}
 	

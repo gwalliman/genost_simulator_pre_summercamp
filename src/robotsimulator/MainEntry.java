@@ -1,6 +1,13 @@
 package robotsimulator;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 import robotsimulator.gui.MainApplet;
+
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 public class MainEntry {
@@ -19,6 +26,9 @@ public class MainEntry {
 	public static String mazePath = resourcePath + "/Mazes";
 	public static String themePath = System.getProperty("user.dir") + "/robotsimulator/themes";	
 	
+	//Robot image
+	public static Image robotSprite;
+	
 	
 	public static void main(String[] args) 
 	{
@@ -30,8 +40,7 @@ public class MainEntry {
 		window.setContentPane(m);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.pack();
-		window.setVisible(true);
-		
+		window.setVisible(true);		
 	}
 
 }

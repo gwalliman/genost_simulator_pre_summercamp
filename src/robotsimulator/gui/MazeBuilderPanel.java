@@ -32,6 +32,8 @@ import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
 import robotsimulator.world.World;
 
+
+//TODO: Disable for test build
 //Used to organize maze components. Held by the main applet class in a JTabbedPane
 public class MazeBuilderPanel extends JPanel implements ActionListener {
 	

@@ -4,8 +4,8 @@
     <sonar>
       <type>c</type>
       <name>Front-Left</name>
-      <x>88.64538643426425</x>
-      <y>150.79355909133707</y>
+      <x>15</x>
+      <y>-10</y>
       <angle>315</angle>
       <length>750</length>
       <fov>25</fov>
@@ -13,8 +13,8 @@
     <sonar>
       <type>c</type>
       <name>Front</name>
-      <x>78.64538643426434</x>
-      <y>150.79355909133716</y>
+      <x>15</x>
+      <y>0</y>
       <angle>0</angle>
       <length>750</length>
       <fov>25</fov>
@@ -22,8 +22,8 @@
     <sonar>
       <type>c</type>
       <name>Front-Right</name>
-      <x>68.64538643426447</x>
-      <y>150.7935590913369</y>
+      <x>15</x>
+      <y>10</y>
       <angle>45</angle>
       <length>750</length>
       <fov>25</fov>
@@ -31,8 +31,8 @@
     <sonar>
       <type>c</type>
       <name>Right</name>
-      <x>68.64538643426427</x>
-      <y>135.7935590913367</y>
+      <x>0</x>
+      <y>10</y>
       <angle>90</angle>
       <length>750</length>
       <fov>25</fov>
@@ -40,8 +40,8 @@
     <sonar>
       <type>c</type>
       <name>Rear</name>
-      <x>78.64538643426452</x>
-      <y>120.7935590913371</y>
+      <x>-15</x>
+      <y>0</y>
       <angle>180</angle>
       <length>750</length>
       <fov>25</fov>
@@ -49,8 +49,8 @@
     <sonar>
       <type>c</type>
       <name>Left</name>
-      <x>88.64538643426413</x>
-      <y>135.79355909133656</y>
+      <x>0</x>
+      <y>-10</y>
       <angle>270</angle>
       <length>750</length>
       <fov>25</fov>

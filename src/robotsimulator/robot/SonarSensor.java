@@ -65,7 +65,7 @@ public class SonarSensor implements Runnable
 		type = 'l';
 		angle = a;
 		
-		int actualA = (int)Math.round(a + s.getRobot().getAngle());
+		int actualA = (int)Math.round(a);
 		if(actualA > 360)
 		{
 			actualA -= 360;
@@ -76,6 +76,8 @@ public class SonarSensor implements Runnable
 		
 		Line2D line = new Line2D.Double(x0, y0, x1, y1);
 		shape1 = line;
+		
+		rotate(s.getRobot().getAngle());
 		
 		robotThread = new Thread(this);
 		robotThread.start();
@@ -100,15 +102,14 @@ public class SonarSensor implements Runnable
 		label = n;
 		type = 'c';
 		angle = a;
-		
-		int actualA = (int)Math.round(a + s.getRobot().getAngle());
+		fov = f;
+			
+		int actualA = (int)Math.round(a);
 		if(actualA > 360)
 		{
 			actualA -= 360;
 		}
-		
-		fov = f;
-		
+			
 		x1 = getEndpointX(actualA - fov / 2);
 		y1 = getEndpointY(actualA - fov / 2);
 		x2 = getEndpointX(actualA + fov / 2);
@@ -119,6 +120,8 @@ public class SonarSensor implements Runnable
 		line = new Line2D.Double(x0, y0, x2, y2);
 		shape2 = line;
 		
+		rotate(s.getRobot().getAngle());
+
 		robotThread = new Thread(this);
 		robotThread.start();
 	}
@@ -401,6 +404,11 @@ public class SonarSensor implements Runnable
 	        if(t != null)
 	        {
 	        	t.setText(Double.toString(Double.parseDouble(new DecimalFormat("#.##").format(getSensorValue()))));
+	        }
+	        if(label == "Front")
+	        {
+	        	//System.out.println("X0: " + x0);
+	           	//System.out.println("Y0: " + y0);
 	        }
 	        
 			timeDiff = System.currentTimeMillis() - beforeTime;

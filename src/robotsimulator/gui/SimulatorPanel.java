@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -30,6 +31,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import robotinterpreter.RobotInterpreter;
 import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
+import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
 
 
@@ -54,7 +56,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JPanel rightPanel;
 	private JLabel runningLbl;				//Robot status-- running or not
 	private JTextArea outputTextArea;		//Holds output from running code, errors, etc.
-	//private JTextArea sensorOutputArea;		//Refreshed with sensor data
+	private JTextArea sensorText;			//Refreshed with sensor data
 	private JPanel sensorPanel;				//Holds labels for sensor data
 	
 	//Variables
@@ -63,10 +65,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	//Reference to the main containing class & simulator
 	private MainApplet main;
 	private Simulator sim;
-	
-	//List of robot sensors
-	ArrayList<SonarSensor> sonars;
-	
+		
 	//Simulator stage
 	private int stageWidth = 520;
 	private int stageHeight = 400;
@@ -74,12 +73,12 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private RobotInterpreter r;
 	SwingWorker<Void, Void> executor;
 	
+	//Thread for updating sensor values
+	sensorThread sThread;
+	
 	//Whether all necessary files are loaded in-- i.e. can we execute?
 	private boolean readyToRun = false;
 	
-	
-	//Hold the stage itself in here, and redraw the contents of just this panel when the stage changes
-	//e.g. if we load a new stage, we only need to update this panel
 	private JPanel stagePanel;
 	private JScrollPane stageScroll;
 		
@@ -88,7 +87,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private FileNameExtensionFilter txtFilter;
 	private FileNameExtensionFilter xmlFilter;
 
-	
+	DecimalFormat df = new DecimalFormat("#.0");
 	
 	public SimulatorPanel(int w, int h, int f, Simulator s, MainApplet m)
 	{
@@ -99,7 +98,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		sim = s;
 		main = m;
-		sonars = sim.getRobot().getSonarSensors();
+		//sonars = sim.getRobot().getSonarSensors();
+		
+		
 		
 		fileChooser = new JFileChooser(MainEntry.resourcePath);
 		
@@ -136,6 +137,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		add(simPane);
 		
 		loadDefaults();		
+		//Start up the sensor thread
+        sThread = new sensorThread();
+        (new Thread(sThread)).start();
 	}
 	
 	//Load in default options-- default map, sensor loadout, and program
@@ -301,28 +305,22 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JPanel createSensorPanel()
 	{
 		System.out.println("Creating Sensor Panel...");
-		JPanel rtn = new JPanel(new GridLayout(sonars.size() + 1, 1));
-		rtn.setPreferredSize(new Dimension(200, 100));
-		
-		rtn.add(new JLabel("Sonar Sensors"));
-		for (SonarSensor son : sonars)
-		{
-			//TODO: Sort out sensors not updating their labels
-			JPanel sPanel = new JPanel(new GridLayout(1, 2));
-			sPanel.add (new Label(son.getLabel()));
-			Label t = new Label();
-			
-			sPanel.add(t);
-			son.setTextField(t);
-			
-			rtn.add(sPanel);
-		}
+		JPanel rtn = new JPanel(new GridLayout(2,1));
+		rtn.setPreferredSize(new Dimension(200, 400));
+
+		sensorText = new JTextArea(24, 40);
+		sensorText.setEditable(false);
+		rtn.add(sensorText);
 		
 		//Can add any other mission critical data here as well
 		
 		return rtn;
 	}
-	
+		
+	private ArrayList<SonarSensor> getRobotSonars()
+	{
+		return sim.getRobot().getSonarSensors();
+	}
 	/*
 	Use the static method in Stage instead!
 	private JPanel createStagePanel()
@@ -608,14 +606,79 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		if (main.configFile != null)
 			sim.importLoadout(main.configFile);	
 		
+		//Pause the sensor thread
+		stopSensorThread();
+		
 		//Also update the sensor panel
 		rightPanel.remove(sensorPanel);
 		sensorPanel = null;
 		sensorPanel = createSensorPanel();
 		rightPanel.add(sensorPanel);
 		rightPanel.revalidate();
+		
+		//Resume the sensor thread
+		resumeSensorThread();
 	}
 
+	
+	private void updateSensors()
+	{
+		try
+		{
+			String newSensorData = "[Sonar Sensors]\n";
+			ArrayList<SonarSensor> sensorList = sim.getRobot().getSonarSensors();
+			
+			for (SonarSensor s : sensorList)
+			{
+				String t = "" + s.getLabel() + ": " + df.format(s.getConeSensorValue());
+				t +=  "\n";
+				newSensorData += t;
+			}
+	
+			sensorText.setText(newSensorData);
+		}
+		catch (ConcurrentModificationException e)
+		{
+			System.out.println("CONCMOD");
+			//e.printStackTrace();
+		}
+	}
+	
+	public void resumeSensorThread()
+	{
+		sThread.running = true;
+	}
+	
+	public void stopSensorThread()
+	{
+		sThread.running = false;
+	}
+	
+	private class sensorThread implements Runnable
+	{
+		SimulatorPanel s;
+		long sleepInterval = 100L;
+		//int ticks = 0;
+		boolean running = true;
+		
+		public void run() 
+		{
+			while (running)
+			{
+				//System.out.println("[sensorThread]: " + ticks++);
+				//call 'updateSensors', then sleep
+				updateSensors();
+				try 
+				{
+					Thread.sleep(sleepInterval);
+				} 
+				catch (InterruptedException e) 
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 	
 }
 

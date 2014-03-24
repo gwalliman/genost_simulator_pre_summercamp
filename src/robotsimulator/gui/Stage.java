@@ -205,6 +205,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 	{
 		for(SonarSensor s : sim.getRobot().getSonarSensors())
 		{
+			g.setColor(Color.black);
 			if(s.getType() == 'l')
 			{
 				g.draw(s.getShape());

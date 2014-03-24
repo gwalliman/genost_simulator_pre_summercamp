@@ -20,6 +20,7 @@ import javax.swing.event.ChangeListener;
 import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.robot.Robot;
+import robotsimulator.robot.SonarSensor;
 
 //This needs to duplicate the functionality of GUI
 public class MainApplet extends JApplet implements ChangeListener {
@@ -80,9 +81,6 @@ public class MainApplet extends JApplet implements ChangeListener {
 			//img = ImageIO.read(new File(MainEntry.resourcePath + "/magictree.png"));
 			img = ImageIO.read(new File(MainEntry.resourcePath + "/robot.png"));
 			MainEntry.robotSprite = img;
-			
-			System.out.println("img: " + MainEntry.robotSprite.toString());
-			
 		}
 		catch (IOException e)
 		{
@@ -145,13 +143,18 @@ public class MainApplet extends JApplet implements ChangeListener {
 			{
 				System.out.println("[DEBUG]");
 				Robot b = sim.getRobot();
-				double tx = b.getCenterX() - MainEntry.robotSprite.getWidth(null) / 2;
-				double ty = b.getCenterY() - MainEntry.robotSprite.getHeight(null) / 2;
-				
-				System.out.println("tx: " + tx + ", ty: " + ty);
-				System.out.println("cx: " + b.getCenterX() + ", cy: " + b.getCenterY());
-				System.out.println("w: " + MainEntry.robotSprite.getWidth(null) + "h: " + MainEntry.robotSprite.getHeight(null));
-				
+				for (SonarSensor s : b.getSonarSensors())
+				{
+					System.out.println("[" + s.getLabel() + "]: " + s.getConeSensorValue());
+				}
+				/*
+				System.out.println("[DEBUG2]");
+				for (SonarSensor s2 : simPanel.sonars)
+				{
+					System.out.println("[" + s2.getLabel() + "]: " + s2.getConeSensorValue());
+				}
+				*/
+				debug_refreshSensorLabels();
 			}
 		});
 		
@@ -196,6 +199,12 @@ public class MainApplet extends JApplet implements ChangeListener {
 	    });
 	}
 	
+	private void debug_refreshSensorLabels()
+	{
+		System.out.println("[RefreshSensors]");
+		//simPanel;
+	}
+	
 	//Returns true if the simulator tab is currently showing
 	private boolean inSimulatorView()
 	{
@@ -223,12 +232,14 @@ public class MainApplet extends JApplet implements ChangeListener {
 		if (inSimulatorView())
 		{
 			System.out.println("In sim view");
+			simPanel.resumeSensorThread();
 		}
 		if (inMazeView())
 		{
 			System.out.println("In maze view");
 			//Stop execution
 			simPanel.stopExecution();
+			simPanel.stopSensorThread();
 			//sim.stop();
 		}
 	}

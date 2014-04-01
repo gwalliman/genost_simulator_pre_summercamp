@@ -50,7 +50,10 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JButton runBtn;					//Button to begin executing the simulation
 	private JButton stopBtn;				//Button to stop executing the simulation
 	private JButton reloadCodeBtn;			//Button to reload the code from the output area
-	private JButton resetBtn;				//Button to reset the maze, robot position, and stop execution. 
+	private JButton resetBtn;				//Button to reset the maze, robot position, and stop execution.
+	
+	private JButton speedBtn;				//Button to toggle speeds		TODO: smooth this out, ensure no bugs
+	private JLabel speedLbl;
 	
 	//Right Panel
 	private JPanel rightPanel;
@@ -88,6 +91,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private FileNameExtensionFilter xmlFilter;
 
 	DecimalFormat df = new DecimalFormat("#.0");
+	
+	//Temp-- testing speed controls
+	private boolean highSpeed = false;
 	
 	public SimulatorPanel(int w, int h, int f, Simulator s, MainApplet m)
 	{
@@ -230,7 +236,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//resetBtn.setEnabled(false);
 		//bGridPanel.add(resetBtn);
 		commandPanel.add(resetBtn);
-		
+				
 		bGridPanel.add(commandPanel);
 		
 		return bGridPanel;
@@ -258,23 +264,12 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		c.gridheight = 2;
 		c.insets = new Insets(4, 4, 4, 4);
+		
+		
 		//add output textarea
 		outputTextArea = new JTextArea(12, 19);
-		
-		/*
-		TODO: Make output text interactable-- highlighting? 
-		Highlighting might require a custom component or using a JEditorPane
-		-First approach is most flexible. Would likely be a series of 
-		 separate textfield-like components that we adjust the font of on the fly
-		
-		-Second part causes issues, because it uses HTML markup, which we'd need 
-		 to modify on the fly-- add <b> tags to executing lines, remove all 
-		 formatting for re-execution, but is the simplest approach. 
-		
-		-Third approach-- some kind of ~adorner~ that just moves position based on
-		 currently executing code and overlays a highlight box or something.
-		*/
 		outputTextArea.setLineWrap(false);
+		outputTextArea.setTabSize(2);
 		
 		JScrollPane outputScroll = new JScrollPane(outputTextArea);
 		outputScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -284,6 +279,22 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		reloadCodeBtn = new JButton("Reload Code from Text");
 		reloadCodeBtn.addActionListener(this);		
 		rightPanel.add(reloadCodeBtn, c);
+		
+
+		//Experimental speed toggle!
+		c.gridheight = 1;
+		c.insets = new Insets(4, 4, 4, 4);
+		JPanel speedPanel = new JPanel();
+
+		speedBtn = new JButton("Toggle Speed");
+		speedBtn.addActionListener(this);
+		speedPanel.add(speedBtn);
+		
+		speedLbl = new JLabel("Speed: Slow");
+		speedPanel.add(speedLbl);
+		
+		rightPanel.add(speedPanel, c);
+
 		
 		
 		c.gridheight = 1;
@@ -297,6 +308,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//add sensor data panel 
 		sensorPanel = createSensorPanel();
 		rightPanel.add(sensorPanel, c);
+				
 		
 		return rightPanel;
 		
@@ -504,6 +516,22 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		{
 			//Loads the program from the edited text area
 			loadCodefromText(outputTextArea.getText());			
+		}
+		else if (e.getSource() == speedBtn)
+		{
+			//Toggle between high and low speeds for robot
+			if (highSpeed)
+			{
+				highSpeed = false;
+				Robot.speedModifier = 1;
+				speedLbl.setText("Speed: Slow");
+			}
+			else
+			{
+				highSpeed = true;
+				Robot.speedModifier = 2;
+				speedLbl.setText("Speed: Fast");
+			}
 		}
 	}
 	

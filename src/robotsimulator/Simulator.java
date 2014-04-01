@@ -188,18 +188,21 @@ public class Simulator implements RobotListener
 
 	public void turnToBearing(int bearing) 
 	{
-		robot.stop();
+			robot.stop();
 
-		int curBearing = getBearing();
-		
-		if(bearing > curBearing)
-		{
-			turnAngle(bearing - curBearing);
-		}
-		else if(bearing < curBearing)
-		{
-			turnAngle(curBearing - bearing);
-		}
+			int curBearing = getBearing();
+			int turnAngle = bearing - curBearing;
+			
+			if(turnAngle > 180)
+			{
+				turnAngle -= 360;
+			}
+			else if(turnAngle < -180)
+			{
+				turnAngle += 360;
+			}
+			
+			turnAngle(turnAngle);
 	}
 
 	@Override

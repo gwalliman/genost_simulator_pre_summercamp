@@ -21,6 +21,7 @@ import org.w3c.dom.NodeList;
 
 import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
+import robotsimulator.gui.MainApplet;
 import robotsimulator.worldobject.Block;
 
 public class World 
@@ -192,6 +193,10 @@ public class World
 			    		Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/" + imageNode.getTextContent())
 			    	);
 		    }
+		    
+		    //Set the robot sprite too
+		    MainApplet.loadRobotSprite("robotsimulator/themes/" + themeid + "/robot.png");
+		    
 		}
 		catch(Exception e)
 		{

@@ -44,7 +44,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 	public File configFile;
 	public File mapFile;
 	
-	//If true, this is a student build, and we should disable the maze builder, etc.
+	//If true, this is a student build, and we should disable the maze builder, arrow keys, etc.
 	private static final boolean studentBuild = true;
 		
 	//This needs to be the main entry point into the program
@@ -55,7 +55,8 @@ public class MainApplet extends JApplet implements ChangeListener {
 			m_instance = this;
 		
 		sim = new Simulator(this);
-		setKeyBindings();
+		if (!studentBuild)
+			setKeyBindings();
 			
 		try 
 		{
@@ -74,20 +75,22 @@ public class MainApplet extends JApplet implements ChangeListener {
 		}
 		
 
+		loadRobotSprite(MainEntry.resourcePath + "/robot.png");		
+	}
+	
+	public static void loadRobotSprite(String path)
+	{
 		//Load some resources
 		Image img = null;
 		try
 		{
-			//img = ImageIO.read(new File(MainEntry.resourcePath + "/magictree.png"));
-			img = ImageIO.read(new File(MainEntry.resourcePath + "/robot.png"));
+			img = ImageIO.read(new File(path));
 			MainEntry.robotSprite = img;
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
 	private void buildGUI()

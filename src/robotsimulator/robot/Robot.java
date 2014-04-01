@@ -24,6 +24,10 @@ public class Robot implements Runnable
 	//Off = o
 	private char status = 'o';
 	
+	//What factor to divide the wait time between instructions by. Set to 1 for default (no modifier)
+	public static int speedModifier = 1;
+	
+	
 	private ArrayList<SonarSensor> sonars = new ArrayList<SonarSensor>();
 	
 	public Robot(int cx, int cy, int a, Simulator s)
@@ -369,9 +373,12 @@ public class Robot implements Runnable
 			}
 			
 			timeDiff = System.currentTimeMillis() - beforeTime;
-	        sleep = delay - timeDiff;
+	        sleep = (delay / speedModifier) - timeDiff;
 	        
-	        if(sleep <= 0) sleep = 2;
+	        if(sleep <= 0) sleep = 1;
+	        
+	        //Sleep modifier
+	        //sleep = sleep / speedModifier;
 
 	        try 
 			{

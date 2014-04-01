@@ -302,15 +302,12 @@ public class SonarSensor implements Runnable
 		int x = length + 10;
 		int y = length + 10;
 		
-		//I think that these two values should always be the same, actually.
-		//int max = Math.max(points1.size(), points2.size());
-		int max = Math.min(points1.size(), points2.size());		
+		int max = Math.min(points1.size(), points2.size());			//Needs to be minimum, or else we get an array out of bounds exception
 		
 		for(int i = 0; i < max; i++)
 		{
-			Point p1 = points1.get(i);		//This is causing threads to crash
-			Point p2 = points2.get(i);		//Index out of bounds exception
-											//If points1.size > points2.size, i->max of those two will cause a IOB exception for points2
+			Point p1 = points1.get(i);		
+			Point p2 = points2.get(i);		
 			
 			ArrayList<Point> ray = World.getLine(p1.getX(), p1.getY(), p2.getX(), p2.getY());
 			
@@ -412,9 +409,13 @@ public class SonarSensor implements Runnable
 	        }
 	        
 			timeDiff = System.currentTimeMillis() - beforeTime;
-			sleep = delay - timeDiff;
+			sleep = (delay / Robot.speedModifier) - timeDiff;
 	         
-	        if(sleep <= 0) sleep = 2;
+	        if(sleep <= 0) sleep = 1;
+
+	        //Sleep modifier
+	        //sleep = sleep / Robot.speedModifier;
+	        
 			
 			try 
 			{

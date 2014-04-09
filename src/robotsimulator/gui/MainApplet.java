@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
+import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -45,7 +46,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 	public File mapFile;
 	
 	//If true, this is a student build, and we should disable the maze builder, arrow keys, etc.
-	private static final boolean studentBuild = true;
+	private static final boolean studentBuild = false;
 		
 	//This needs to be the main entry point into the program
 	public void init()
@@ -75,19 +76,24 @@ public class MainApplet extends JApplet implements ChangeListener {
 		}
 		
 
-		loadRobotSprite(MainEntry.resourcePath + "/robot.png");		
+		ClassLoader cl = this.getClass().getClassLoader();
+		loadRobotSprite("robot.png", cl);		
 	}
 	
-	public static void loadRobotSprite(String path)
+	public static void loadRobotSprite(String filename, ClassLoader cl)
 	{
 		//Load some resources
-		Image img = null;
+		ImageIcon img = null;
+		
 		try
 		{
-			img = ImageIO.read(new File(path));
+
+			img = new ImageIcon(cl.getResource("Resources/" + filename));
+			//img = ImageIO.read(new File(cl.getResource("Resources/" + filename).toString()));
+			//img = ImageIO.read(new File(path));
 			MainEntry.robotSprite = img;
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -228,6 +234,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		
 	@Override
 	//Fires whenever a tab is changed. Used to save/close/stop execution when changing focus
+	//TODO: Reinitialize robot sensors when switching back from builder view
 	public void stateChanged(ChangeEvent e) 
 	{
 		System.out.println("Changed tab.");

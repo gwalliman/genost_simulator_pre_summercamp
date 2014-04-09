@@ -8,6 +8,7 @@ import java.io.IOException;
 import robotsimulator.gui.MainApplet;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 
 public class MainEntry {
@@ -20,14 +21,15 @@ public class MainEntry {
 	 */
 	
 	//File paths
-	public static String resourcePath = System.getProperty("user.dir") + "/Resources";
+	//public static String resourcePath = System.getProperty("user.dir") + "/Resources";
+	public static String resourcePath = "";
 	public static String codePath = resourcePath + "/Code";
 	public static String loadoutPath = resourcePath + "/Loadouts";
 	public static String mazePath = resourcePath + "/Mazes";
-	public static String themePath = System.getProperty("user.dir") + "/robotsimulator/themes";	
+	//public static String themePath = System.getProperty("user.dir") + "/robotsimulator/themes";	
 	
 	//Robot image
-	public static Image robotSprite;
+	public static ImageIcon robotSprite;
 	
 	
 	public static void main(String[] args) 

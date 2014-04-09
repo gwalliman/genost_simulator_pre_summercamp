@@ -153,7 +153,15 @@ public class World
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/theme.xml").toString());
+			
+			//Attempting to read themes from the jar
+			ClassLoader cl = this.getClass().getClassLoader();
+			//String themeFile = cl.getResource("Resources/Themes/" + themeid + "/theme.xml").toString();
+			
+			Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
+			//Document document = builder.parse(themeFile);
+			//Document document = builder.parse(Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/theme.xml").toString());
+			//Document document = builder.parse(Simulator.class.getResource("/Resources/Themes/" + themeid + "/theme.xml").toString());
 			Node root = document.getDocumentElement();
 			
 			XPathFactory xPathFactory = XPathFactory.newInstance();
@@ -190,12 +198,13 @@ public class World
 					);
 			    setCellTheme(
 			    		idNode.getNodeValue(), 
-			    		Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/" + imageNode.getTextContent())
+			    		//Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/" + imageNode.getTextContent())
+			    		cl.getResource("Resources/Themes/" + themeid + "/" + imageNode.getTextContent())
 			    	);
 		    }
 		    
 		    //Set the robot sprite too
-		    MainApplet.loadRobotSprite("robotsimulator/themes/" + themeid + "/robot.png");
+		    MainApplet.loadRobotSprite("Themes/" + themeid + "/robot.png", cl);
 		    
 		}
 		catch(Exception e)
@@ -203,7 +212,7 @@ public class World
 			e.printStackTrace();
 		}
 		
-		grid = new GridSquare[width / gridWidth][height / gridHeight];
+		grid = new GridSquare[width / gridWidth][height / gridHeight];		//TODO: figure out why this is causing NPEs-- likely not loading the theme right
 		for(int x = 0; x < width / gridWidth; x++)
 		{
 			for(int y = 0; y < height / gridHeight; y++)

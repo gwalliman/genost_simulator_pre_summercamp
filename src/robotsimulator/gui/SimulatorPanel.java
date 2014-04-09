@@ -11,9 +11,13 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -152,8 +156,58 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private void loadDefaults()
 	{
 		//Load loadout config
-		main.configFile = new File(MainEntry.loadoutPath + "/DefaultLoadout.xml");
-		loadoutNameLbl.setText("Current Config: " + main.configFile.getName());
+		//Load the initial config from the jar
+		ClassLoader cl = this.getClass().getClassLoader();
+		//main.configFile = new File(cl.getResource("Resources/Loadouts/DefaultLoadout.xml").toString());
+		InputStream is = null;
+		FileOutputStream os = null;
+		File newConfig = new File("tempConfig");
+		
+		try
+		{
+			is = cl.getResourceAsStream("Resources/Loadouts/DefaultLoadout.xml");
+			os = new FileOutputStream(newConfig);
+			int read = 0;
+			byte[] bytes = new byte[1024];
+			while ((read = is.read(bytes)) != -1)
+			{
+				os.write(bytes, 0, read);
+			}
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		finally
+		{
+			if (is != null)
+			{
+				try 
+				{
+					is.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+			if (os != null)
+			{
+				try 
+				{
+					os.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		
+
+
+		main.configFile = newConfig;
+		loadoutNameLbl.setText("Current Config: " + "DefaultLoadout.xml");
 		updateRunningStatus();
 		
 		//Update the robot's sensor and loadout configuration

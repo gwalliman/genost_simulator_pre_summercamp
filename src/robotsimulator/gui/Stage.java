@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -129,8 +130,8 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		AffineTransform at2 = new AffineTransform();
 		
 		//Need to adjust this to hit the exact center of 
-		double sWidth = MainEntry.robotSprite.getWidth(this);
-		double sHeight = MainEntry.robotSprite.getHeight(this);
+		double sWidth = MainEntry.robotSprite.getIconWidth();
+		double sHeight = MainEntry.robotSprite.getIconHeight();
 		double tx = b.getCenterX() - sWidth / 2;
 		double ty = b.getCenterY() - sHeight / 2;
 		
@@ -143,7 +144,8 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		at1.concatenate(at2);
 		
 		//Draw robot sprite
-		g.drawImage(MainEntry.robotSprite, at1, this);
+		g.drawImage(MainEntry.robotSprite.getImage(), at1, this);
+		
 		
 		//Draw debug box
 		//g.setColor(c);

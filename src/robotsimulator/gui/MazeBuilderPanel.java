@@ -312,8 +312,10 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		//Get some user prefs-- dimensions, theme
 		
 		//Collect available themes
-		File currentDir = new File(MainEntry.themePath);
-		String[] themeNames = currentDir.list();
+		//File currentDir = new File(MainEntry.themePath);
+		//No way to do this easily with the classloader-- hardcoded for now, since themes are hardcoded anyway
+		String[] themeNames = { "default", "loz", "minecraft", "pkmn" };
+		
 		
 		//Open the dialog
 		String userChoice = (String)JOptionPane.showInputDialog(new Frame(), "Select a theme: ", "New Maze", JOptionPane.PLAIN_MESSAGE, null, themeNames, themeNames[0]);

@@ -212,7 +212,7 @@ public class World
 			e.printStackTrace();
 		}
 		
-		grid = new GridSquare[width / gridWidth][height / gridHeight];		//TODO: figure out why this is causing NPEs-- likely not loading the theme right
+		grid = new GridSquare[width / gridWidth][height / gridHeight];		
 		for(int x = 0; x < width / gridWidth; x++)
 		{
 			for(int y = 0; y < height / gridHeight; y++)

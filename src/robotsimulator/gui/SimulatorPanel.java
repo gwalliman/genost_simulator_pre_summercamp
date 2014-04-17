@@ -55,6 +55,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JButton stopBtn;				//Button to stop executing the simulation
 	private JButton reloadCodeBtn;			//Button to reload the code from the output area
 	private JButton resetBtn;				//Button to reset the maze, robot position, and stop execution.
+	private JButton webloadCodeBtn;			//Button to load code from the web service
 	
 	private JButton speedBtn;				//Button to toggle speeds		TODO: smooth this out, ensure no bugs
 	private JLabel speedLbl;
@@ -330,10 +331,19 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		outputScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		rightPanel.add(outputScroll, c);
 		
+		JPanel actionPanel = new JPanel(new GridLayout(2, 1));
+		
 		reloadCodeBtn = new JButton("Reload Code from Text");
 		reloadCodeBtn.addActionListener(this);		
-		rightPanel.add(reloadCodeBtn, c);
+		//rightPanel.add(reloadCodeBtn, c);
+		actionPanel.add(reloadCodeBtn);
 		
+		webloadCodeBtn = new JButton("Load Code from Web");
+		webloadCodeBtn.addActionListener(this);
+		//rightPanel.add(webloadCodeBtn, c);
+		actionPanel.add(webloadCodeBtn);
+		
+		rightPanel.add(actionPanel, c);
 
 		//Experimental speed toggle!
 		c.gridheight = 1;
@@ -569,7 +579,47 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		else if (e.getSource() == reloadCodeBtn)
 		{
 			//Loads the program from the edited text area
-			loadCodefromText(outputTextArea.getText());			
+			loadCodefromText(outputTextArea.getText(), "Modified from Text*");			
+		}
+		else if (e.getSource() == webloadCodeBtn)
+		{
+			System.out.println("Webload test!");
+			//Loads the program from the web service
+			//Create a client to access the service from
+			try
+			{
+			
+				
+				
+				
+				//To load code in the program, pass the string representation of the code into this method
+				String webCode = "no code!";
+				loadCodefromText(webCode, "Loaded from Web*");
+			}
+			catch (Exception e1)
+			{
+				e1.printStackTrace();
+			}
+			
+			/*
+			//holy goddamn look at all the shit you have to do to call services in eclipse 
+			DynamicClientFactory dcf = DynamicClientFactory.newInstance();
+			Client client = dcf.createClient("http://venus.eas.asu.edu/WSRepository/eRobotic/DataService/Service.svc?wsdl");
+			System.out.println("Client created without issue");
+			
+			try 
+			{
+				Object[] a = client.invoke("GetCode");
+				System.out.println("[Invoked]");
+				System.out.println(a);
+				
+			} 
+			catch (Exception e1) 
+			{
+				e1.printStackTrace();
+			}*/
+			
+			
 		}
 		else if (e.getSource() == speedBtn)
 		{
@@ -609,7 +659,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 	}
 	
-	public void loadCodefromText(String code)
+	public void loadCodefromText(String code, String newCodeName)
 	{
 		//Convert the text in the textarea to a file and set the codeFile in main to be this file
 		BufferedWriter w = null;
@@ -621,7 +671,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		w.close();
 		
 		main.codeFile = textCode;
-		codeNameLbl.setText("Current Program: " + "Modified from Text*");
+		codeNameLbl.setText("Current Program: " + newCodeName);
+		
 		
 		runBtn.setEnabled(true);
 		updateRunningStatus();

@@ -10,6 +10,8 @@ import robotsimulator.gui.MainApplet;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebServiceRef;
 
 public class MainEntry {
 
@@ -26,11 +28,12 @@ public class MainEntry {
 	public static String codePath = resourcePath + "/Code";
 	public static String loadoutPath = resourcePath + "/Loadouts";
 	public static String mazePath = resourcePath + "/Mazes";
-	//public static String themePath = System.getProperty("user.dir") + "/robotsimulator/themes";	
 	
 	//Robot image
 	public static ImageIcon robotSprite;
 	
+	//Reference to code service
+	//@WebServiceRef(wsdlLocation="http://venus.eas.asu.edu/WSRepository/eRobotic/DataService/Service.svc?wsdl")
 	
 	public static void main(String[] args) 
 	{
@@ -42,7 +45,8 @@ public class MainEntry {
 		window.setContentPane(m);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.pack();
-		window.setVisible(true);		
+		window.setVisible(true);	
+		
 	}
 
 }

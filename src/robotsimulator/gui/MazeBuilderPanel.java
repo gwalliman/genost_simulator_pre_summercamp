@@ -26,7 +26,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
@@ -41,34 +40,35 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	private Simulator sim;
 	private int fps;
 		
+    //Default attributes of maze elements
 	private int mazeWidth = 16;
 	private int mazeHeight = 12;
 	private int gridWidth = 16;
 	private int gridHeight = 16;
 	
-	JButton newMazeBtn;
-	JButton loadMazeBtn;
-	JButton saveMazeBtn;
+	JButton newMazeBtn;         //On click: Creates a new maze
+	JButton loadMazeBtn;        //On click: opens a dialog to load a maze
+	JButton saveMazeBtn;        //On click: opens a dialog to save current maze
 	
-	JButton loadThemeBtn;
-	JLabel currentThemeLbl;
+	JLabel currentThemeLbl;     //Displays the name of the current theme
 	
-	JSpinner widthSpinner;
-	JSpinner heightSpinner;
+	JSpinner widthSpinner;      //Allows changing maze width
+	JSpinner heightSpinner;     //Allows changing maze height
+    //Spinner bounds
 	private final int wMin = 5;
 	private final int wMax = 30;
 	private final int hMin = 5;
 	private final int hMax = 20;
-	SpinnerModel widthModel = new SpinnerNumberModel(16, wMin, wMax, 1);		
-	SpinnerModel heightModel = new SpinnerNumberModel(12, hMin, hMax, 1);
+	SpinnerModel widthModel = new SpinnerNumberModel(16, wMin, wMax, 1);    //Defines maze width spinner bounds		
+	SpinnerModel heightModel = new SpinnerNumberModel(12, hMin, hMax, 1);   //Defines maze height spinner bounds
 	
-	JPanel leftPanel;
-	JPanel palettePanel;
-	JPanel stagePanel;
+	JPanel leftPanel;       //Contains buttons and the stage on the left
+	JPanel palettePanel;    //Contains the maze object inventory/palette on the right
+	JPanel stagePanel;      //Holds just the stage being edited
 	
 	//File IO
-	private JFileChooser fileChooser;
-	private FileNameExtensionFilter xmlFilter;
+	private JFileChooser fileChooser;               //Call this to open a file dialog
+	private FileNameExtensionFilter xmlFilter;      //Use this when restricting to just xml files
 	
 	public MazeBuilderPanel(int f, Simulator s, MainApplet m)
 	{
@@ -80,16 +80,18 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		gridWidth = simWorld.getGridWidth();
 		gridHeight = simWorld.getGridHeight();
 		
-		fileChooser = new JFileChooser(MainEntry.resourcePath);
+		fileChooser = new JFileChooser("");
 		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
-				
-		
+        
 		leftPanel = createLeftPanel();
 		palettePanel = createPalettePanel();
 	
 		add(leftPanel);
-		
 		add(palettePanel);	
+        
+        //Lazy way to set up the initial world size
+		simWorld.adjustWorld(mazeWidth, mazeHeight);
+		updateStagePanel();
 	}
 	
 	private JPanel createLeftPanel()
@@ -103,6 +105,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		GridLayout g2 = new GridLayout(1, 0);
 		g2.setHgap(8);
 		
+        //Add interface buttons
 		newMazeBtn = new JButton("New Maze");
 		newMazeBtn.addActionListener(this);
 		
@@ -123,7 +126,6 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			{
 				mazeWidth = (Integer) widthModel.getValue();
 				mazeHeight = (Integer) heightModel.getValue();
-				//System.out.println("Spinners: [" + newW + ", " + newH + "]");
 				
 				World simWorld = sim.getWorld();
 				simWorld.adjustWorld(mazeWidth, mazeHeight);
@@ -161,36 +163,12 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		gridWidth = simWorld.getGridWidth();
 		gridHeight = simWorld.getGridHeight();
 		stagePanel = Stage.createStagePanel(mazeWidth * gridWidth, mazeHeight * gridHeight, fps, sim, true);		
-		
 	}
-	
-	/*
-	Use the static method in Stage instead!
-	private JPanel createStagePanel()
-	{
-		JPanel stagePanel = new JPanel();
-		stagePanel.setSize(520, 400);
-		Stage simStage = new Stage(mazeWidth * 2, mazeHeight * 2, fps, sim);
-		simStage.allowEditing();
-
-		JScrollPane stageScroll = new JScrollPane(simStage);
-		stageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		stageScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		stageScroll.setSize(mazeWidth, mazeHeight);
 		
-		stagePanel.add(stageScroll);
-		return stagePanel;
-	}
-	*/
-	
 	private JPanel createPalettePanel()
 	{
-		//Theme button and label, divider, then scroll area with dynamic buttons for each tile type
 		JPanel rtn = new JPanel();
 		rtn.setSize(200, 600);
-		
-		loadThemeBtn = new JButton("Load Theme");
-		loadThemeBtn.addActionListener(this);
 		
 		currentThemeLbl = new JLabel("Current Theme: " + sim.themeid);
 				
@@ -199,7 +177,6 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		c.gridwidth = 1;
 		
 		JPanel buttonPanel = new JPanel(new GridLayout(3, 0));
-		//buttonPanel.add(loadThemeBtn);
 		buttonPanel.add(currentThemeLbl);
 		
 		JSeparator jsep = new JSeparator();
@@ -210,7 +187,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		c.gridy = 0;
 		rtn.add(buttonPanel, c);
 		
-		//Dynamically fill a panel with tile button
+		//Dynamically fill a panel with tile buttons
 		palettePanel = createPaletteButtons();
 				
 		//Wrap it all in a scroll pane
@@ -221,24 +198,21 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		
 		c.gridy = 1;
 		rtn.add(paletteScroll, c);
-		//rtn.add(palettePanel, c);
 		return rtn;
 	}
 	
 	private JPanel createPaletteButtons()
 	{
-		//System.out.println("Create palette: " + sim.themeid);
-		
 		JPanel rtn = new JPanel(new GridLayout(0, 1));
 		rtn.setSize(200, 400);
 		rtn.setPreferredSize(new Dimension(200, 400));
 				
+        //Create buttons for each cell type in the current theme
 		for(CellType ctype : sim.getWorld().getCellTypes())
 		{
 			String cellTypeID = ctype.getID();	
 			
 			JButton b; 
-			//System.out.println("  -celltypeID: " + cellTypeID);
 			if(sim.getWorld().getCellThemes().containsKey(cellTypeID))
 			{
 				CellTheme cellTheme = sim.getWorld().getCellThemes().get(cellTypeID);
@@ -254,11 +228,13 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			b.setName(ctype.getID());
 			b.setSize(150, 50);
 			b.setPreferredSize(new Dimension(150, 50));
+            //Adds an action listener to each button
+            //When clicked, sets the current cell type added when clicking to this
 			ActionListener a = new ActionListener() 
 			{
+                @Override
 				public void actionPerformed(ActionEvent a) 
 				{
-					//System.out.println("Clicked " + hashCode());
 					JButton b = (JButton)a.getSource();
 					ArrayList<CellType> types = sim.getWorld().getCellTypes();
 					String id = b.getName();
@@ -270,14 +246,11 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 							break;
 						}
 					}
-
 				}
 			}; 
-			
 			b.addActionListener(a);
 			rtn.add(b);
 		}
-		
 		return rtn;	
 	}
 	
@@ -299,20 +272,13 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		{
 			saveMaze();
 		}
-		else if (e.getSource() == loadThemeBtn)
-		{
-			//loadTheme();
-		}
 	}
 	
 	//When the 'New Maze' button is clicked, creates a new, empty maze
+    //Also prompt the user to select a theme for the maze
 	private void newMaze()
 	{
-		//Open up a dialog
-		//Get some user prefs-- dimensions, theme
-		
 		//Collect available themes
-		//File currentDir = new File(MainEntry.themePath);
 		//No way to do this easily with the classloader-- hardcoded for now, since themes are hardcoded anyway
 		String[] themeNames = { "default", "loz", "minecraft", "pkmn" };
 		
@@ -323,15 +289,11 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		if (userChoice != null && userChoice.length() > 0)
 		{
 			//User has made a choice
-			
 			sim.themeid = userChoice;
 			sim.getWorld().setTheme(sim.themeid);
-			//Clear out old celltypes
-			
 			
 			//Reset the theme palette
 			refreshPalette();
-			
 			sim.resetStage();
 		}
 		else
@@ -342,11 +304,10 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	}
 	
 	//When the 'Load Maze' button is clicked, loads a maze in from a file for editing. 
-	//Can copy from the SimPanel method.
-	private void loadMaze()
+	//Extended from the SimPanel method.
+	public void loadMaze()
 	{
 		fileChooser.setFileFilter(xmlFilter);
-		fileChooser.setCurrentDirectory(new File(MainEntry.mazePath));
 		
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -354,33 +315,37 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			File loadedMaze = fileChooser.getSelectedFile();	
 			//Update the maze here
 			sim.importStage(loadedMaze);
-			
-			//Update the width and height spinners
-			World simWorld = sim.getWorld();
-			int newW = simWorld.getWidth() / simWorld.getGridWidth();
-			int newH = simWorld.getHeight() / simWorld.getGridHeight();
-			
-			//Constrain new width and height to spinner boundaries
-			if (newW > wMax)
-				newW = wMax;
-			else if (newW < wMin)
-				newW = wMin;
-			if (newH > hMax)
-				newH = hMax;
-			else if (newH < hMin)
-				newH = hMin;
-			
-			widthSpinner.setValue(newW);
-			heightSpinner.setValue(newH);
-			simWorld.adjustWorld(newW, newH);
-			
-			//Update the block palette and theme
-			currentThemeLbl.setText("Current Theme: " + sim.themeid);
-			
-			refreshPalette();
-			
+			refreshMazeSettings();
 		}
 	}
+    
+    //Refreshes spinner values, theme palettes, etc. based on the current maze
+    public void refreshMazeSettings()
+    {
+        //Update the width and height spinners
+        World simWorld = sim.getWorld();
+        int newW = simWorld.getWidth() / simWorld.getGridWidth();
+        int newH = simWorld.getHeight() / simWorld.getGridHeight();
+
+        //Constrain new width and height to spinner boundaries
+        if (newW > wMax)
+            newW = wMax;
+        else if (newW < wMin)
+            newW = wMin;
+        if (newH > hMax)
+            newH = hMax;
+        else if (newH < hMin)
+            newH = hMin;
+
+        widthSpinner.setValue(newW);
+        heightSpinner.setValue(newH);
+        simWorld.adjustWorld(newW, newH);
+
+        //Update the block palette and theme
+        currentThemeLbl.setText("Current Theme: " + sim.themeid);
+
+        refreshPalette();
+    }
 
 	//Hacky method to redraw the block palette
 	private void refreshPalette()
@@ -398,7 +363,6 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	private void saveMaze()
 	{
 		//Open a file dialog and write the file to XML
-		fileChooser.setCurrentDirectory(new File(MainEntry.mazePath));
 		
 		int returnVal = fileChooser.showSaveDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -408,5 +372,4 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			sim.exportStage(saveFile);	
 		}
 	}
-	
 }

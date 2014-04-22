@@ -1,10 +1,10 @@
 package robotsimulator.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.Scrollable;
 
-import robotsimulator.MainEntry;
+import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
 import robotsimulator.robot.SonarSensor;
 import robotsimulator.world.CellTheme;
@@ -26,15 +26,20 @@ import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
 @SuppressWarnings("serial")
-//In charge of rendering the stage, and the robot on top of it
+/*
+ * Represents the space the robot moves around in
+ * Controls rendering the robot
+ */
 public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 {
 	private Simulator sim;
 	private Thread animator;
-	//@SuppressWarnings("unused")
 	private int width, height, fps;
-	//Whether or not we can edit the maze in this view
+	//Whether or not we can edit the maze in this view-- defaults to non-edit mode
 	private boolean editable = false;
+    //Out-of-bounds color and background color
+    private Color oobColor = new Color(71, 79, 97);
+    private Color bColor = new Color(238, 239, 242);
 
 	public Stage(int w, int h, int f, Simulator s)
 	{
@@ -48,14 +53,16 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		setDoubleBuffered(true);
 		setPreferredSize(new Dimension(w, h));
 		setSize(w, h);
-		setBackground(Color.white);
+		setBackground(oobColor);
 	}
 	
+    //Call this to enable editing the maze (e.g. in maze builder)
 	public void allowEditing()
 	{
 		editable = true;
 	}
 	
+    //Call this method to disable editing the maze (e.g. in the simulator view)
 	public void disableEditing()
 	{
 		editable = false;
@@ -68,13 +75,20 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
         animator.start();
     }
 	
+    //Draws the stage, robot, and each block
 	public void paintComponent(Graphics graphics)
 	{
 		super.paintComponent(graphics);
 		
 		Graphics2D g = (Graphics2D) graphics;
-		
-		g.draw(sim.getWorld().getBoundary());
+        
+        //Draw the usable area
+		g.setPaint(bColor);
+        g.fill(sim.getWorld().getBoundary());
+        //Draw the boundary
+        g.setPaint(Color.black);
+        g.setStroke(new BasicStroke(3f));
+        g.draw(sim.getWorld().getBoundary());
 		
 		ArrayList<Block> blocks = sim.getWorld().getBlocks();
 		for(Block b : blocks)
@@ -82,25 +96,11 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 			paintBlock(g, b, b.getColor());
 		}
 		
-		//paintBlock(g, sim.getRobot().getBlock(), Color.RED);
 		paintRobot(g, sim.getRobot().getBlock(), Color.RED);
 		
-		//paintRobotEdges(g);
-		//paintSonarSensors(g);
-		
-		/*Point[][] worldPoints = sim.getWorld().getWorldPoints();
-		for(int x = 0; x < worldPoints.length; x++)
-		{
-			for(int y = 0; y < worldPoints[x].length; y++)
-			{
-				if(worldPoints[x][y].isOccupied())
-				{
-					g.fill(new Ellipse2D.Double(x - (5 / 2), y - (5 / 2), 5, 5));
-				}
-			}
-		}*/
 	}
 
+    //Draws a block on the stage
 	private void paintBlock(Graphics2D g, Block b, Color c)
 	{
 		g.setColor(c);
@@ -120,18 +120,20 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		}
 	}
 	
+    //Draws the robot itself
 	private void paintRobot(Graphics2D g, Block b, Color c)
 	{
-		//g.setColor(c);
-		//AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
-		//g.fill(at.createTransformedShape(b.getRect()));
-		
+        //To render Ol' Red: 
+        /*
+         * g.setColor(c);
+         * AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
+         * g.fill(at.createTransformedShape(b.getRect()));
+		*/
 		AffineTransform at1 = new AffineTransform();
 		AffineTransform at2 = new AffineTransform();
 		
-		//Need to adjust this to hit the exact center of 
-		double sWidth = MainEntry.robotSprite.getIconWidth();
-		double sHeight = MainEntry.robotSprite.getIconHeight();
+		double sWidth = MainApplet.robotSprite.getIconWidth();
+		double sHeight = MainApplet.robotSprite.getIconHeight();
 		double tx = b.getCenterX() - sWidth / 2;
 		double ty = b.getCenterY() - sHeight / 2;
 		
@@ -144,13 +146,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		at1.concatenate(at2);
 		
 		//Draw robot sprite
-		g.drawImage(MainEntry.robotSprite.getImage(), at1, this);
-		
-		
-		//Draw debug box
-		//g.setColor(c);
-		//AffineTransform at = AffineTransform.getRotateInstance(b.getRadAngle() - (Math.PI / 2), b.getCenterX(), b.getCenterY());  
-		//g.fill(at.createTransformedShape(b.getRect()));
+		g.drawImage(MainApplet.robotSprite.getImage(), at1, this);
 		
 		CellType ct = b.getCellType();
 		if(ct != null)
@@ -164,7 +160,8 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		}
 	}
 	
-	//@SuppressWarnings("unused")
+    //Unused-- draws the edges of the robot's hitbox.
+    //Might be useful for testing, so I'm leaving it in. 
 	private void paintRobotEdges(Graphics2D g) 
 	{
 		g.setColor(Color.red);
@@ -202,7 +199,8 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		g.fill(new Ellipse2D.Double(sim.getRobot().getX3() - (5 / 2), sim.getRobot().getY3() - (5 / 2), 5, 5));		
 	}
 	
-	//@SuppressWarnings("unused")
+    //Draws lines from each sonar sensors to the edge of its 'vision'
+    //Useful for debugging what the sensors are doing
 	private void paintSonarSensors(Graphics2D g)
 	{
 		for(SonarSensor s : sim.getRobot().getSonarSensors())
@@ -232,7 +230,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 		MainApplet.m_instance.getFocus();
 		if (editable)
 		{
-			//sim.addBlock(20, 20, click.getX(), click.getY());
+            //Add the block to the point selected
 			sim.getWorld().toggleCell(click.getX(), click.getY());
 			repaint();			
 		}
@@ -258,7 +256,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 			} 
 			catch (InterruptedException e) 
 			{
-				System.out.println("Interrupted Exception");
+				RobotSimulator.println("Interrupted Exception");
 			}
 			
             beforeTime = System.currentTimeMillis();
@@ -274,6 +272,7 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
 	public void mouseReleased(MouseEvent arg0) { }
 
 	//Creates a standard scrollable stage
+    //Use this any time you need to add a stage somewhere
 	public static JPanel createStagePanel(int mazeWidth, int mazeHeight, int fps, Simulator sim, boolean editable)
 	{
 		JPanel stagePanel = new JPanel();

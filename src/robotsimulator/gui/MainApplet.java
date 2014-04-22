@@ -1,29 +1,27 @@
 package robotsimulator.gui;
 
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import robotsimulator.MainEntry;
+import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
 import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
 
-//This needs to duplicate the functionality of GUI
+/*
+ * Main container class. Holds simulator panel and mazebuilder panel in tabbed panes.
+ * Handles keybinds for the robot, and switching between tabs. 
+*/
 public class MainApplet extends JApplet implements ChangeListener {
 
 	public static MainApplet m_instance;
@@ -35,10 +33,9 @@ public class MainApplet extends JApplet implements ChangeListener {
 	
 	//Structural variables
 	private JTabbedPane tabPane;
-	
 	private Simulator sim;
 	public SimulatorPanel simPanel;
-	private MazeBuilderPanel mazePanel;
+	public MazeBuilderPanel mazePanel;
 	
 	//IO variables
 	public File codeFile;
@@ -46,9 +43,11 @@ public class MainApplet extends JApplet implements ChangeListener {
 	public File mapFile;
 	
 	//If true, this is a student build, and we should disable the maze builder, arrow keys, etc.
-	private static final boolean studentBuild = false;
+	public static final boolean studentBuild = false;
+    
+    //Robot image
+	public static ImageIcon robotSprite;
 		
-	//This needs to be the main entry point into the program
 	public void init()
 	{
 		//Create a static reference to the applet if none exists
@@ -56,6 +55,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 			m_instance = this;
 		
 		sim = new Simulator(this);
+        
 		if (!studentBuild)
 			setKeyBindings();
 			
@@ -71,7 +71,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		}
 		catch (Exception e)
 		{
-			System.err.println("couldn't construct the GUI");
+			System.err.println("[ERROR]: Couldn't construct the GUI.");
 			e.printStackTrace();
 		}
 		
@@ -82,16 +82,10 @@ public class MainApplet extends JApplet implements ChangeListener {
 	
 	public static void loadRobotSprite(String filename, ClassLoader cl)
 	{
-		//Load some resources
-		ImageIcon img = null;
-		
+		//Load the sprite from the resources folder in the jar
 		try
 		{
-
-			img = new ImageIcon(cl.getResource("Resources/" + filename));
-			//img = ImageIO.read(new File(cl.getResource("Resources/" + filename).toString()));
-			//img = ImageIO.read(new File(path));
-			MainEntry.robotSprite = img;
+			robotSprite = new ImageIcon(cl.getResource("Resources/" + filename));
 		}
 		catch (Exception e)
 		{
@@ -101,24 +95,24 @@ public class MainApplet extends JApplet implements ChangeListener {
 	
 	private void buildGUI()
 	{
-		//setSize(new Dimension(800, 600));
 		setSize(new Dimension(width, height));
 		
 		tabPane = new JTabbedPane();
 		tabPane.setSize(width, height);
-		//Remove the keyboard shortcuts-- 
-		//Want to control robot with arrow keys, not switch tabs
+        
+		//Remove the default keyboard shortcuts for tabs-- conflicts with robot manual control
 		tabPane.setActionMap(null);
 		tabPane.addChangeListener(this);
 		
 		simPanel = new SimulatorPanel(width, height, fps, sim, this);
-		tabPane.addTab("Simulator", simPanel);
+        tabPane.addTab("Simulator", simPanel);
 		
 		mazePanel = new MazeBuilderPanel(fps, sim, this);
+        //Add in the maze builder tab if we're not using a student build
 		if (!studentBuild)
 			tabPane.addTab("Maze Builder", mazePanel);
 				
-		add (tabPane);
+		add(tabPane);
 	}
 	
 	//Returns focus back to the GUI and re-enables keyboard controls for the robot
@@ -133,6 +127,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 		return fps;
 	}
 
+    //Defines the keyboard shortcuts for driving the robot. 
 	private void setKeyBindings()
 	{
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0, false), "debug");
@@ -150,23 +145,19 @@ public class MainApplet extends JApplet implements ChangeListener {
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				System.out.println("[DEBUG]");
+                //Debug command-- change this for easy on-demand console printing, debugging, etc.
+				RobotSimulator.println("[DEBUG]");
 				Robot b = sim.getRobot();
 				for (SonarSensor s : b.getSonarSensors())
 				{
-					System.out.println("[" + s.getLabel() + "]: " + s.getConeSensorValue());
+					RobotSimulator.println("[" + s.getLabel() + "]: " + s.getConeSensorValue());
 				}
-				/*
-				System.out.println("[DEBUG2]");
-				for (SonarSensor s2 : simPanel.sonars)
-				{
-					System.out.println("[" + s2.getLabel() + "]: " + s2.getConeSensorValue());
-				}
-				*/
-				debug_refreshSensorLabels();
 			}
 		});
-		
+        
+        /*
+         * The following all allow manual driving of the robot
+         */
 		getRootPane().getActionMap().put("up", new AbstractAction() {
 	    	public void actionPerformed(ActionEvent e) 
 	    	{
@@ -207,13 +198,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 	    	}
 	    });
 	}
-	
-	private void debug_refreshSensorLabels()
-	{
-		System.out.println("[RefreshSensors]");
-		//simPanel;
-	}
-	
+		
 	//Returns true if the simulator tab is currently showing
 	private boolean inSimulatorView()
 	{
@@ -234,25 +219,19 @@ public class MainApplet extends JApplet implements ChangeListener {
 		
 	@Override
 	//Fires whenever a tab is changed. Used to save/close/stop execution when changing focus
-	//TODO: Reinitialize robot sensors when switching back from builder view
+	//TODO: Reinitialize robot sensor display when switching back from builder view
 	public void stateChanged(ChangeEvent e) 
 	{
-		System.out.println("Changed tab.");
-		
 		if (inSimulatorView())
 		{
-			System.out.println("In sim view");
 			simPanel.resumeSensorThread();
 		}
 		if (inMazeView())
 		{
-			System.out.println("In maze view");
 			//Stop execution
 			simPanel.stopExecution();
 			simPanel.stopSensorThread();
 			//sim.stop();
 		}
-	}
-
-	
+	}	
 }

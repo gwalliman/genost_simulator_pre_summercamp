@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
 import robotsimulator.worldobject.Block;
 
@@ -17,16 +18,16 @@ public class Robot implements Runnable
 	private boolean driveDist, rotateDist = false;
 	private int distTotal, distGoal, angTotal, angGoal = 0;
 	
-	//Forward = f, Backwards = b
-	//Left = l, Right = r
-	//Strafe Left = h, Strafe Right = i (Hook and slIce)
-	//Stop = s
-	//Off = o
+	//Forward = f, Backwards = b                            -
+	//Left = l, Right = r                                   -
+	//Strafe Left = h, Strafe Right = i (Hook and slIce)    -Unused, I think
+	//Stop = s                                              -Pause between commands / threads
+	//Off = o                                               -Wait until execution begins (perma-stop)
 	private char status = 'o';
 	
-	//What factor to divide the wait time between instructions by. Set to 1 for default (no modifier)
+	//What factor to divide the wait time between instructions by. 
+    //Set to 1 for default (no modifier). 2 = twice as fast, etc 
 	public static int speedModifier = 1;
-	
 	
 	private ArrayList<SonarSensor> sonars = new ArrayList<SonarSensor>();
 	
@@ -60,7 +61,6 @@ public class Robot implements Runnable
 	public void addSonar(Simulator s, String n, double x, double y, int l, int a, int fov)
 	{
 		sonars.add(new SonarSensor(s, n, x + b.getCenterX(), y + b.getCenterY(), l, a, fov));
-		//System.out.println(b.getDegAngle());
 	}
 	
 	public SonarSensor getSonarSensor(int num) 
@@ -175,8 +175,6 @@ public class Robot implements Runnable
 			status = d;
 			robotThread = new Thread(this);
 			robotThread.start();
-			
-			logThread(robotThread);
 		}
 	}
 	
@@ -199,8 +197,6 @@ public class Robot implements Runnable
 
 			robotThread = new Thread(this);
 			robotThread.start();
-			
-			logThread(robotThread);
 		}
 	}
 	
@@ -211,8 +207,6 @@ public class Robot implements Runnable
 			status = d;
 			robotThread = new Thread(this);
 			robotThread.start();
-			
-			logThread(robotThread);
 		}
 	}
 	
@@ -234,12 +228,10 @@ public class Robot implements Runnable
 			angTotal = 0;
 			robotThread = new Thread(this);
 			robotThread.start();
-			
-			logThread(robotThread);
 		}
 	}
 	
-	//Puts the robot on 'stopped' state and allows execution to being
+	//Puts the robot on 'stopped' state and allows execution to begin
 	public void start()
 	{
 		status = 's';
@@ -253,6 +245,8 @@ public class Robot implements Runnable
 		robotThread = null;
 	}
 
+    //Main method of the robot-- determines what to do based on status code
+    @Override
 	public void run() 
 	{
 		Thread me = Thread.currentThread();
@@ -377,16 +371,13 @@ public class Robot implements Runnable
 	        
 	        if(sleep <= 0) sleep = 1;
 	        
-	        //Sleep modifier
-	        //sleep = sleep / speedModifier;
-
 	        try 
 			{
 				Thread.sleep(sleep);
 			} 
 			catch (InterruptedException e) 
 			{
-				System.out.println("InterruptedException");		//Not yet thrown... probably not a solution
+				RobotSimulator.println("InterruptedException");
 			}
 			
             beforeTime = System.currentTimeMillis();
@@ -430,21 +421,15 @@ public class Robot implements Runnable
 	}
 	
 	//Debug function: prints out the names of each sensor it owns
+    //Use this to verify sensors exist and check values
 	public void printSensors()
 	{
 		System.out.println("[Sensors]");
 		int n = 0;
 		for (SonarSensor s : sonars)
 		{
-			System.out.println("Sensor " + n + ": " + s.getLabel());
+			RobotSimulator.println("Sensor " + n + ": " + s.getLabel());
 			n++;
 		}	
-	}
-	
-	//Debug function: logs thread name to the console
-	private void logThread(Thread t)
-	{
-		//System.out.println("[logThread] ID: " + t.getId() + ", Name: " + t.getName());
-	}
-	
+	}	
 }

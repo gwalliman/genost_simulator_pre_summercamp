@@ -18,21 +18,21 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import robotinterpreter.RobotListener;
-import robotsimulator.gui.GUI;
 import robotsimulator.gui.MainApplet;
-import robotsimulator.gui.SimulatorPanel;
 import robotsimulator.robot.Robot;
 import robotsimulator.world.World;
 import robotsimulator.worldobject.Block;
 
+/*
+ * Listens to the robot interpreter and runs the simulation
+ */
 public class Simulator implements RobotListener 
 {
-	private GUI gui;
 	private MainApplet mainApp;
 	
 	private World world;
 	private Robot robot;
-	//@SuppressWarnings("unused")
+    
 	private static String newline = "\n";
 	
 	public int guiWidth = 520 * 2;
@@ -41,14 +41,10 @@ public class Simulator implements RobotListener
 	public String themeid = "default";
 	
 	public boolean running = false;
-	
-	
+    
 	public Simulator(MainApplet m)
 	{
-		/*
-		 * SETTING ROBOT PARAMS
-		 */
-		
+        //Defining robot parameters
 		int centerX = 100;
 		int centerY = 100;
 		int angle = 0;
@@ -65,22 +61,11 @@ public class Simulator implements RobotListener
 		robot.addSonar(this, "Rear", robot.getCenterRearX(), robot.getCenterRearY(), sonarLen, 180, fov);
 		robot.addSonar(this, "Left", robot.getCenterLeftX(), robot.getCenterLeftY(), sonarLen, 270, fov);
 			
-		/*
-		 * SETTING BASIC WORLD PARAMS
-		 */
-			
+        //Defining world parameters
 		world = new World(guiWidth, guiHeight, this);
 		world.setTheme(themeid);
-		
-		/*
-		 * SETTING WORLD CELL TYPES
-		 */
-	
-		//gui = new GUI(guiWidth, guiHeight, guiFPS, this);
+        
 		mainApp = m;
-		
-		//running = true?
-
 	}
 	
 	public Robot getRobot()
@@ -93,17 +78,17 @@ public class Simulator implements RobotListener
 		return world;
 	}
 	
-	public GUI getGUI() 
-	{
-		return gui;
-	}
-	
 	public void addBlock(int w, int h, int x, int y, int a)
 	{
 		Block b = new Block(w, h, x, y, a, this);
 		world.addBlock(b);
 	}
 
+    /*
+     * Robot execution commands
+     * Each of these is implemented from RobotListener
+     * Modify these methods if you want to change how the robot responds to code commands
+     */
 	public void driveForward() 
 	{
 		robot.stop();
@@ -132,9 +117,7 @@ public class Simulator implements RobotListener
 	{
 		running = false;
 		robot.stop();
-		robot.abort();
-		//Need to tell interpreter to stop as well
-		
+		robot.abort();		
 	}
 
 	public int getSonarData(int num) 
@@ -222,12 +205,11 @@ public class Simulator implements RobotListener
 		System.out.println(e);		
 	}
 	
-	//This does not change the theme-- only the loaded maze
+    //Loads in a maze from the given file
 	public void importStage(File f)
 	{
 		try
 		{
-			
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			
 			DocumentBuilder builder = factory.newDocumentBuilder();
@@ -238,16 +220,19 @@ public class Simulator implements RobotListener
 			XPathFactory xPathFactory = XPathFactory.newInstance();
 		    XPath xpath = xPathFactory.newXPath();
 		    
+            //Collect attributes for the maze
 	    	Node guiWidthNode = root.getAttributes().getNamedItem("guiwidth");
 	    	Node guiHeightNode = root.getAttributes().getNamedItem("guiheight");
 	    	Node themeIDNode = root.getAttributes().getNamedItem("theme");
 	    	themeid = themeIDNode.getNodeValue();
 		    
+            //Collect robot attributes
 		    Node robotNode = ((NodeList)xpath.compile("robot").evaluate(root, XPathConstants.NODESET)).item(0);
 		    Node robotXNode = (((NodeList)xpath.compile("x").evaluate(robotNode, XPathConstants.NODESET))).item(0);
 		    Node robotYNode = (((NodeList)xpath.compile("y").evaluate(robotNode, XPathConstants.NODESET))).item(0);
 		    Node robotANode = (((NodeList)xpath.compile("a").evaluate(robotNode, XPathConstants.NODESET))).item(0);
 	
+            //Redefine the robot
 			robot = new Robot(
 					(int)Math.round(Double.parseDouble(robotXNode.getTextContent())), 
 					(int)Math.round(Double.parseDouble(robotYNode.getTextContent())), 
@@ -255,49 +240,7 @@ public class Simulator implements RobotListener
 					this
 				);
 			
-				
-			//This is now part of the loadout import
-		    /*NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(robotNode, XPathConstants.NODESET));
-
-		    for(int i = 0; i < sonarNodes.getLength(); i++)
-		    {
-			    Node sonarTypeNode = (((NodeList)xpath.compile("type").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node sonarNameNode = (((NodeList)xpath.compile("name").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node sonarXNode = (((NodeList)xpath.compile("x").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node sonarYNode = (((NodeList)xpath.compile("y").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node sonarAngleNode = (((NodeList)xpath.compile("angle").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node sonarLengthNode = (((NodeList)xpath.compile("length").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-			    
-			    char sonarType = sonarTypeNode.getTextContent().charAt(0);
-			    if(sonarType == 'l')
-			    {
-					robot.addSonar(
-							this, 
-							sonarNameNode.getTextContent(), 
-							Double.parseDouble(sonarXNode.getTextContent()),
-							Double.parseDouble(sonarYNode.getTextContent()),
-							Integer.parseInt(sonarLengthNode.getTextContent()),
-							Integer.parseInt(sonarAngleNode.getTextContent())
-						);
-
-			    }
-			    else if(sonarType == 'c')
-			    {
-				    Node sonarFOVNode = (((NodeList)xpath.compile("fov").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
-				    robot.addSonar(
-							this, 
-							sonarNameNode.getTextContent(), 
-							Double.parseDouble(sonarXNode.getTextContent()),
-							Double.parseDouble(sonarYNode.getTextContent()),
-							Integer.parseInt(sonarLengthNode.getTextContent()),
-							Integer.parseInt(sonarAngleNode.getTextContent()),
-							Integer.parseInt(sonarFOVNode.getTextContent())
-						);
-			    }
-
-		    }
-		    */
-		    
+			//Collect world attributes
 		    Node worldNode = ((NodeList)xpath.compile("world").evaluate(root, XPathConstants.NODESET)).item(0);
 		    Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
 		    Node worldGridHeighthNode = (((NodeList)xpath.compile("gridheight").evaluate(worldNode, XPathConstants.NODESET))).item(0);
@@ -307,6 +250,7 @@ public class Simulator implements RobotListener
 		    world.setGridHeight(Integer.parseInt(worldGridHeighthNode.getTextContent()));
 			world.setTheme(themeIDNode.getNodeValue());	
 			
+            //Add objects to the world
 			NodeList cellNodes = ((NodeList)xpath.compile("cells/cell").evaluate(worldNode, XPathConstants.NODESET));
 			for(int i = 0; i < cellNodes.getLength(); i++)
 			{
@@ -320,20 +264,14 @@ public class Simulator implements RobotListener
 			    		cellTypeNode.getTextContent()
 			    	);
 			}
-			
-			//Update the simPanel stage -- might not even be needed. Should auto-update
-			//mainApp.simPanel.updateStage(world.getWidth(), world.getHeight());
-			
-			
-			//gui.dispose();
-			//gui = new GUI(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), guiFPS, this);
-		}
+        }
 		catch(Exception e)
 		{
 			e.printStackTrace();
 		}
 	}
 	
+    //Saves the current stage to the provided file
 	public void exportStage(File f) 
 	{
 		try 
@@ -393,7 +331,6 @@ public class Simulator implements RobotListener
 		    
 		    NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(root, XPathConstants.NODESET));
 
-		    System.out.println("sonar node length: " + sonarNodes.getLength());
 		    for(int i = 0; i < sonarNodes.getLength(); i++)
 		    {
 			    Node sonarTypeNode = (((NodeList)xpath.compile("type").evaluate(sonarNodes.item(i), XPathConstants.NODESET))).item(0);
@@ -430,15 +367,10 @@ public class Simulator implements RobotListener
 						);
 			    }
 		    }
-
-		    
-		   robot.printSensors();
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		
 	}
-	
 }

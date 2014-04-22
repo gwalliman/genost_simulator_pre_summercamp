@@ -74,11 +74,9 @@ public class World
 		boundary = new Rectangle2D.Double(0, 0, width, height);
 		sim.guiWidth = width;
 		sim.guiHeight = height;
-		
-		
 	}
 	
-	//Temporary, slow, bad practice array resize. newW is in grid squares.
+	//Slow, bad practice array resize. newW is in grid squares.
 	//After running it... might not be so slow and bad. Just don't make 999x999 mazes!
 	private void resizeArrays(int newW, int newH)
 	{
@@ -141,11 +139,9 @@ public class World
 		{
 			Block deadBlock = deadBlocks.get(i);
 			removeBlock(deadBlock);
-			
 		}
 	}
 	
-
 	public void setTheme(String themeid) 
 	{
 		try
@@ -154,15 +150,11 @@ public class World
 	
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			
-			//Attempting to read themes from the jar
-			ClassLoader cl = this.getClass().getClassLoader();
-			//String themeFile = cl.getResource("Resources/Themes/" + themeid + "/theme.xml").toString();
-			
+            //Read themes from the jar file
+            ClassLoader cl = this.getClass().getClassLoader();
+		
 			Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
-			//Document document = builder.parse(themeFile);
-			//Document document = builder.parse(Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/theme.xml").toString());
-			//Document document = builder.parse(Simulator.class.getResource("/Resources/Themes/" + themeid + "/theme.xml").toString());
-			Node root = document.getDocumentElement();
+        	Node root = document.getDocumentElement();
 			
 			XPathFactory xPathFactory = XPathFactory.newInstance();
 		    XPath xpath = xPathFactory.newXPath();
@@ -198,14 +190,11 @@ public class World
 					);
 			    setCellTheme(
 			    		idNode.getNodeValue(), 
-			    		//Simulator.class.getResource("/robotsimulator/themes/" + themeid + "/" + imageNode.getTextContent())
 			    		cl.getResource("Resources/Themes/" + themeid + "/" + imageNode.getTextContent())
 			    	);
 		    }
-		    
 		    //Set the robot sprite too
 		    MainApplet.loadRobotSprite("Themes/" + themeid + "/robot.png", cl);
-		    
 		}
 		catch(Exception e)
 		{

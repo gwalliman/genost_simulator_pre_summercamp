@@ -15,6 +15,10 @@ import robotsimulator.Simulator;
 import robotsimulator.world.Point;
 import robotsimulator.world.World;
 
+/*
+ * Represents one sonar sensor attached to the robot
+ * Note that the update speed is tied to the robot update speed (speedModifier)
+ */
 public class SonarSensor implements Runnable
 {
 	private Simulator sim;
@@ -402,21 +406,12 @@ public class SonarSensor implements Runnable
 	        {
 	        	t.setText(Double.toString(Double.parseDouble(new DecimalFormat("#.##").format(getSensorValue()))));
 	        }
-	        if(label == "Front")
-	        {
-	        	//System.out.println("X0: " + x0);
-	           	//System.out.println("Y0: " + y0);
-	        }
 	        
 			timeDiff = System.currentTimeMillis() - beforeTime;
 			sleep = (delay / Robot.speedModifier) - timeDiff;
 	         
 	        if(sleep <= 0) sleep = 1;
 
-	        //Sleep modifier
-	        //sleep = sleep / Robot.speedModifier;
-	        
-			
 			try 
 			{
 				Thread.sleep(sleep);

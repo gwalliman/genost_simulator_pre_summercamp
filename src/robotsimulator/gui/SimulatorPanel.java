@@ -5,19 +5,16 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -28,12 +25,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import robotsimulator.RobotSimulator;
 import robotinterpreter.RobotInterpreter;
-import robotsimulator.MainEntry;
 import robotsimulator.Simulator;
 import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
@@ -57,8 +53,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JButton resetBtn;				//Button to reset the maze, robot position, and stop execution.
 	private JButton webloadCodeBtn;			//Button to load code from the web service
 	
-	private JButton speedBtn;				//Button to toggle speeds		TODO: smooth this out, ensure no bugs
-	private JLabel speedLbl;
+	private JButton speedBtn;				//Button to toggle speeds. Can later extend to a slider
+	private JLabel speedLbl;                //Label to display current speed
 	
 	//Right Panel
 	private JPanel rightPanel;
@@ -88,34 +84,26 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private boolean readyToRun = false;
 	
 	private JPanel stagePanel;
-	private JScrollPane stageScroll;
-		
+			
 	//File IO
-	private JFileChooser fileChooser;
-	private FileNameExtensionFilter txtFilter;
-	private FileNameExtensionFilter xmlFilter;
+	private JFileChooser fileChooser;           //Call this to let users load files
+	private FileNameExtensionFilter txtFilter;  //Use this to restrict to text files (code)
+	private FileNameExtensionFilter xmlFilter;  //Use this to restrict to xml files (loadouts & mazes)
 
-	DecimalFormat df = new DecimalFormat("#.0");
+	DecimalFormat df = new DecimalFormat("#.0");    //Used by sensor output to make display not horrible
 	
-	//Temp-- testing speed controls
 	private boolean highSpeed = false;
 	
 	public SimulatorPanel(int w, int h, int f, Simulator s, MainApplet m)
-	{
-		
+	{	
 		width = w;
 		height = h;
 		fps = f;
 		
 		sim = s;
 		main = m;
-		//sonars = sim.getRobot().getSonarSensors();
-		
-		
-		
-		fileChooser = new JFileChooser(MainEntry.resourcePath);
-		
-		
+        
+		fileChooser = new JFileChooser("");
 		txtFilter = new FileNameExtensionFilter("Text Files ('.txt')", "txt");
 		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
 		
@@ -132,12 +120,10 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//Controls size of right side-- status, output, sensor data, etc. 1/4 of panel
 		GridBagConstraints rightSideConstraints = new GridBagConstraints();
 		rightSideConstraints.gridx = GridBagConstraints.RELATIVE;
-		//rightSideConstraints.gridx = 1;
-		rightSideConstraints.gridy = 0;
+        rightSideConstraints.gridy = 0;
 		rightSideConstraints.gridwidth = 1;
 		rightSideConstraints.anchor = GridBagConstraints.FIRST_LINE_END;
 		rightSideConstraints.insets = new Insets(4, 4, 4, 4);
-		
 		
 		leftPanel = createLeftPanel();
 		simPane.add(leftPanel, leftSideConstraints);
@@ -159,11 +145,12 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//Load loadout config
 		//Load the initial config from the jar
 		ClassLoader cl = this.getClass().getClassLoader();
-		//main.configFile = new File(cl.getResource("Resources/Loadouts/DefaultLoadout.xml").toString());
-		InputStream is = null;
+
+        InputStream is = null;
 		FileOutputStream os = null;
 		File newConfig = new File("tempConfig");
 		
+        //Gross procedure to serialize the resource file into a File object
 		try
 		{
 			is = cl.getResourceAsStream("Resources/Loadouts/DefaultLoadout.xml");
@@ -205,14 +192,15 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			}
 		}
 		
-
-
 		main.configFile = newConfig;
 		loadoutNameLbl.setText("Current Config: " + "DefaultLoadout.xml");
 		updateRunningStatus();
 		
 		//Update the robot's sensor and loadout configuration
 		sim.importLoadout(main.configFile);
+        
+        //Load the initial code from the web service
+        loadCodeFromWeb();
 	}
 	
 	//Builds the left side of the window-- input buttons, stage, etc.
@@ -235,10 +223,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//Create stage and add it with these constraints
 		stagePanel = Stage.createStagePanel(stageWidth, stageHeight, fps, sim, false);
 		leftPanel.add(stagePanel, bottomConstraints);
-		
-		//For now, create a text area to fill in the space
-		//JTextArea tempStage = new JTextArea(27, 50);
-		//leftPanel.add(tempStage, bottomConstraints);
 		
 		return leftPanel;
 	}
@@ -277,23 +261,18 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		runBtn = new JButton("Execute!");
 		runBtn.addActionListener(this);
 		runBtn.setEnabled(false);
-		//bGridPanel.add(runBtn);
 		commandPanel.add(runBtn);
 		
 		stopBtn = new JButton("Stop");
 		stopBtn.addActionListener(this);
 		stopBtn.setEnabled(false);
-		//bGridPanel.add(stopBtn);
 		commandPanel.add(stopBtn);
 		
 		resetBtn = new JButton("Reset");
 		resetBtn.addActionListener(this);
-		//resetBtn.setEnabled(false);
-		//bGridPanel.add(resetBtn);
 		commandPanel.add(resetBtn);
 				
 		bGridPanel.add(commandPanel);
-		
 		return bGridPanel;
 	}
 	
@@ -309,7 +288,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		c.gridheight = 1;
 		//Add 'robot status' label
 		JLabel statusLbl = new JLabel("Robot Status");
-		//statusLbl.setHorizontalAlignment(SwingConstants.LEFT);
 		rightPanel.add(statusLbl, c);
 		
 		c.gridheight = 1;
@@ -319,7 +297,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		c.gridheight = 2;
 		c.insets = new Insets(4, 4, 4, 4);
-		
 		
 		//add output textarea
 		outputTextArea = new JTextArea(12, 19);
@@ -335,17 +312,16 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		reloadCodeBtn = new JButton("Reload Code from Text");
 		reloadCodeBtn.addActionListener(this);		
-		//rightPanel.add(reloadCodeBtn, c);
 		actionPanel.add(reloadCodeBtn);
 		
 		webloadCodeBtn = new JButton("Load Code from Web");
 		webloadCodeBtn.addActionListener(this);
-		//rightPanel.add(webloadCodeBtn, c);
 		actionPanel.add(webloadCodeBtn);
 		
 		rightPanel.add(actionPanel, c);
 
 		//Experimental speed toggle!
+        //Can later replace this with a slider
 		c.gridheight = 1;
 		c.insets = new Insets(4, 4, 4, 4);
 		JPanel speedPanel = new JPanel();
@@ -359,8 +335,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		rightPanel.add(speedPanel, c);
 
-		
-		
 		c.gridheight = 1;
 		c.insets = new Insets(1, 1, 1, 1);
 		//add 'sensor data' label
@@ -372,15 +346,13 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//add sensor data panel 
 		sensorPanel = createSensorPanel();
 		rightPanel.add(sensorPanel, c);
-				
-		
+					
 		return rightPanel;
-		
 	}
 	
 	private JPanel createSensorPanel()
 	{
-		System.out.println("Creating Sensor Panel...");
+		RobotSimulator.println("Creating Sensor Panel...");
 		JPanel rtn = new JPanel(new GridLayout(2,1));
 		rtn.setPreferredSize(new Dimension(200, 400));
 
@@ -397,25 +369,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	{
 		return sim.getRobot().getSonarSensors();
 	}
-	/*
-	Use the static method in Stage instead!
-	private JPanel createStagePanel()
-	{
-		stagePanel = new JPanel();
-		stagePanel.setSize(520, 400);
-		simStage = new Stage(stageWidth * 2, stageHeight * 2, fps, sim);
-		//simStage.allowEditing();
-
-		stageScroll = new JScrollPane(simStage);
-		stageScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		stageScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-		stageScroll.setSize(stageWidth, stageHeight);
-		
-		stagePanel.add(stageScroll);
-		//rtn.add(simStage);
-		return stagePanel;		
-	}
-	*/
 	
 	//Updates the runningLbl with what it's waiting on (code, maze, etc.) and its current status
 	private void updateRunningStatus()
@@ -455,7 +408,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			//Open a file chooser dialog to load in code.
 			//Restrict filechooser to the correct datatype
 			fileChooser.setFileFilter(txtFilter);
-			fileChooser.setCurrentDirectory(new File(MainEntry.codePath));
 			
 			int returnVal = fileChooser.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -473,7 +425,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		{
 			//Open a file chooser dialog to load in robot loadouts
 			fileChooser.setFileFilter(xmlFilter);
-			fileChooser.setCurrentDirectory(new File(MainEntry.loadoutPath));
 			
 			int returnVal = fileChooser.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -490,7 +441,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		{
 			//Open a file chooser dialog to load in maze layouts
 			fileChooser.setFileFilter(xmlFilter);
-			fileChooser.setCurrentDirectory(new File(MainEntry.mazePath));
 			
 			int returnVal = fileChooser.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -502,6 +452,10 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				//Update the maze here
 				sim.importStage(main.mapFile);
 				reinitializeSensors();
+                
+                //Also signal to mazebuilder to update its displays
+                if (!MainApplet.studentBuild)
+                    main.mazePanel.refreshMazeSettings();
 			}
 		}
 		else if (e.getSource() == runBtn)
@@ -521,7 +475,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	            	@Override
 	            	public Void doInBackground()
 	            	{
-	            		System.out.println("doInBackground: " + this.hashCode());
+	            		RobotSimulator.println("doInBackground: " + this.hashCode());
 	            		
 	            		r = new RobotInterpreter();
 	            		r.addRobotListener(sim);
@@ -538,9 +492,10 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 						return null;
 	            	}
 	            	
+                    @Override
 	            	public void done()
 	            	{
-	            		System.out.println("done: " + this.hashCode());
+	            		RobotSimulator.println("done: " + this.hashCode());
 	            		
 	        			runBtn.setEnabled(true);
 	        			stopBtn.setEnabled(false);
@@ -555,19 +510,17 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	        }
 			else
 			{
-				//Not ready to run!
-				
+				//Not ready to run!	
 			}
 		}
 		else if (e.getSource() == stopBtn)
 		{
 			//Stop execution, enable the runBtn, and disable ourselves
 			stopExecution();
-			//updateRunningStatus();
 		}
 		else if (e.getSource() == resetBtn)
 		{
-			//Stop execution, reload the maze
+			//Stop execution, and reload the maze
 			stopExecution();
 			
 			if (main.mapFile != null)
@@ -583,47 +536,13 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		}
 		else if (e.getSource() == webloadCodeBtn)
 		{
-			System.out.println("Webload test!");
 			//Loads the program from the web service
-			//Create a client to access the service from
-			try
-			{
-			
-				
-				
-				
-				//To load code in the program, pass the string representation of the code into this method
-				String webCode = "no code!";
-				loadCodefromText(webCode, "Loaded from Web*");
-			}
-			catch (Exception e1)
-			{
-				e1.printStackTrace();
-			}
-			
-			/*
-			//holy goddamn look at all the shit you have to do to call services in eclipse 
-			DynamicClientFactory dcf = DynamicClientFactory.newInstance();
-			Client client = dcf.createClient("http://venus.eas.asu.edu/WSRepository/eRobotic/DataService/Service.svc?wsdl");
-			System.out.println("Client created without issue");
-			
-			try 
-			{
-				Object[] a = client.invoke("GetCode");
-				System.out.println("[Invoked]");
-				System.out.println(a);
-				
-			} 
-			catch (Exception e1) 
-			{
-				e1.printStackTrace();
-			}*/
-			
-			
+            loadCodeFromWeb();
 		}
 		else if (e.getSource() == speedBtn)
 		{
 			//Toggle between high and low speeds for robot
+            //Speed is a multiplier-- e.g. sM=2 is twice as fast as sM=1
 			if (highSpeed)
 			{
 				highSpeed = false;
@@ -639,6 +558,12 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		}
 	}
 	
+    //Calls the web service and loads in the code file from the web
+    public void loadCodeFromWeb()
+    {
+		loadCodefromText(getCode(), "Loaded from Web*");
+    }
+    
 	public void stopExecution()
 	{
 		if(executor != null)
@@ -653,16 +578,13 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		executor = null;
 		
 		updateRunningStatus();
-		//runBtn.setEnabled(true);
-		//stopBtn.setEnabled(false);
-		//runningLbl.setText("Stopped.");
-		
 	}
 	
 	public void loadCodefromText(String code, String newCodeName)
 	{
-		//Convert the text in the textarea to a file and set the codeFile in main to be this file
-		BufferedWriter w = null;
+		
+        //Convert 'code' to a file and load the code in from there
+        BufferedWriter w = null;
 		try
 		{
 		File textCode = new File("ModifiedCode");
@@ -672,7 +594,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		main.codeFile = textCode;
 		codeNameLbl.setText("Current Program: " + newCodeName);
-		
 		
 		runBtn.setEnabled(true);
 		updateRunningStatus();
@@ -698,6 +619,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 
 	}
 	
+    //Loads the code into the program from the codeFile in main
 	public void loadCodeFile()
     {
 		try 
@@ -734,7 +656,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	}
 	
 	//Hacky method to reinitialize sensors and have them work again after the maze has changed
-	private void reinitializeSensors()
+	public void reinitializeSensors()
 	{
 		if (main.configFile != null)
 			sim.importLoadout(main.configFile);	
@@ -753,7 +675,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		resumeSensorThread();
 	}
 
-	
+    //Updates the sensor output text
 	private void updateSensors()
 	{
 		try
@@ -772,8 +694,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		}
 		catch (ConcurrentModificationException e)
 		{
-			System.out.println("CONCMOD");
-			//e.printStackTrace();
+            e.printStackTrace();
 		}
 	}
 	
@@ -787,18 +708,18 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		sThread.running = false;
 	}
 	
+    //The sensor update happens on a timer in this thread
 	private class sensorThread implements Runnable
 	{
 		SimulatorPanel s;
 		long sleepInterval = 100L;
-		//int ticks = 0;
 		boolean running = true;
 		
+        @Override
 		public void run() 
 		{
 			while (running)
-			{
-				//System.out.println("[sensorThread]: " + ticks++);
+            {
 				//call 'updateSensors', then sleep
 				updateSensors();
 				try 
@@ -812,6 +733,22 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			}
 		}
 	}
+
+    //Autogenerated by Netbeans to call the code service
+    private static String getCode() 
+    {
+        try
+        {
+            org.tempuri.Service service = new org.tempuri.Service();            //* Autogen'd
+            org.tempuri.IService port = service.getBasicHttpBindingIService();  //* Autogen'd
+            return port.getCode();                                              //* Autogen'd
+        }
+        catch (Exception e)
+        {
+            RobotSimulator.println("Couldn't load code from web. ");
+            return "Couldn't load code from web. ";
+        }
+    }
 	
 }
 

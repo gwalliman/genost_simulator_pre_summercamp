@@ -15,7 +15,7 @@ Enables students to run their code developed in Galvatron and test it with a sim
     <resources>
         <j2se java-vm-args="-Djava.security.policy=applet.policy" version="1.7+"/>
         <jar href="RobotSimNB.jar" main="true"/>
-    <jar href="lib/robotinterpreter_1.3.jar"/>
+    <extension href="jnlpcomponent1.jnlp"/>
 </resources>
     <application-desc main-class="robotsimulator.RobotSimulator">
     </application-desc>

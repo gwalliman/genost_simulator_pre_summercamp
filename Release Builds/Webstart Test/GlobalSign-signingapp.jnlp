@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jnlp codebase="https://www.globalsign.com/code-signing-tool/" href="launch.jnlp" spec="1.0+">
+    <information>
+        <title>GlobalSign Code Signing Tool</title>
+        <vendor>GlobalSign</vendor>
+        <homepage href=""/>
+        <description>GlobalSign Code Signing Tool</description>
+        <description kind="short">GlobalSign Code Signing Tool</description>
+
+    </information>
+<update check="always"/>
+<security>
+<all-permissions/>
+</security>
+    <resources>
+<j2se version="1.6+"/>
+<jar href="codesigner.jar" main="true"/>
+
+
+    </resources>
+    <application-desc main-class="CodeSignerUI">
+
+    </application-desc>
+</jnlp>

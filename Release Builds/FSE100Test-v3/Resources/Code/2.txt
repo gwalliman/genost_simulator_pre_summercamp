@@ -1,0 +1,7 @@
+{
+	loopfor 100
+	{
+		method print(string "Printing");
+		method print(method intToString(method getSonars(int 1)));
+	}
+}

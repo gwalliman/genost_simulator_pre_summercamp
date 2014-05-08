@@ -1,0 +1,9 @@
+{
+	loopfor -1
+	{
+		method drive  ( string "f" );
+		waituntil ( [ method getSonars  ( int 1 ) < int 20 ] );
+	}
+
+
+}

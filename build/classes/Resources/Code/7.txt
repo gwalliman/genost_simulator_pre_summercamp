@@ -1,0 +1,7 @@
+{
+	loopfor -1
+	{
+		method driveDistance(int 100);
+		method turnAngle(int 90);
+	}
+}

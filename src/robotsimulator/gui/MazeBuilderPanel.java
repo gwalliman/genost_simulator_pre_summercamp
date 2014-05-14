@@ -9,8 +9,10 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
-
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -25,7 +27,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import robotsimulator.Simulator;
 import robotsimulator.world.CellTheme;
 import robotsimulator.world.CellType;
@@ -307,7 +308,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	//Extended from the SimPanel method.
 	public void loadMaze()
 	{
-		fileChooser.setFileFilter(xmlFilter);
+		/*fileChooser.setFileFilter(xmlFilter);
 		
 		int returnVal = fileChooser.showOpenDialog(this);
 		if (returnVal == JFileChooser.APPROVE_OPTION)
@@ -316,7 +317,22 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			//Update the maze here
 			sim.importStage(loadedMaze);
 			refreshMazeSettings();
-		}
+		}*/
+                String uri = "http://localhost:58884/genost_services/Service.svc/listMazes";
+                try
+                {
+                    URL url = new URL(uri);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept","application/xml");
+                    InputStream xml = conn.getInputStream();
+                    String xmlString = xml.toString();
+                    System.out.println(xmlString);
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
 	}
     
     //Refreshes spinner values, theme palettes, etc. based on the current maze

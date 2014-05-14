@@ -1,6 +1,7 @@
 package robotsimulator;
 
 import java.io.File;
+import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,6 +17,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import robotinterpreter.RobotListener;
 import robotsimulator.gui.MainApplet;
@@ -206,14 +208,14 @@ public class Simulator implements RobotListener
 	}
 	
     //Loads in a maze from the given file
-	public void importStage(File f)
+	public void importStage(String x)
 	{
 		try
 		{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(f);
+			Document document = builder.parse(new InputSource(new StringReader(x)));
 			
 			Node root = document.getDocumentElement();
 			

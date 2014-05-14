@@ -15,11 +15,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,12 +31,21 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import robotsimulator.RobotSimulator;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import javax.xml.parsers.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
 import robotinterpreter.RobotInterpreter;
+import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
 import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
+
 
 
 //Used to organize simulator components. Held by the main applet class in a JTabbedPane
@@ -45,8 +58,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	private JLabel codeNameLbl;				//Label to display loaded code file name
 	private JButton openLoadoutBtn;			//Button for loading robot loadouts from a file
 	private JLabel loadoutNameLbl;			//Label to display loaded loadout file name
-	private JButton openMazeBtn;			//Button for loading maze from a file
-	private JLabel mazeNameLbl;				//Label to display loaded maze file name
+	//private JButton openMazeBtn;			//Button for loading maze from a file
+	private JComboBox openMazeList;
+        private JLabel mazeNameLbl;				//Label to display loaded maze file name
 	private JButton runBtn;					//Button to begin executing the simulation
 	private JButton stopBtn;				//Button to stop executing the simulation
 	private JButton reloadCodeBtn;			//Button to reload the code from the output area
@@ -241,9 +255,13 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		codeNameLbl = new JLabel("Current Program: ");
 		bGridPanel.add(codeNameLbl);
 			
-		openMazeBtn = new JButton("Load Maze");
+		/*openMazeBtn = new JButton("Load Maze");
 		openMazeBtn.addActionListener(this);
-		bGridPanel.add(openMazeBtn);
+		bGridPanel.add(openMazeBtn);*/
+                
+                openMazeList = new JComboBox(getMazesFromWeb());
+                openMazeList.addActionListener(this);
+                bGridPanel.add(openMazeList);
 		
 		mazeNameLbl = new JLabel("Current Maze: ");
 		bGridPanel.add(mazeNameLbl);
@@ -321,7 +339,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		rightPanel.add(actionPanel, c);
 
 		//Experimental speed toggle!
-        //Can later replace this with a slider
+                //Can later replace this with a slider
 		c.gridheight = 1;
 		c.insets = new Insets(4, 4, 4, 4);
 		JPanel speedPanel = new JPanel();
@@ -381,7 +399,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			{
 				runningLbl.setText("Waiting for Program...");
 			}
-		else if (main.mapFile == null)
+		else if (main.mapData == null)
 			{
 				runningLbl.setText("Waiting for maze file...");
 			}
@@ -437,26 +455,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 				reinitializeSensors();
 			}
 		}
-		else if (e.getSource() == openMazeBtn)
+		else if (e.getSource() == openMazeList)
 		{
-			//Open a file chooser dialog to load in maze layouts
-			fileChooser.setFileFilter(xmlFilter);
-			
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION)
-			{
-				main.mapFile = fileChooser.getSelectedFile();
-				mazeNameLbl.setText("Current Maze: " + main.mapFile.getName());
-				updateRunningStatus();
-				
-				//Update the maze here
-				sim.importStage(main.mapFile);
-				reinitializeSensors();
-                
-                //Also signal to mazebuilder to update its displays
-                if (!MainApplet.studentBuild)
-                    main.mazePanel.refreshMazeSettings();
-			}
+                    openNewMaze();
 		}
 		else if (e.getSource() == runBtn)
 		{
@@ -523,9 +524,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 			//Stop execution, and reload the maze
 			stopExecution();
 			
-			if (main.mapFile != null)
+			if (main.mapData != null)
 			{
-				sim.importStage(main.mapFile);
+				sim.importStage(main.mapData);
 				reinitializeSensors();
 			}
 		}
@@ -749,7 +750,96 @@ public class SimulatorPanel extends JPanel implements ActionListener {
             return "Couldn't load code from web. ";
         }
     }
-	
+
+    public String[] getMazesFromWeb()
+    {
+        String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/mazeSvc/Service.svc/listMazes";
+        try
+        {
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept","application/json");
+            InputStream is = conn.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            
+            JSONParser jsonParser = new JSONParser();
+            JSONArray jsonArray = (JSONArray) jsonParser.parse(isr);
+            ArrayList<String> mazeList = new ArrayList<String>();
+            for(int x = 0; x < jsonArray.size(); x++)
+            {
+                mazeList.add((String) jsonArray.get(x));
+            }
+            
+            return mazeList.toArray(new String[mazeList.size()]);
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public void openNewMaze()
+    {
+        //Open a file chooser dialog to load in maze layouts
+        String mazeId = getSelectedMaze();
+        String mazeXml = getMazeData(mazeId);
+
+        if (mazeXml != null)
+        {
+            main.mapData = mazeXml;
+            mazeNameLbl.setText("Current Maze: " + mazeId);
+            updateRunningStatus();
+
+            //Update the maze here
+            sim.importStage(main.mapData);
+            reinitializeSensors();
+
+            //Also signal to mazebuilder to update its displays
+            if (!MainApplet.studentBuild)
+            {
+                main.mazePanel.refreshMazeSettings();
+            }
+        }
+    }
+    
+    public String getMazeData(String mazeId)
+    {
+        String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/mazeSvc/Service.svc/getMaze/" + mazeId;
+        try
+        {
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept","application/xml");
+            
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            
+            Document document = builder.parse(conn.getInputStream());
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(document), new StreamResult(writer));
+            String output = writer.getBuffer().toString().replaceAll("\n|\r", ""); 
+            
+            return output;
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    private String getSelectedMaze()
+    {
+        return (String) openMazeList.getSelectedItem();
+    }
 }
 
 

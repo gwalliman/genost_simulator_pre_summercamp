@@ -40,7 +40,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 	//IO variables
 	public File codeFile;
 	public File configFile;
-	public File mapFile;
+	public String mapData;
 	
 	//If true, this is a student build, and we should disable the maze builder, arrow keys, etc.
 	public static final boolean studentBuild = false;
@@ -77,7 +77,8 @@ public class MainApplet extends JApplet implements ChangeListener {
 		
 
 		ClassLoader cl = this.getClass().getClassLoader();
-		loadRobotSprite("robot.png", cl);		
+		loadRobotSprite("robot.png", cl);
+                simPanel.openNewMaze();
 	}
 	
 	public static void loadRobotSprite(String filename, ClassLoader cl)

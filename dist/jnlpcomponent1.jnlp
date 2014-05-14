@@ -2,7 +2,7 @@
 <jnlp codebase="http://webstrar44.fulton.asu.edu/page3/RobotSim/" href="jnlpcomponent1.jnlp" spec="1.0+">
     <information>
         <title>jnlpcomponent1</title>
-        <vendor>1</vendor>
+        <vendor>GALVATRO</vendor>
     </information>
     <security>
         <all-permissions/>

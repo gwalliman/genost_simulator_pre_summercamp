@@ -146,17 +146,17 @@ public class World
 	{
 		try
 		{
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	
-			DocumentBuilder builder = factory.newDocumentBuilder();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
 			
-            //Read themes from the jar file
-            ClassLoader cl = this.getClass().getClassLoader();
+                    //Read themes from the jar file
+                    ClassLoader cl = this.getClass().getClassLoader();
 		
-			Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
-        	Node root = document.getDocumentElement();
+                    Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
+                    Node root = document.getDocumentElement();
 			
-			XPathFactory xPathFactory = XPathFactory.newInstance();
+                    XPathFactory xPathFactory = XPathFactory.newInstance();
 		    XPath xpath = xPathFactory.newXPath();
 		    
 		    XPathExpression gridWidthExp = xpath.compile("gridwidth");

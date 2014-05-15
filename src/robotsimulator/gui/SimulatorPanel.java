@@ -541,6 +541,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		{
 			//Loads the program from the web service
                     loadCodeFromWeb();
+                    openNewMaze(main.mapData);
 		}
 		else if (e.getSource() == speedBtn)
 		{

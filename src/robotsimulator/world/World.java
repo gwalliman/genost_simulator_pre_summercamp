@@ -6,22 +6,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
 import robotsimulator.gui.MainApplet;
+import robotsimulator.gui.SimulatorPanel;
 import robotsimulator.worldobject.Block;
 
 public class World 
@@ -153,7 +151,8 @@ public class World
                     //Read themes from the jar file
                     ClassLoader cl = this.getClass().getClassLoader();
 		
-                    Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
+                    //Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
+                    Document document = SimulatorPanel.getThemeData(themeid);
                     Node root = document.getDocumentElement();
 			
                     XPathFactory xPathFactory = XPathFactory.newInstance();

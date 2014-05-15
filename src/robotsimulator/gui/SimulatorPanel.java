@@ -169,7 +169,8 @@ public class SimulatorPanel extends JPanel implements ActionListener {
         //Gross procedure to serialize the resource file into a File object
 		try
 		{
-			is = cl.getResourceAsStream("Resources/Loadouts/DefaultLoadout.xml");
+			//is = cl.getResourceAsStream("Resources/Loadouts/DefaultLoadout.xml");
+                        is = getLoadoutData("DefaultLoadout");
 			os = new FileOutputStream(newConfig);
 			int read = 0;
 			byte[] bytes = new byte[1024];
@@ -851,6 +852,53 @@ public class SimulatorPanel extends JPanel implements ActionListener {
             String output = writer.getBuffer().toString().replaceAll("\n|\r", ""); 
             
             return output;
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public static InputStream getLoadoutData(String loadoutId)
+    {
+        String uri = "http://localhost:54907/mazeSvc/Service.svc/getLoadout/" + loadoutId;
+        try
+        {
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept","application/xml");
+            
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            
+            return conn.getInputStream();
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public static Document getThemeData(String themeId)
+    {
+        String uri = "http://localhost:54907/mazeSvc/Service.svc/getTheme/" + themeId;
+        try
+        {
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept","application/xml");
+            
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            
+            Document document = builder.parse(conn.getInputStream());
+            return document;
         }
         catch(Exception e2)
         {

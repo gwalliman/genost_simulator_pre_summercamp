@@ -21,7 +21,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -457,7 +459,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		}
 		else if (e.getSource() == openMazeList)
 		{
-                    openNewMaze();
+                    openNewMaze(null);
 		}
 		else if (e.getSource() == runBtn)
 		{
@@ -538,7 +540,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		else if (e.getSource() == webloadCodeBtn)
 		{
 			//Loads the program from the web service
-            loadCodeFromWeb();
+                    loadCodeFromWeb();
 		}
 		else if (e.getSource() == speedBtn)
 		{
@@ -562,7 +564,26 @@ public class SimulatorPanel extends JPanel implements ActionListener {
     //Calls the web service and loads in the code file from the web
     public void loadCodeFromWeb()
     {
-		loadCodefromText(getCode(), "Loaded from Web*");
+        String webdata = getCode();
+        String[] splitWebData = webdata.split("%", 2);
+
+        String code;
+        if(splitWebData.length == 2)
+        {
+            String mazeID = splitWebData[0];
+            code = splitWebData[1];
+            
+            List<String> validMazes = Arrays.asList(getMazesFromWeb());
+            if(validMazes.contains(mazeID))
+            {
+                main.mapData = mazeID;
+            }
+        }
+        else
+        {
+            code = splitWebData[0];
+        }
+        loadCodefromText(code, "Loaded from Web*");
     }
     
 	public void stopExecution()
@@ -781,10 +802,12 @@ public class SimulatorPanel extends JPanel implements ActionListener {
         return null;
     }
     
-    public void openNewMaze()
+    public void openNewMaze(String mazeId)
     {
-        //Open a file chooser dialog to load in maze layouts
-        String mazeId = getSelectedMaze();
+        if(mazeId == null)
+        {
+            mazeId = getSelectedMaze();
+        }
         String mazeXml = getMazeData(mazeId);
 
         if (mazeXml != null)

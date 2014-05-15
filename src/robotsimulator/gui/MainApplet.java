@@ -78,7 +78,7 @@ public class MainApplet extends JApplet implements ChangeListener {
 
 		ClassLoader cl = this.getClass().getClassLoader();
 		loadRobotSprite("robot.png", cl);
-                simPanel.openNewMaze();
+                simPanel.openNewMaze(mapData);
 	}
 	
 	public static void loadRobotSprite(String filename, ClassLoader cl)

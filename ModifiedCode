@@ -1,4 +1,6 @@
 {
-method drive(string "f");
-method turn( string "r" );
+	vardecl int x;
+	assign x  = int 5;
+
+
 }

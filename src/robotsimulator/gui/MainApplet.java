@@ -3,7 +3,11 @@ package robotsimulator.gui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
@@ -12,9 +16,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
+import static robotsimulator.gui.MainApplet.m_instance;
+import static robotsimulator.gui.MainApplet.studentBuild;
 import robotsimulator.robot.Robot;
 import robotsimulator.robot.SonarSensor;
 
@@ -38,9 +43,11 @@ public class MainApplet extends JApplet implements ChangeListener {
 	public MazeBuilderPanel mazePanel;
 	
 	//IO variables
-	public File codeFile;
-	public File configFile;
+	public String codeFile;
+	public String configFile;
 	public String mapData;
+        
+        public String codeId;
 	
 	//If true, this is a student build, and we should disable the maze builder, arrow keys, etc.
 	public static final boolean studentBuild = false;
@@ -50,6 +57,30 @@ public class MainApplet extends JApplet implements ChangeListener {
 		
 	public void init()
 	{
+            try
+            {
+               String url = getDocumentBase().toString();
+               Map<String, String> paramValue = new HashMap<String, String>();
+               
+               if (url.indexOf("?") > -1) 
+               {
+                       String parameters = url.substring(url.indexOf("?") + 1);
+                       StringTokenizer paramGroup = new StringTokenizer(parameters, "&");
+ 
+                       while(paramGroup.hasMoreTokens())
+                       {
+                           StringTokenizer value = new StringTokenizer(paramGroup.nextToken(), "=");
+                           paramValue.put(value.nextToken(), value.nextToken());
+                       }
+               }
+               
+               codeId = paramValue.get("codeId");
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            
 		//Create a static reference to the applet if none exists
 		if (m_instance == null)
 			m_instance = this;
@@ -75,22 +106,37 @@ public class MainApplet extends JApplet implements ChangeListener {
 			e.printStackTrace();
 		}
 		
-
-		ClassLoader cl = this.getClass().getClassLoader();
-		loadRobotSprite("robot.png", cl);
+                try
+                {
+                    InputStream is = loadSprite("default", "robot");
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+                    int reads = is.read(); 
+                    while(reads != -1)
+                    { 
+                        baos.write(reads); 
+                        reads = is.read(); 
+                    }
+                    robotSprite = new ImageIcon(baos.toByteArray());
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
                 simPanel.openNewMaze(mapData);
 	}
 	
-	public static void loadRobotSprite(String filename, ClassLoader cl)
+	public static InputStream loadSprite(String themeId, String imageId)
 	{
 		//Load the sprite from the resources folder in the jar
 		try
 		{
-			robotSprite = new ImageIcon(cl.getResource("Resources/" + filename));
+                    InputStream is = SimulatorPanel.getThemeImage(themeId, imageId);
+                    return is;
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
+                        return null;
 		}
 	}
 	

@@ -81,7 +81,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		gridWidth = simWorld.getGridWidth();
 		gridHeight = simWorld.getGridHeight();
 		
-		fileChooser = new JFileChooser("");
+		//fileChooser = new JFileChooser("");
 		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
         
 		leftPanel = createLeftPanel();
@@ -318,7 +318,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			sim.importStage(loadedMaze);
 			refreshMazeSettings();
 		}*/
-                String uri = "http://localhost:58884/genost_services/Service.svc/listMazes";
+                String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/mazeSvc/Service.svc/listMazes";
                 try
                 {
                     URL url = new URL(uri);

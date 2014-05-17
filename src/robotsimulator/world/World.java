@@ -2,10 +2,12 @@ package robotsimulator.world;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.net.URL;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.ImageIcon;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -19,6 +21,7 @@ import org.w3c.dom.NodeList;
 import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
 import robotsimulator.gui.MainApplet;
+import static robotsimulator.gui.MainApplet.loadSprite;
 import robotsimulator.gui.SimulatorPanel;
 import robotsimulator.worldobject.Block;
 
@@ -149,7 +152,6 @@ public class World
                     DocumentBuilder builder = factory.newDocumentBuilder();
 			
                     //Read themes from the jar file
-                    ClassLoader cl = this.getClass().getClassLoader();
 		
                     //Document document = builder.parse(cl.getResourceAsStream("Resources/Themes/" + themeid + "/theme.xml"));
                     Document document = SimulatorPanel.getThemeData(themeid);
@@ -187,13 +189,32 @@ public class World
 						Boolean.parseBoolean(clipNode.getTextContent()),
 						Color.decode(colorNode.getTextContent())
 					);
+                            String imageNodeTextContent = imageNode.getTextContent();
+                            String[] imageName = imageNodeTextContent.split("\\.");
+                            
 			    setCellTheme(
 			    		idNode.getNodeValue(), 
-			    		cl.getResource("Resources/Themes/" + themeid + "/" + imageNode.getTextContent())
+			    		//cl.getResource("Resources/Themes/" + themeid + "/" + imageNode.getTextContent())
+                                        MainApplet.loadSprite(themeid, imageName[0])
 			    	);
 		    }
 		    //Set the robot sprite too
-		    MainApplet.loadRobotSprite("Themes/" + themeid + "/robot.png", cl);
+                    try
+                    {
+                        InputStream is = loadSprite(themeid, "robot");
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+                        int reads = is.read(); 
+                        while(reads != -1)
+                        { 
+                            baos.write(reads); 
+                            reads = is.read(); 
+                        }
+                        MainApplet.robotSprite = new ImageIcon(baos.toByteArray());
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                    }
 		}
 		catch(Exception e)
 		{
@@ -241,9 +262,9 @@ public class World
 		return cellThemes;
 	}
 	
-	public void setCellTheme(String id, URL url) 
+	public void setCellTheme(String id, InputStream is) 
 	{
-		cellThemes.put(id, new CellTheme(id, url));
+		cellThemes.put(id, new CellTheme(id, is));
 	}
 	
 	public int getWidth()

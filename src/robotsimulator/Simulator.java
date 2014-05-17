@@ -1,6 +1,7 @@
 package robotsimulator;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.StringReader;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -314,14 +315,14 @@ public class Simulator implements RobotListener
 	
 	//Changes the robot's sensor loadout based on the file
 	//Doesn't change x/y and angle-- that's stored in the maze
-	public void importLoadout(File f)
+	public void importLoadout(String loadoutXml)
 	{
 		try
 		{
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(f);
+			Document document = builder.parse(new InputSource(new StringReader(loadoutXml)));
 			
 			Node root = document.getDocumentElement();
 			

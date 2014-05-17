@@ -1,4 +1,0 @@
-{
-method drive(string "f");
-method turn( string "r" );
-}

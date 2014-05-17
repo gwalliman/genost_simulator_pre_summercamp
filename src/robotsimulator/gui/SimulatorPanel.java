@@ -7,13 +7,6 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
@@ -33,15 +26,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import javax.xml.parsers.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import robotinterpreter.RobotInterpreter;
 import robotsimulator.RobotSimulator;
 import robotsimulator.Simulator;
@@ -119,7 +116,6 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		sim = s;
 		main = m;
         
-		fileChooser = new JFileChooser("");
 		txtFilter = new FileNameExtensionFilter("Text Files ('.txt')", "txt");
 		xmlFilter = new FileNameExtensionFilter("XML Files ('.xml')", "xml");
 		
@@ -136,7 +132,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//Controls size of right side-- status, output, sensor data, etc. 1/4 of panel
 		GridBagConstraints rightSideConstraints = new GridBagConstraints();
 		rightSideConstraints.gridx = GridBagConstraints.RELATIVE;
-        rightSideConstraints.gridy = 0;
+                rightSideConstraints.gridy = 0;
 		rightSideConstraints.gridwidth = 1;
 		rightSideConstraints.anchor = GridBagConstraints.FIRST_LINE_END;
 		rightSideConstraints.insets = new Insets(4, 4, 4, 4);
@@ -151,73 +147,25 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		loadDefaults();		
 		//Start up the sensor thread
-        sThread = new sensorThread();
-        (new Thread(sThread)).start();
+                sThread = new sensorThread();
+                (new Thread(sThread)).start();
 	}
 	
 	//Load in default options-- default map, sensor loadout, and program
 	private void loadDefaults()
 	{
-		//Load loadout config
-		//Load the initial config from the jar
-		ClassLoader cl = this.getClass().getClassLoader();
-
-        InputStream is = null;
-		FileOutputStream os = null;
-		File newConfig = new File("tempConfig");
 		
-        //Gross procedure to serialize the resource file into a File object
-		try
-		{
-			//is = cl.getResourceAsStream("Resources/Loadouts/DefaultLoadout.xml");
-                        is = getLoadoutData("DefaultLoadout");
-			os = new FileOutputStream(newConfig);
-			int read = 0;
-			byte[] bytes = new byte[1024];
-			while ((read = is.read(bytes)) != -1)
-			{
-				os.write(bytes, 0, read);
-			}
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			if (is != null)
-			{
-				try 
-				{
-					is.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-			if (os != null)
-			{
-				try 
-				{
-					os.close();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
+            //Gross procedure to serialize the resource file into a File object
+            String loadoutXml = getLoadoutData("DefaultLoadout");
+            loadoutNameLbl.setText("Current Config: " + "DefaultLoadout.xml");
+            main.configFile = loadoutXml;
 		
-		main.configFile = newConfig;
-		loadoutNameLbl.setText("Current Config: " + "DefaultLoadout.xml");
-		updateRunningStatus();
-		
-		//Update the robot's sensor and loadout configuration
-		sim.importLoadout(main.configFile);
-        
-        //Load the initial code from the web service
-        loadCodeFromWeb();
+            //Update the robot's sensor and loadout configuration
+            sim.importLoadout(main.configFile);
+            updateRunningStatus();
+            
+            //Load the initial code from the web service
+            loadCodeFromWeb();
 	}
 	
 	//Builds the left side of the window-- input buttons, stage, etc.
@@ -426,37 +374,11 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	{
 		if (e.getSource() == openCodeBtn)
 		{
-			//Open a file chooser dialog to load in code.
-			//Restrict filechooser to the correct datatype
-			fileChooser.setFileFilter(txtFilter);
 			
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION)
-			{
-				main.codeFile = fileChooser.getSelectedFile();
-				codeNameLbl.setText("Current Program: " + main.codeFile.getName());
-				
-				runBtn.setEnabled(true);
-				updateRunningStatus();
-				
-				loadCodeFile();
-			}
 		}
 		else if (e.getSource() == openLoadoutBtn)
 		{
-			//Open a file chooser dialog to load in robot loadouts
-			fileChooser.setFileFilter(xmlFilter);
-			
-			int returnVal = fileChooser.showOpenDialog(this);
-			if (returnVal == JFileChooser.APPROVE_OPTION)
-			{
-				main.configFile = fileChooser.getSelectedFile();
-				loadoutNameLbl.setText("Current Config: " + main.configFile.getName());
-				updateRunningStatus();
-				
-				//Update the robot's sensor and loadout configuration
-				reinitializeSensors();
-			}
+
 		}
 		else if (e.getSource() == openMazeList)
 		{
@@ -591,14 +513,14 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	public void stopExecution()
 	{
 		if(executor != null)
-    	{
-    		executor.cancel(true);
+                {
+                    executor.cancel(true);
 			
 			if (r != null)
 				r.stop();
-    	}
+                }       
 		
-        sim.stop();
+                sim.stop();
 		executor = null;
 		
 		updateRunningStatus();
@@ -607,62 +529,23 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	public void loadCodefromText(String code, String newCodeName)
 	{
 		
-        //Convert 'code' to a file and load the code in from there
-        BufferedWriter w = null;
-		try
-		{
-		File textCode = new File("ModifiedCode");
-		w = new BufferedWriter(new FileWriter(textCode));
-		w.write(code);
-		w.close();
-		
-		main.codeFile = textCode;
+            //Convert 'code' to a file and load the code in from there
+            	main.codeFile = code;
 		codeNameLbl.setText("Current Program: " + newCodeName);
 		
 		runBtn.setEnabled(true);
 		updateRunningStatus();
 		
 		loadCodeFile();
-		
-		}
-		catch (Exception writerE)
-		{
-			writerE.printStackTrace();
-		}
-		finally
-		{
-			try 
-			{
-				w.close();
-			} 
-			catch (Exception e1) 
-			{
-				e1.printStackTrace();
-			}
-		}
-
 	}
 	
     //Loads the code into the program from the codeFile in main
-	public void loadCodeFile()
+    public void loadCodeFile()
     {
 		try 
 		{
-			FileReader fr = new FileReader(main.codeFile);
-		    BufferedReader br = new BufferedReader(fr);
-		    String line = "";
-            String code = "";
-            
-            while((line = br.readLine()) != null)
-            {
-                 code += line + "\n";
-            }
-             
-            br.close();
-            fr.close();
-             
-            outputTextArea.setText(null);
-            outputTextArea.append(code);
+                    outputTextArea.setText(null);
+                    outputTextArea.append(main.codeFile);
 		}
 		catch (Exception e) 
 		{
@@ -718,7 +601,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		}
 		catch (ConcurrentModificationException e)
 		{
-            e.printStackTrace();
+                    e.printStackTrace();
 		}
 	}
 	
@@ -759,13 +642,49 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 	}
 
     //Autogenerated by Netbeans to call the code service
-    private static String getCode() 
+    private String getCode() 
     {
         try
         {
-            org.tempuri.Service service = new org.tempuri.Service();            //* Autogen'd
+            /*org.tempuri.Service service = new org.tempuri.Service();            //* Autogen'd
             org.tempuri.IService port = service.getBasicHttpBindingIService();  //* Autogen'd
-            return port.getCode();                                              //* Autogen'd
+            return port.getCode();                                              //* Autogen'd*/
+            
+            String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/codeRestSvc/Service.svc/GetCode/";
+            if(main.codeId != null && main.codeId != "")
+            {
+                uri = uri + main.codeId;
+            }
+            else
+            {
+                uri = uri + "asdf123";
+            }
+            
+            try
+            {
+                URL url = new URL(uri);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept","application/xml");
+
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+
+                Document document = builder.parse(conn.getInputStream());
+                Element root = document.getDocumentElement();
+                
+                Node child = root.getFirstChild();
+                if (child instanceof CharacterData) {
+                    CharacterData cd = (CharacterData) child;
+                    return cd.getData();
+                }
+            }
+            catch(Exception e2)
+            {
+                e2.printStackTrace();
+            }
+
+            return null;
         }
         catch (Exception e)
         {
@@ -861,9 +780,9 @@ public class SimulatorPanel extends JPanel implements ActionListener {
         return null;
     }
     
-    public static InputStream getLoadoutData(String loadoutId)
+    public static String getLoadoutData(String loadoutId)
     {
-        String uri = "http://localhost:54907/mazeSvc/Service.svc/getLoadout/" + loadoutId;
+        String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/mazeSvc/Service.svc/getLoadout/" + loadoutId;
         try
         {
             URL url = new URL(uri);
@@ -874,7 +793,15 @@ public class SimulatorPanel extends JPanel implements ActionListener {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             
-            return conn.getInputStream();
+            Document document = builder.parse(conn.getInputStream());
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer transformer = tf.newTransformer();
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            StringWriter writer = new StringWriter();
+            transformer.transform(new DOMSource(document), new StreamResult(writer));
+            String output = writer.getBuffer().toString().replaceAll("\n|\r", ""); 
+            
+            return output;
         }
         catch(Exception e2)
         {
@@ -886,7 +813,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
     
     public static Document getThemeData(String themeId)
     {
-        String uri = "http://localhost:54907/mazeSvc/Service.svc/getTheme/" + themeId;
+        String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/mazeSvc/Service.svc/getTheme/" + themeId;
         try
         {
             URL url = new URL(uri);
@@ -899,6 +826,29 @@ public class SimulatorPanel extends JPanel implements ActionListener {
             
             Document document = builder.parse(conn.getInputStream());
             return document;
+        }
+        catch(Exception e2)
+        {
+            e2.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public static InputStream getThemeImage(String themeId, String imageId)
+    {
+        String uri = "http://venus.eas.asu.edu/WSRepository/eRobotic2/mazeSvc/Service.svc/getThemeImage/" + themeId + "/" + imageId;
+        try
+        {
+            URL url = new URL(uri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept","application/xml");
+            
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            
+            return conn.getInputStream();
         }
         catch(Exception e2)
         {

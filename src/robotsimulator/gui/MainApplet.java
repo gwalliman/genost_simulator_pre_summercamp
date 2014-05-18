@@ -81,48 +81,49 @@ public class MainApplet extends JApplet implements ChangeListener {
                 e.printStackTrace();
             }
             
-		//Create a static reference to the applet if none exists
-		if (m_instance == null)
-			m_instance = this;
-		
-		sim = new Simulator(this);
-        
-		if (!studentBuild)
-			setKeyBindings();
-			
-		try 
-		{
-			javax.swing.SwingUtilities.invokeAndWait(new Runnable()
-			{
-				public void run()
-				{
-					buildGUI();
-				}
-			});
-		}
-		catch (Exception e)
-		{
-			System.err.println("[ERROR]: Couldn't construct the GUI.");
-			e.printStackTrace();
-		}
-		
-                try
-                {
-                    InputStream is = loadSprite("default", "robot");
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
-                    int reads = is.read(); 
-                    while(reads != -1)
-                    { 
-                        baos.write(reads); 
-                        reads = is.read(); 
-                    }
-                    robotSprite = new ImageIcon(baos.toByteArray());
-                }
-                catch(Exception e)
-                {
+            //Create a static reference to the applet if none exists
+            if (m_instance == null)
+                    m_instance = this;
+
+            sim = new Simulator(this);
+
+            if (!studentBuild)
+                    setKeyBindings();
+
+            try 
+            {
+                    javax.swing.SwingUtilities.invokeAndWait(new Runnable()
+                    {
+                            public void run()
+                            {
+                                    buildGUI();
+                            }
+                    });
+            }
+            catch (Exception e)
+            {
+                    System.err.println("[ERROR]: Couldn't construct the GUI.");
                     e.printStackTrace();
+            }
+
+            try
+            {
+                InputStream is = loadSprite("default", "robot");
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+                int reads = is.read(); 
+                while(reads != -1)
+                { 
+                    baos.write(reads); 
+                    reads = is.read(); 
                 }
-                simPanel.openNewMaze(mapData);
+                robotSprite = new ImageIcon(baos.toByteArray());
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+            
+            simPanel.openNewMaze(mapData);
 	}
 	
 	public static InputStream loadSprite(String themeId, String imageId)
@@ -152,10 +153,10 @@ public class MainApplet extends JApplet implements ChangeListener {
 		tabPane.addChangeListener(this);
 		
 		simPanel = new SimulatorPanel(width, height, fps, sim, this);
-        tabPane.addTab("Simulator", simPanel);
+                tabPane.addTab("Simulator", simPanel);
 		
 		mazePanel = new MazeBuilderPanel(fps, sim, this);
-        //Add in the maze builder tab if we're not using a student build
+                //Add in the maze builder tab if we're not using a student build
 		if (!studentBuild)
 			tabPane.addTab("Maze Builder", mazePanel);
 				

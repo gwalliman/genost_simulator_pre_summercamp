@@ -1,9 +1,12 @@
 package robotsimulator;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URL;
+import java.net.URLConnection;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,6 +47,7 @@ public class Simulator implements RobotListener
 	public int guiHeight = 400 * 2;
 	int guiFPS = 60;
 	public String themeid = "default";
+        public byte[] coinBytes;
 	
 	public boolean running = false;
     
@@ -71,6 +75,30 @@ public class Simulator implements RobotListener
 		world.setTheme(themeid);
         
 		mainApp = m;
+                
+                try
+                {
+                    URL uri = new URL("http://themushroomkingdom.net/sounds/wav/smw/smw_coin.wav");
+                    URLConnection urlc = uri.openConnection();
+                    InputStream is = (InputStream)urlc.getInputStream();
+                     // Get the size of the file
+                    long streamLength = is.available();
+
+                     // Create the byte array to hold the data
+                    coinBytes = new byte[(int) streamLength];
+
+                     // Read in the bytes
+                    int offset = 0;
+                    int numRead = 0;
+                    while (offset < coinBytes.length && (numRead = is.read(coinBytes, offset, coinBytes.length - offset)) >= 0) 
+                    {
+                        offset += numRead;
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.printStackTrace();
+                }
 	}
 	
 	public Robot getRobot()
@@ -327,18 +355,18 @@ public class Simulator implements RobotListener
 	{
 		try
 		{
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(new InputSource(new StringReader(loadoutXml)));
-			
-			Node root = document.getDocumentElement();
-			
-			XPathFactory xPathFactory = XPathFactory.newInstance();
-		    XPath xpath = xPathFactory.newXPath();
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document document = builder.parse(new InputSource(new StringReader(loadoutXml)));
+
+                    Node root = document.getDocumentElement();
+
+                    XPathFactory xPathFactory = XPathFactory.newInstance();
+                    XPath xpath = xPathFactory.newXPath();
 		    
 		    //Reset the robot, but keep it in the same place and orientation
-		    robot = new Robot((int)robot.getCenterX(), (int)robot.getCenterY(), (int)robot.getAngle(), this);
+                    robot = new Robot((int)robot.getCenterX(), (int)robot.getCenterY(), (int)robot.getAngle(), this);
 		    
 		    NodeList sonarNodes = ((NodeList)xpath.compile("sonars/sonar").evaluate(root, XPathConstants.NODESET));
 

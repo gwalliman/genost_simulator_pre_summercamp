@@ -201,10 +201,10 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		//Add buttons and labels to it as needed
 		openCodeBtn = new JButton("Load Program");
 		openCodeBtn.addActionListener(this);
-		bGridPanel.add(openCodeBtn);
+		//bGridPanel.add(openCodeBtn);
 		
 		codeNameLbl = new JLabel("Current Program: ");
-		bGridPanel.add(codeNameLbl);
+		//bGridPanel.add(codeNameLbl);
 			
 		/*openMazeBtn = new JButton("Load Maze");
 		openMazeBtn.addActionListener(this);
@@ -215,15 +215,15 @@ public class SimulatorPanel extends JPanel implements ActionListener {
                 bGridPanel.add(openMazeList);
 		
 		mazeNameLbl = new JLabel("Current Maze: ");
-		bGridPanel.add(mazeNameLbl);
+		//bGridPanel.add(mazeNameLbl);
 		
 		openLoadoutBtn = new JButton("Load Config");
 		openLoadoutBtn.addActionListener(this);
 		openLoadoutBtn.setEnabled(false);
-		bGridPanel.add(openLoadoutBtn);
+		//bGridPanel.add(openLoadoutBtn);
 		
 		loadoutNameLbl = new JLabel("Current Config: ");
-		bGridPanel.add(loadoutNameLbl);
+		//bGridPanel.add(loadoutNameLbl);
 		
 		JPanel commandPanel = new JPanel();
 		
@@ -281,7 +281,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		reloadCodeBtn = new JButton("Reload Code from Text");
 		reloadCodeBtn.addActionListener(this);		
-		actionPanel.add(reloadCodeBtn);
+		//actionPanel.add(reloadCodeBtn);
 		
 		webloadCodeBtn = new JButton("Load Code from Web");
 		webloadCodeBtn.addActionListener(this);

@@ -2,7 +2,12 @@ package robotsimulator.worldobject;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -246,6 +251,17 @@ public class Block
                                 worldPoints[p.getX()][p.getY()].getOccupier().setCellType(
                                         worldPoints[p.getX()][p.getY()].getOccupier().getCellType().getCoinUnder()
                                 );
+                                try
+                                {
+                                    InputStream is = new ByteArrayInputStream(sim.coinBytes);
+                                    Clip clip = AudioSystem.getClip();
+                                    clip.open(AudioSystem.getAudioInputStream(is));
+                                    clip.start();
+                                }
+                                catch(Exception e)
+                                {
+                                    e.printStackTrace();
+                                }
                                 
                                 return false;
                             }

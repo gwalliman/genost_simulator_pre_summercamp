@@ -106,7 +106,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		GridLayout g2 = new GridLayout(1, 0);
 		g2.setHgap(8);
 		
-        //Add interface buttons
+                //Add interface buttons
 		newMazeBtn = new JButton("New Maze");
 		newMazeBtn.addActionListener(this);
 		
@@ -135,7 +135,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			}		
 		};
 		
-		widthSpinner.addChangeListener(c);
+		//widthSpinner.addChangeListener(c);
 		heightSpinner.addChangeListener(c);
 		
 		JPanel buttonPanel = new JPanel(g2);
@@ -353,6 +353,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
         else if (newH < hMin)
             newH = hMin;
 
+        //HeightSpinner must ALWAYS be changed with WidthSpinner and must ALWAYS be called second!
         widthSpinner.setValue(newW);
         heightSpinner.setValue(newH);
         simWorld.adjustWorld(newW, newH);
@@ -378,14 +379,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	//Similar to load maze (but in reverse, naturally)
 	private void saveMaze()
 	{
-		//Open a file dialog and write the file to XML
-		
-		int returnVal = fileChooser.showSaveDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION)
-		{
-			//Serialize the file into an xml file 
-			File saveFile = fileChooser.getSelectedFile();
-			sim.exportStage(saveFile);	
-		}
+		String mazeXml = sim.exportStage();	
+                JOptionPane.showInputDialog(null, mazeXml, mazeXml);
 	}
 }

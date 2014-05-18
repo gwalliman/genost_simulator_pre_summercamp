@@ -51,5 +51,14 @@
 			<color>#FFFFFF</color>
 			<image>floor3.png</image>
 		</celltype>
+		<celltype id="pkmn_coin">
+			<name>Coin</name>
+			<width>1</width>
+			<height>1</height>
+			<clip>true</clip>
+			<color>#FFFFFF</color>
+			<image>coin.png</image>
+			<coin>pkmn_floor3</coin>
+		</celltype>
 	</celltypes>
 </theme>

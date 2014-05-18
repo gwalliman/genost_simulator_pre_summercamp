@@ -9,8 +9,10 @@ public class CellType
 	private int width, height;
 	private Color color;
 	private boolean clip;
+        private boolean coin;
+        private String coinUnder;
 	
-	public CellType(String i, String n, int w, int h, boolean cl, Color c)
+	public CellType(String i, String n, int w, int h, boolean cl, boolean c2, String cu, Color c)
 	{
 		id = i;
 		label = n;
@@ -18,6 +20,8 @@ public class CellType
 		height = h;
 		clip = cl;
 		color = c;
+                coin = c2;
+                coinUnder = cu;
 	}
 	
 	public String getID()
@@ -44,9 +48,19 @@ public class CellType
 	{
 		return clip;
 	}
+        
+        public boolean isCoin()
+        {
+            return coin;
+        }
 
 	public Color getColor() 
 	{
 		return color;
 	}
+        
+        public String getCoinUnder()
+        {
+            return coinUnder;
+        }
 }

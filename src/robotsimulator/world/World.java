@@ -37,6 +37,7 @@ public class World
 	private ArrayList<Block> blocks = new ArrayList<Block>();
 	private Rectangle2D boundary;
 	private CellType curCellType;
+        private int counter = 0;
 	
 	public World(int w, int h, Simulator s)
 	{
@@ -59,6 +60,8 @@ public class World
 				points[x][y] = new Point(x, y);
 			}
 		}
+                
+                    
 	}
 	
 	//Resize the world given the number of cells wide and high to make it
@@ -181,12 +184,30 @@ public class World
 			    Node clipNode = (((NodeList)xpath.compile("clip").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
 			    Node colorNode = (((NodeList)xpath.compile("color").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
 			    Node imageNode = (((NodeList)xpath.compile("image").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+                            Node coinNode = (((NodeList)xpath.compile("coin").evaluate(celltypes.item(i), XPathConstants.NODESET))).item(0);
+                            
+                            boolean isCoin;
+                            String coinUnder;
+                            
+                            if(coinNode == null)
+                            {
+                                isCoin = false;
+                                coinUnder = null;
+                            }
+                            else
+                            {
+                                isCoin = true;
+                                coinUnder = coinNode.getTextContent();
+                            }
+                            
 			    setCellType(
 			    		idNode.getNodeValue(), 
 						nameNode.getTextContent(), 
 						Integer.parseInt(widthNode.getTextContent()), 
 						Integer.parseInt(heightNode.getTextContent()), 
 						Boolean.parseBoolean(clipNode.getTextContent()),
+                                                isCoin,
+                                                coinUnder,
 						Color.decode(colorNode.getTextContent())
 					);
                             String imageNodeTextContent = imageNode.getTextContent();
@@ -221,14 +242,17 @@ public class World
 			e.printStackTrace();
 		}
 		
-		grid = new GridSquare[width / gridWidth][height / gridHeight];		
+		grid = new GridSquare[width / gridWidth][height / gridHeight];
+                int counter = 0;
 		for(int x = 0; x < width / gridWidth; x++)
 		{
 			for(int y = 0; y < height / gridHeight; y++)
 			{
 				grid[x][y] = new GridSquare(x * gridWidth, y * gridHeight, gridWidth, gridHeight, 0);
+                                counter++;
 			}
 		}
+                int asdf = 0;
 	}
 	
 	public ArrayList<Block> getBlocks()
@@ -246,9 +270,9 @@ public class World
 		return cellTypes;
 	}
 	
-	public void setCellType(String id, String n, int w, int h, boolean cl, Color c) 
+	public void setCellType(String id, String n, int w, int h, boolean cl, boolean c2, String cu, Color c) 
 	{
-		cellTypes.add(new CellType(id, n, w, h, cl, c));
+		cellTypes.add(new CellType(id, n, w, h, cl, c2, cu, c));
 		curCellType = cellTypes.get(0);
 	}
 	
@@ -304,6 +328,7 @@ public class World
 	
 	public void addBlock(Block b)
 	{
+            counter++;
 		blocks.add(b);
 		int x0 = (int) ((b.getCenterX()) - (b.getWidth() / 2));
 		int y0 = (int) ((b.getCenterY()) - (b.getHeight() / 2));
@@ -404,10 +429,14 @@ public class World
 					toggleCell(x, y);
 				}
 			}
+                        else
+                        {
+                            int asdf = 0;
+                        }
 		}
 		catch(Exception e)
 		{
-			
+                    e.printStackTrace();
 		}
 	}
 	

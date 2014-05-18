@@ -84,11 +84,11 @@ public class Stage extends JPanel implements MouseListener, Runnable, Scrollable
         
         //Draw the usable area
 		g.setPaint(bColor);
-        g.fill(sim.getWorld().getBoundary());
-        //Draw the boundary
-        g.setPaint(Color.black);
-        g.setStroke(new BasicStroke(3f));
-        g.draw(sim.getWorld().getBoundary());
+                g.fill(sim.getWorld().getBoundary());
+                //Draw the boundary
+                g.setPaint(Color.black);
+                g.setStroke(new BasicStroke(3f));
+                g.draw(sim.getWorld().getBoundary());
 		
 		ArrayList<Block> blocks = sim.getWorld().getBlocks();
 		for(Block b : blocks)

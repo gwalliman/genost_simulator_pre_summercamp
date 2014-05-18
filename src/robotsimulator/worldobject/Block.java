@@ -170,6 +170,19 @@ public class Block
 	{
 		cellType = c;
 	}
+        
+        public void setCellType(String ct_id)
+        {
+            ArrayList<CellType> ct_list =  sim.getWorld().getCellTypes();
+            for(CellType c : ct_list)
+            {
+                if(c.getID().equals(ct_id))
+                {
+                    cellType = c;
+                    break;
+                }
+            }
+        }
 	
 	public CellType getCellType()
 	{
@@ -228,7 +241,18 @@ public class Block
             
 			if(worldPoints[p.getX()][p.getY()].isOccupied() && worldPoints[p.getX()][p.getY()].getOccupier().getCellType().doesClip())
 			{
+                            if(worldPoints[p.getX()][p.getY()].getOccupier().getCellType().isCoin())
+                            {
+                                worldPoints[p.getX()][p.getY()].getOccupier().setCellType(
+                                        worldPoints[p.getX()][p.getY()].getOccupier().getCellType().getCoinUnder()
+                                );
+                                
+                                return false;
+                            }
+                            else
+                            {
 				return true;
+                            }
 			}
 		}
 		return false;

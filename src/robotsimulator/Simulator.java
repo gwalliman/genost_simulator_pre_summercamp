@@ -3,9 +3,11 @@ package robotsimulator;
 import java.io.File;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -47,7 +49,7 @@ public class Simulator implements RobotListener
     
 	public Simulator(MainApplet m)
 	{
-        //Defining robot parameters
+                //Defining robot parameters
 		int centerX = 100;
 		int centerY = 100;
 		int angle = 0;
@@ -64,7 +66,7 @@ public class Simulator implements RobotListener
 		robot.addSonar(this, "Rear", robot.getCenterRearX(), robot.getCenterRearY(), sonarLen, 180, fov);
 		robot.addSonar(this, "Left", robot.getCenterLeftX(), robot.getCenterLeftY(), sonarLen, 270, fov);
 			
-        //Defining world parameters
+                //Defining world parameters
 		world = new World(guiWidth, guiHeight, this);
 		world.setTheme(themeid);
         
@@ -211,71 +213,74 @@ public class Simulator implements RobotListener
     //Loads in a maze from the given file
 	public void importStage(String x)
 	{
-		try
-		{
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			
-			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document document = builder.parse(new InputSource(new StringReader(x)));
-			
-			Node root = document.getDocumentElement();
-			
-			XPathFactory xPathFactory = XPathFactory.newInstance();
-		    XPath xpath = xPathFactory.newXPath();
-		    
-            //Collect attributes for the maze
-	    	Node guiWidthNode = root.getAttributes().getNamedItem("guiwidth");
-	    	Node guiHeightNode = root.getAttributes().getNamedItem("guiheight");
-	    	Node themeIDNode = root.getAttributes().getNamedItem("theme");
-	    	themeid = themeIDNode.getNodeValue();
-		    
-            //Collect robot attributes
-		    Node robotNode = ((NodeList)xpath.compile("robot").evaluate(root, XPathConstants.NODESET)).item(0);
-		    Node robotXNode = (((NodeList)xpath.compile("x").evaluate(robotNode, XPathConstants.NODESET))).item(0);
-		    Node robotYNode = (((NodeList)xpath.compile("y").evaluate(robotNode, XPathConstants.NODESET))).item(0);
-		    Node robotANode = (((NodeList)xpath.compile("a").evaluate(robotNode, XPathConstants.NODESET))).item(0);
-	
-            //Redefine the robot
-			robot = new Robot(
-					(int)Math.round(Double.parseDouble(robotXNode.getTextContent())), 
-					(int)Math.round(Double.parseDouble(robotYNode.getTextContent())), 
-					(int)Math.round(Double.parseDouble(robotANode.getTextContent())), 
-					this
-				);
-			
-			//Collect world attributes
-		    Node worldNode = ((NodeList)xpath.compile("world").evaluate(root, XPathConstants.NODESET)).item(0);
-		    Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
-		    Node worldGridHeighthNode = (((NodeList)xpath.compile("gridheight").evaluate(worldNode, XPathConstants.NODESET))).item(0);
-		    
-		    world = new World(Integer.parseInt(guiWidthNode.getNodeValue()), Integer.parseInt(guiHeightNode.getNodeValue()), this);
-		    world.setGridWidth(Integer.parseInt(worldGridWidthNode.getTextContent()));
-		    world.setGridHeight(Integer.parseInt(worldGridHeighthNode.getTextContent()));
-			world.setTheme(themeIDNode.getNodeValue());	
-			
-            //Add objects to the world
-			NodeList cellNodes = ((NodeList)xpath.compile("cells/cell").evaluate(worldNode, XPathConstants.NODESET));
-			for(int i = 0; i < cellNodes.getLength(); i++)
-			{
-				Node cellXNode = (((NodeList)xpath.compile("x").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node cellYNode = (((NodeList)xpath.compile("y").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
-			    Node cellTypeNode = (((NodeList)xpath.compile("celltype").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
-			    
-			    world.toggleCell(
-			    		(int)Math.floor(Double.parseDouble(cellXNode.getTextContent())),
-			    		(int)Math.floor(Double.parseDouble(cellYNode.getTextContent())),
-			    		cellTypeNode.getTextContent()
-			    	);
-			}
-        }
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+            try
+            {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document document = builder.parse(new InputSource(new StringReader(x)));
+
+                Node root = document.getDocumentElement();
+
+                XPathFactory xPathFactory = XPathFactory.newInstance();
+                XPath xpath = xPathFactory.newXPath();
+
+                //Collect attributes for the maze
+                Node guiWidthNode = root.getAttributes().getNamedItem("guiwidth");
+                Node guiHeightNode = root.getAttributes().getNamedItem("guiheight");
+                Node themeIDNode = root.getAttributes().getNamedItem("theme");
+                themeid = themeIDNode.getNodeValue();
+
+                //Collect robot attributes
+                Node robotNode = ((NodeList)xpath.compile("robot").evaluate(root, XPathConstants.NODESET)).item(0);
+                Node robotXNode = (((NodeList)xpath.compile("x").evaluate(robotNode, XPathConstants.NODESET))).item(0);
+                Node robotYNode = (((NodeList)xpath.compile("y").evaluate(robotNode, XPathConstants.NODESET))).item(0);
+                Node robotANode = (((NodeList)xpath.compile("a").evaluate(robotNode, XPathConstants.NODESET))).item(0);
+
+                //Redefine the robot
+                robot = new Robot(
+                    (int)Math.round(Double.parseDouble(robotXNode.getTextContent())), 
+                    (int)Math.round(Double.parseDouble(robotYNode.getTextContent())), 
+                    (int)Math.round(Double.parseDouble(robotANode.getTextContent())), 
+                    this
+                );
+
+                //Collect world attributes
+                Node worldNode = ((NodeList)xpath.compile("world").evaluate(root, XPathConstants.NODESET)).item(0);
+                Node worldGridWidthNode = (((NodeList)xpath.compile("gridwidth").evaluate(worldNode, XPathConstants.NODESET))).item(0);
+                Node worldGridHeighthNode = (((NodeList)xpath.compile("gridheight").evaluate(worldNode, XPathConstants.NODESET))).item(0);
+
+                guiWidth = Integer.parseInt(guiWidthNode.getNodeValue());
+                guiHeight = Integer.parseInt(guiHeightNode.getNodeValue());
+                world = new World(guiWidth, guiHeight, this);
+                world.setGridWidth(Integer.parseInt(worldGridWidthNode.getTextContent()));
+                world.setGridHeight(Integer.parseInt(worldGridHeighthNode.getTextContent()));               
+                world.setTheme(themeIDNode.getNodeValue());
+                
+
+                //Add objects to the world
+                NodeList cellNodes = ((NodeList)xpath.compile("cells/cell").evaluate(worldNode, XPathConstants.NODESET));
+                for(int i = 0; i < cellNodes.getLength(); i++)
+                {
+                    Node cellXNode = (((NodeList)xpath.compile("x").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
+                    Node cellYNode = (((NodeList)xpath.compile("y").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
+                    Node cellTypeNode = (((NodeList)xpath.compile("celltype").evaluate(cellNodes.item(i), XPathConstants.NODESET))).item(0);
+
+                    world.toggleCell(
+                        (int)Math.floor(Double.parseDouble(cellXNode.getTextContent())),
+                        (int)Math.floor(Double.parseDouble(cellYNode.getTextContent())),
+                        cellTypeNode.getTextContent()
+                    );
+                }
+            }
+            catch(Exception e)
+            {
+                    e.printStackTrace();
+            }
 	}
 	
     //Saves the current stage to the provided file
-	public void exportStage(File f) 
+	public String exportStage() 
 	{
 		try 
 		{
@@ -295,14 +300,17 @@ public class Simulator implements RobotListener
 			
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(f);
-	 
-			transformer.transform(source, result);
+                        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+                        StringWriter writer = new StringWriter();
+                        transformer.transform(new DOMSource(doc), new StreamResult(writer));
+                        String output = writer.getBuffer().toString().replaceAll("\n|\r", ""); 
+                        
+                        return output;
 		} 
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+                        return null;
 		}		
 	}
 	

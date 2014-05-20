@@ -43,8 +43,8 @@ public class Simulator implements RobotListener
     
 	private static String newline = "\n";
 	
-	public int guiWidth = 520 * 2;
-	public int guiHeight = 400 * 2;
+	public int guiWidth = 32;
+	public int guiHeight = 32;
 	int guiFPS = 60;
 	public String themeid = "default";
         public byte[] coinBytes;

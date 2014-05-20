@@ -135,7 +135,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 			}		
 		};
 		
-		//widthSpinner.addChangeListener(c);
+		widthSpinner.addChangeListener(c);
 		heightSpinner.addChangeListener(c);
 		
 		JPanel buttonPanel = new JPanel(g2);

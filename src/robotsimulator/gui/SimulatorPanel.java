@@ -281,7 +281,7 @@ public class SimulatorPanel extends JPanel implements ActionListener {
 		
 		reloadCodeBtn = new JButton("Reload Code from Text");
 		reloadCodeBtn.addActionListener(this);		
-		//actionPanel.add(reloadCodeBtn);
+		actionPanel.add(reloadCodeBtn);
 		
 		webloadCodeBtn = new JButton("Load Code from Web");
 		webloadCodeBtn.addActionListener(this);

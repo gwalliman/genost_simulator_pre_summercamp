@@ -57,9 +57,9 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 	JSpinner heightSpinner;     //Allows changing maze height
     //Spinner bounds
 	private final int wMin = 5;
-	private final int wMax = 30;
+	private final int wMax = 100;
 	private final int hMin = 5;
-	private final int hMax = 20;
+	private final int hMax = 100;
 	SpinnerModel widthModel = new SpinnerNumberModel(16, wMin, wMax, 1);    //Defines maze width spinner bounds		
 	SpinnerModel heightModel = new SpinnerNumberModel(12, hMin, hMax, 1);   //Defines maze height spinner bounds
 	
@@ -195,7 +195,7 @@ public class MazeBuilderPanel extends JPanel implements ActionListener {
 		JScrollPane paletteScroll = new JScrollPane(palettePanel);
 		paletteScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		paletteScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		paletteScroll.setSize(200, 500);
+		paletteScroll.setSize(500, 500);
 		
 		c.gridy = 1;
 		rtn.add(paletteScroll, c);
